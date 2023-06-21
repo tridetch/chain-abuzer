@@ -1,0 +1,16 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "Stub",
+  "sourceName": "contracts/StubContract.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    }
+  ],
+  "bytecode": "0x6080604052348015600f57600080fd5b5043600181905550603f8060246000396000f3fe6080604052600080fdfea2646970667358221220773c3121e850f0a8d4cb431ef0a2c7beb827ea379a94af5a2c3647fe5a7a252264736f6c63430007000033",
+  "deployedBytecode": "0x6080604052600080fdfea2646970667358221220773c3121e850f0a8d4cb431ef0a2c7beb827ea379a94af5a2c3647fe5a7a252264736f6c63430007000033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

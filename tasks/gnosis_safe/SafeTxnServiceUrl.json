@@ -1,0 +1,5 @@
+{
+  "ethereumMainnet": "https://safe-transaction.mainnet.gnosis.io/",
+  "ethereumGoerli": "https://safe-transaction.goerli.gnosis.io/",
+  "arbitrum": "https://safe-transaction.arbitrum.gnosis.io/"
+}

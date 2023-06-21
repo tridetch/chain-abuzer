@@ -1,0 +1,211 @@
+{
+      "add": "0x9aA48260Dc222Ca19bdD1E964857f6a2015f4078",
+      abi: [{
+          anonymous: !1,
+          inputs: [{
+              indexed: !0,
+              name: "_amount",
+              type: "uint256"
+          }],
+          name: "Deposit",
+          type: "event"
+      }, {
+          anonymous: !1,
+          inputs: [{
+              indexed: !0,
+              name: "_recipient",
+              type: "address"
+          }, {
+              indexed: !0,
+              name: "_amount",
+              type: "uint256"
+          }],
+          name: "Claim",
+          type: "event"
+      }, {
+          anonymous: !1,
+          inputs: [{
+              indexed: !0,
+              name: "_burner",
+              type: "address"
+          }, {
+              indexed: !0,
+              name: "_amount",
+              type: "uint256"
+          }],
+          name: "Burn",
+          type: "event"
+      }, {
+          anonymous: !1,
+          inputs: [{
+              indexed: !0,
+              name: "_old_signer",
+              type: "address"
+          }, {
+              indexed: !0,
+              name: "_new_signer",
+              type: "address"
+          }],
+          name: "SetSigner",
+          type: "event"
+      }, {
+          anonymous: !1,
+          inputs: [{
+              indexed: !0,
+              name: "_old_owner",
+              type: "address"
+          }, {
+              indexed: !0,
+              name: "_new_owner",
+              type: "address"
+          }],
+          name: "SetOwner",
+          type: "event"
+      }, {
+          inputs: [{
+              name: "_signer",
+              type: "address"
+          }],
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "constructor"
+      }, {
+          inputs: [],
+          name: "name",
+          outputs: [{
+              name: "",
+              type: "string"
+          }],
+          stateMutability: "view",
+          type: "function"
+      }, {
+          inputs: [],
+          name: "version",
+          outputs: [{
+              name: "",
+              type: "string"
+          }],
+          stateMutability: "view",
+          type: "function"
+      }, {
+          inputs: [{
+              name: "_amount",
+              type: "uint256"
+          }],
+          name: "deposit",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function"
+      }, {
+          inputs: [{
+              name: "_owner",
+              type: "address"
+          }, {
+              name: "_value",
+              type: "uint256"
+          }, {
+              name: "_nonce",
+              type: "uint256"
+          }, {
+              name: "_deadline",
+              type: "uint256"
+          }, {
+              name: "_v",
+              type: "uint8"
+          }, {
+              name: "_r",
+              type: "bytes32"
+          }, {
+              name: "_s",
+              type: "bytes32"
+          }],
+          name: "claim",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function"
+      }, {
+          inputs: [],
+          name: "burn",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function"
+      }, {
+          inputs: [{
+              name: "_new_signer",
+              type: "address"
+          }],
+          name: "set_signer",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function"
+      }, {
+          inputs: [{
+              name: "_new_owner",
+              type: "address"
+          }],
+          name: "set_owner",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function"
+      }, {
+          inputs: [],
+          name: "end_time",
+          outputs: [{
+              name: "",
+              type: "uint256"
+          }],
+          stateMutability: "view",
+          type: "function"
+      }, {
+          inputs: [],
+          name: "remaining_supply",
+          outputs: [{
+              name: "",
+              type: "uint256"
+          }],
+          stateMutability: "view",
+          type: "function"
+      }, {
+          inputs: [{
+              name: "arg0",
+              type: "address"
+          }],
+          name: "claimed",
+          outputs: [{
+              name: "",
+              type: "bool"
+          }],
+          stateMutability: "view",
+          type: "function"
+      }, {
+          inputs: [{
+              name: "arg0",
+              type: "uint256"
+          }],
+          name: "used_nonce",
+          outputs: [{
+              name: "",
+              type: "bool"
+          }],
+          stateMutability: "view",
+          type: "function"
+      }, {
+          inputs: [],
+          name: "owner",
+          outputs: [{
+              name: "",
+              type: "address"
+          }],
+          stateMutability: "view",
+          type: "function"
+      }, {
+          inputs: [],
+          name: "signer",
+          outputs: [{
+              name: "",
+              type: "address"
+          }],
+          stateMutability: "view",
+          type: "function"
+      }]
+  }
