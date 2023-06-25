@@ -1,5 +1,5 @@
 {
-  "name": "chain-abuser",
+  "name": "arbitrum-abuse",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -11,6 +11,7 @@
   "license": "ISC",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^2.0.0",
+    "@typechain/ethers-v5": "^10.2.1",
     "@types/node-fetch": "^2.6.2",
     "@uniswap/sdk-core": "^3.1.0",
     "@uniswap/v3-sdk": " ^3.9.0",
@@ -18,7 +19,8 @@
     "ethers": "^5.7.2",
     "hardhat": "^2.12.2",
     "hardhat-gas-reporter": "^1.0.9",
-    "solidity-coverage": "^0.8.2"
+    "solidity-coverage": "^0.8.2",
+    "typechain": "^8.1.1"
   },
   "dependencies": {
     "@arbitrum/sdk": "^3.0.0",
