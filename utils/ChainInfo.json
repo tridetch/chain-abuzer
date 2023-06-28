@@ -2,49 +2,49 @@
   "ethereumMainnetChainInfo": {
     "chainId": 1,
     "chainName": "Ethereum Mainnet",
-    "explorer": "",
+    "explorer": "https://etherscan.io/tx/",
     "wethAddress": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
     "usdcAddress": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48"
   },
   "ethereumGoerliChainInfo": {
     "chainId": 5,
     "chainName": "Ethereum Goerli",
-    "explorer": "",
+    "explorer": "https://goerli.etherscan.io/tx/",
     "wethAddress": "0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6",
     "usdcAddress": "0x07865c6E87B9F70255377e024ace6630C1Eaa37F"
   },
   "ethereumSepoliaChainInfo": {
     "chainId": 11155111,
     "chainName": "Ethereum Sepolia",
-    "explorer": "",
+    "explorer": "https://sepolia.etherscan.io/tx/",
     "wethAddress": "emptyWethAddress",
     "usdcAddress": "emptyUsdcAddress"
   },
   "arbitrumMainnetChainInfo": {
     "chainId": 42161,
     "chainName": "Arbitrum Mainnet",
-    "explorer": "",
+    "explorer": "https://arbiscan.io/tx/",
     "wethAddress": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
     "usdcAddress": "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8"
   },
   "arbitrumNovaChainInfo": {
     "chainId": 42170,
     "chainName": "Arbitrum Nova",
-    "explorer": "",
+    "explorer": "https://nova.arbiscan.io/tx/",
     "wethAddress": "0x722E8BdD2ce80A4422E880164f2079488e115365",
     "usdcAddress": "0x750ba8b76187092B0D1E87E28daaf484d1b5273b"
   },
   "arbitrumGoerliChainInfo": {
     "chainId": 421613,
     "chainName": "Arbitrum Goerli",
-    "explorer": "",
+    "explorer": "https://goerli.arbiscan.io/tx/",
     "wethAddress": "0xe39Ab88f8A4777030A534146A9Ca3B52bd5D43A3",
     "usdcAddress": "0x6775842AE82BF2F0f987b10526768Ad89d79536E"
   },
   "binanceMainnetChainInfo":{
     "chainId": 56,
     "chainName": "Binance Mainnet",
-    "explorer": "",
+    "explorer": "https://bscscan.com/tx/",
     "wethAddress": "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
     "usdcAddress": "0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d",
     "busdAddress": "0xe9e7cea3dedca5984780bafc599bd69add087d56" 
@@ -52,70 +52,70 @@
   "optimismMainnetChainInfo":{
     "chainId": 10,
     "chainName": "Optimism Mainnet",
-    "explorer": "",
+    "explorer": "https://optimistic.etherscan.io/tx/",
     "wethAddress": "0x4200000000000000000000000000000000000006",
     "usdcAddress": "0x7f5c764cbc14f9669b88837ca1490cca17c31607" 
   },
   "zksyncGoerliTestnetChainInfo":{
     "chainId": 10,
     "chainName": "ZkSync goerli testnet",
-    "explorer": "",
+    "explorer": "https://zksync2-testnet.zkscan.io/tx/",
     "wethAddress": "0x223D7fceEF24258155a3341C770E8D1ca6B938fE",
     "usdcAddress": "emptyUsdcAddress" 
   },
   "polygonMainnetChainInfo":{
     "chainId": 137,
     "chainName": "MATIC",
-    "explorer": "",
+    "explorer": "https://polygonscan.com/tx/",
     "wethAddress": "0x7ceb23fd6bc0add59e62ac25578270cff1b9f619",
     "usdcAddress": "0x2791bca1f2de4661ed88a30c99a7a9449aa84174"
   },
   "polygonZkEvmChainInfo":{
     "chainId": 1101,
     "chainName": "PolygonZkEvm",
-    "explorer": "",
+    "explorer": "https://zkevm.polygonscan.com/tx/",
     "wethAddress": "emptyWethAddress",
     "usdcAddress": "emptyUsdcAddress"
   },
   "fantomMainnetChainInfo":{
     "chainId": 250,
     "chainName": "FTM",
-    "explorer": "",
+    "explorer": "https://ftmscan.com/tx/",
     "wethAddress": "0x74b23882a30290451a17c44f4f05243b6b58c76d",
     "usdcAddress": "0x04068da6c83afcfa0e13ba15a6696662335d5b75" 
   },
   "avalancheMainnetChainInfo":{
     "chainId": 43114,
     "chainName": "Avalanche",
-    "explorer": "",
+    "explorer": "https://snowtrace.io/tx/",
     "wethAddress": "",
     "usdcAddress": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E" 
   },
   "coinbaseChainInfo":{
     "chainId": 84531,
     "chainName": "BASE",
-    "explorer": "",
+    "explorer": "https://goerli.basescan.org/tx/",
     "wethAddress": "emptyWethAddress",
     "usdcAddress": "emptyUsdcAddress" 
   },
   "lineaChainInfo":{
     "chainId": 59140,
     "chainName": "Linea",
-    "explorer": "",
+    "explorer": "https://goerli.lineascan.build/tx/",
     "wethAddress": "0x2C1b868d6596a18e32E61B901E4060C872647b6C",
     "usdcAddress": "emptyUsdcAddress" 
   },
   "scrollAlphaChainInfo":{
     "chainId": 534353,
     "chainName": "Scroll",
-    "explorer": "",
+    "explorer": "https://blockscout.scroll.io/tx/",
     "wethAddress": "emptyWethAddress",
     "usdcAddress": "emptyUsdcAddress" 
   },
   "zksyncEraChainInfo":{
     "chainId": 324,
     "chainName": "ZksyncEra",
-    "explorer": "",
+    "explorer": "https://explorer.zksync.io/tx/",
     "wethAddress": "emptyWethAddress",
     "usdcAddress": "0x3355df6D4c9C3035724Fd0e3914dE96A5a83aaf4" 
   },
@@ -129,7 +129,14 @@
   "zoraTestnetChainInfo":{
     "chainId": 999,
     "chainName": "ZORA testnet",
-    "explorer": "",
+    "explorer": "https://testnet.explorer.zora.co/tx/",
+    "wethAddress": "emptyWethAddress",
+    "usdcAddress": "emptyUSDCAddress" 
+  },
+  "taikoAlpha3ChainInfo":{
+    "chainId": 167005,
+    "chainName": "TaikoA3",
+    "explorer": "https://explorer.test.taiko.xyz/tx",
     "wethAddress": "emptyWethAddress",
     "usdcAddress": "emptyUSDCAddress" 
   }
