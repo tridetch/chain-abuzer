@@ -159,5 +159,13 @@
         "wethAddress": "emptyWethAddress",
         "usdcAddress": "emptyUSDCAddress",
         "usdtAddress": ""
+    },
+    "pgnSepoliaChainInfo": {
+        "chainId": 58008,
+        "chainName": "Public Goods Network Sepolia",
+        "explorer": "https://explorer.sepolia.publicgoods.network/tx",
+        "wethAddress": "emptyWethAddress",
+        "usdcAddress": "emptyUSDCAddress",
+        "usdtAddress": ""
     }
 }
