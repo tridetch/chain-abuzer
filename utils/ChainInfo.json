@@ -104,10 +104,18 @@
     "usdcAddress": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
     "usdtAddress": ""
   },
-  "coinbaseChainInfo":{
+  "baseGoerliChainInfo":{
     "chainId": 84531,
-    "chainName": "BASE",
+    "chainName": "Base Goerli",
     "explorer": "https://goerli.basescan.org/tx/",
+    "wethAddress": "emptyWethAddress",
+    "usdcAddress": "emptyUsdcAddress",
+    "usdtAddress": ""
+  },
+  "baseMainnetChainInfo":{
+    "chainId": 8453,
+    "chainName": "Base Mainnet",
+    "explorer": "https://basescan.org/tx/",
     "wethAddress": "emptyWethAddress",
     "usdcAddress": "emptyUsdcAddress",
     "usdtAddress": ""
