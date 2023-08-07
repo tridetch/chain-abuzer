@@ -4,7 +4,7 @@ import { subtask, task, types } from "hardhat/config";
 import { ERC20__factory } from "../typechain-types";
 import { ChainId, getChainInfo } from "../utils/ChainInfoUtils";
 import "../utils/Util.tasks";
-import { addDust, delay, getAccounts, waitForGasPrice } from "../utils/Utils";
+import { addDust, delay, getAccounts, populateTxnParams, waitForGasPrice } from "../utils/Utils";
 
 dotenv.config();
 
@@ -499,14 +499,20 @@ task("sendEth", "Send ETH to address")
         for (const account of accounts) {
             try {
                 await waitForGasPrice({ maxPriceInGwei: taskArgs.gasPrice, provider: hre.ethers.provider });
-
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
                 const balance = await account.getBalance();
                 if (balance.gte(amount)) {
-                    const txn = await account.sendTransaction({ to: taskArgs.to, value: amount });
+                    const txParams = await populateTxnParams({ signer: account, chain: chainInfo });
+                    const txn = await account.sendTransaction({
+                        to: taskArgs.to,
+                        value: amount,
+                        ...txParams,
+                    });
+
                     console.log(
-                        `\n#${accounts.indexOf(account)} Address: ${account.address} Send ${utils.formatUnits(
-                            amount
-                        )} ETH to ${taskArgs.to} txn: ${txn.hash}`
+                        `Send ${utils.formatUnits(amount)} ETH to ${taskArgs.to} \ntxn: ${
+                            chainInfo.explorer
+                        }${txn.hash}`
                     );
                 } else {
                     console.log(
