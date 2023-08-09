@@ -109,10 +109,11 @@ export async function populateTxnParams({
 
     switch (chain.chainId) {
         case ChainId.optimismMainnet:
-            txRequest.maxPriorityFeePerGas = ethers.utils.parseUnits("2", "wei");
+            txRequest.maxPriorityFeePerGas = ethers.utils.parseUnits("1", "wei");
+            txRequest.gasPrice = undefined // 
             break;
         case ChainId.baseMainnet:
-            txRequest.maxPriorityFeePerGas = ethers.utils.parseUnits("0.005", "gwei");
+            txRequest.maxPriorityFeePerGas = ethers.utils.parseUnits("0.0001", "gwei");
             txRequest.gasPrice = undefined // 
             break;
         case ChainId.zoraMainnet:

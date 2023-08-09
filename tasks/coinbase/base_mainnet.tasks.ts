@@ -2,7 +2,7 @@ import { BigNumber, Contract, ethers, utils } from "ethers";
 import { task, types } from "hardhat/config";
 import { ChainId, getChainInfo } from "../../utils/ChainInfoUtils";
 import "../../utils/Util.tasks";
-import { addDust, delay, getAccounts, waitForGasPrice } from "../../utils/Utils";
+import { addDust, delay, getAccounts, populateTxnParams, waitForGasPrice } from "../../utils/Utils";
 
 task("baseMainnetBridge", "Bridge ETH to base network")
     .addParam("amount", "Amount of ETH to deposit", undefined, types.float, true)
@@ -173,7 +173,66 @@ task("baseMintOnchainSummerNFT", "Mint Onchain Summer NFT")
                     data: calldata,
                     maxPriorityFeePerGas: priorityFee,
                 });
-                
+
+                console.log(`Mint txn: ${chainInfo.explorer}${mintTx.hash}`);
+
+                if (taskArgs.delay != undefined) {
+                    await delay(taskArgs.delay);
+                }
+            } catch (error) {
+                console.log(
+                    `\nError when process account #${accounts.indexOf(account)} Address: ${account.address}`
+                );
+                console.log(error);
+            }
+        }
+    });
+
+task("baseMintOnchainSummerD1NFT", "Mint Onchain Summer Day One NFT")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const contractAddress = "0x7d5861cfe1c74aaa0999b7e2651bf2ebd2a62d89";
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        if (![ChainId.baseMainnet].includes(currentNetwork.chainId)) {
+            console.log("Task available only at Base mainnet network!");
+            return;
+        }
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        const mintContract = new Contract(
+            contractAddress,
+            [
+                "function mintWithRewards(address recipient,uint256 quantity,string comment,address mintReferral) payable",
+            ],
+            hre.ethers.provider
+        );
+
+        const referral = "0x9652721d02b9db43f4311102820158aBb4ecc95B";
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                var txParams = await populateTxnParams({ signer: account, chain: chainInfo });
+
+                const mintTx = await mintContract
+                    .connect(account)
+                    .mintWithRewards(account.address, 1, "", referral, {
+                        value: utils.parseEther("0.000777"),
+                        ...txParams,
+                    });
+
                 console.log(`Mint txn: ${chainInfo.explorer}${mintTx.hash}`);
 
                 if (taskArgs.delay != undefined) {
