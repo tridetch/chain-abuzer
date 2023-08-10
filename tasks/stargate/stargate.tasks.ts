@@ -36,6 +36,9 @@ function getBridgeInfo(chainId: number) {
         case ChainId.binanceMainnet:
             bridge = stargateBridgeInfo.binance;
             break;
+        case ChainId.baseMainnet:
+            bridge = stargateBridgeInfo.base;
+            break;
         default:
             throw new Error(`Unsupported chain - ${chainId}`);
     }
