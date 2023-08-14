@@ -2,3 +2,4 @@ node_modules
 coverage
 coverage.json
 temp.json
+private_keys_e.json

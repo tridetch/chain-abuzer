@@ -15,33 +15,60 @@ export interface SData {
 task("encryptSeedPhrase", "Encrypt seed phrase")
     .addParam("message", "Message to encrypt", undefined, types.string, true)
     .setAction(async (taskArgs, hre) => {
-        const filePath = `./utils/temp/temp.json`;
-
         const message = taskArgs.message || process.env.MNEMONIC;
 
-        const k = crypto.randomBytes(32);
-        const i = crypto.randomBytes(16);
+        let sData: SData = getSdata();
 
-        let sData: SData = { k: k, i: i };
-
-        const cipher = crypto.createCipheriv("aes-256-cbc", sData.k, sData.i);
+        const cipher = crypto.createCipheriv("aes-256-cbc", Buffer.from(sData.k), Buffer.from(sData.i));
         let encrypted = cipher.update(message, "utf8", "hex");
         encrypted += cipher.final("hex");
 
         console.log("Encrypted seed phrase:", encrypted);
         console.log("Put it into `MNEMONIC_ENCRYPTED` field in .env file");
-
-        fs.writeFileSync(filePath, JSON.stringify(sData));
     });
 
-task("revealSeedPhrase", "Reveal seed phrase")
-    .setAction(async (taskArgs, hre) => {
-        let seed: string = process.env.MNEMONIC_ENCRYPTED || "";
-        let sData: SData = require(`./temp/temp.json`);
+task("revealSeedPhrase", "Reveal seed phrase").setAction(async (taskArgs, hre) => {
+    let seed: string = process.env.MNEMONIC_ENCRYPTED || "";
+    let sData: SData = require(`./temp/temp.json`);
 
-        const decipher = crypto.createDecipheriv("aes-256-cbc", Buffer.from(sData.k), Buffer.from(sData.i));
-        let decrypted = decipher.update(seed, "hex", "utf8");
-        decrypted += decipher.final("utf8");
+    const decipher = crypto.createDecipheriv("aes-256-cbc", Buffer.from(sData.k), Buffer.from(sData.i));
+    let decrypted = decipher.update(seed, "hex", "utf8");
+    decrypted += decipher.final("utf8");
 
-        console.log(`Seed phrase: ${decrypted}`);
-    });
+    console.log(`Seed phrase: ${decrypted}`);
+});
+
+task("encryptPrivateKeys", "Encrypt private keys").setAction(async (taskArgs, hre) => {
+    const keys: string[] = require("../private_keys.json");
+
+    let sData: SData = getSdata();
+
+    let pkObf: string[] = [];
+    for (const key of keys) {
+        const cipher = crypto.createCipheriv("aes-256-cbc", Buffer.from(sData.k), Buffer.from(sData.i));
+        let encrypted = cipher.update(key, "utf8", "hex");
+        encrypted += cipher.final("hex");
+        pkObf.push(encrypted);
+    }
+
+    fs.writeFileSync("./private_keys_e.json", JSON.stringify(pkObf));
+    fs.writeFileSync("./private_keys.json", JSON.stringify([]));
+
+    console.log("Private keys encrypted end saved in ./private_keys_e.json");
+});
+
+function getSdata() {
+    const sFilePath = `./utils/temp/temp.json`;
+    let sData: SData;
+    if (fs.existsSync(sFilePath)) {
+        sData = require(`./temp/temp.json`);
+    } else {
+        const k = crypto.randomBytes(32);
+        const i = crypto.randomBytes(16);
+
+        sData = { k: k, i: i };
+
+        fs.writeFileSync(`./utils/temp/temp.json`, JSON.stringify(sData));
+    }
+    return sData;
+}
