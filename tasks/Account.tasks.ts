@@ -600,7 +600,10 @@ task("approve", "Approve token to spender")
 
             console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
 
-            const tx = await tokenContract.connect(account).approve(taskArgs.spenderAddress, amount);
+            const txParams = await populateTxnParams({ signer: account, chain: chainInfo });
+            const tx = await tokenContract
+                .connect(account)
+                .approve(taskArgs.spenderAddress, amount, { ...txParams });
             console.log(
                 `Approved ${utils.formatUnits(amount, decimals)} ${symbol} tx ${chainInfo.explorer}${tx.hash}`
             );

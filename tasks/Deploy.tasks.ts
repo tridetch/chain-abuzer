@@ -1,7 +1,7 @@
 import { task, types } from "hardhat/config";
-import "../utils/Util.tasks";
-import { delay, getAccounts } from "../utils/Utils";
 import { getChainInfo } from "../utils/ChainInfoUtils";
+import "../utils/Util.tasks";
+import { delay, getAccounts, populateTxnParams } from "../utils/Utils";
 
 export const DeployTasks = {
     deployStubContract: "deployStubContract",
@@ -22,12 +22,14 @@ task("deployStubContract", "Deploy stub contract")
     .setAction(async (taskArgs, hre) => {
         const accounts = await getAccounts(taskArgs, hre.ethers.provider);
         const StubFactory = await hre.ethers.getContractFactory("Stub");
+        const network = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(network.chainId);
 
         for (const account of accounts) {
             try {
                 console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
-
-                const stubContract = await StubFactory.connect(account).deploy();
+                const txParams = await populateTxnParams({ signer: account, chain: chainInfo });
+                const stubContract = await StubFactory.connect(account).deploy({ ...txParams });
                 await stubContract.deployed();
 
                 console.log(`Contract deployed at address ${stubContract.address})`);
@@ -57,15 +59,20 @@ task("deployErc20", "Deploy standart ERC20 contract")
     )
     .setAction(async (taskArgs, hre) => {
         const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+        const network = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(network.chainId);
         const ERC20ContractFacroty = await hre.ethers.getContractFactory("Erc20Stub");
 
         for (const account of accounts) {
             try {
                 console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
 
+                const txParams = await populateTxnParams({ signer: account, chain: chainInfo });
+
                 const erc20StubContract = await ERC20ContractFacroty.connect(account).deploy(
                     taskArgs.name,
-                    taskArgs.symbol
+                    taskArgs.symbol,
+                    { ...txParams }
                 );
                 await erc20StubContract.deployed();
                 console.log(`Contract deployed at address: ${erc20StubContract.address})`);
@@ -94,6 +101,9 @@ task("deployErc721", "Deploy standart ERC721 contract")
         types.string
     )
     .setAction(async (taskArgs, hre) => {
+        const network = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(network.chainId);
+
         const accounts = await getAccounts(taskArgs, hre.ethers.provider);
         const Erc721ContractFacroty = await hre.ethers.getContractFactory("Erc721Stub");
 
@@ -101,9 +111,12 @@ task("deployErc721", "Deploy standart ERC721 contract")
             try {
                 console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
 
+                const txParams = await populateTxnParams({ signer: account, chain: chainInfo });
+
                 const erc721StubContract = await Erc721ContractFacroty.connect(account).deploy(
                     taskArgs.name,
-                    taskArgs.symbol
+                    taskArgs.symbol,
+                    { ...txParams }
                 );
                 await erc721StubContract.deployed();
                 console.log(`Contract deployed at address: ${erc721StubContract.address}`);
@@ -130,6 +143,9 @@ task("deployEscrowContract", "Deploy standart Escrow contract")
         types.string
     )
     .setAction(async (taskArgs, hre) => {
+        const network = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(network.chainId);
+
         const accounts = await getAccounts(taskArgs, hre.ethers.provider);
         const EscrowContractFacroty = await hre.ethers.getContractFactory("Escrow");
 
@@ -137,7 +153,11 @@ task("deployEscrowContract", "Deploy standart Escrow contract")
             try {
                 console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
 
-                const escrowStubContract = await EscrowContractFacroty.connect(account).deploy();
+                const txParams = await populateTxnParams({ signer: account, chain: chainInfo });
+
+                const escrowStubContract = await EscrowContractFacroty.connect(account).deploy({
+                    ...txParams,
+                });
                 await escrowStubContract.deployed();
                 console.log(`Contract deployed at address: ${escrowStubContract.address}`);
             } catch (error) {
