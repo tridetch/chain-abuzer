@@ -1,6 +1,7 @@
 import * as dotenv from "dotenv";
 import { BigNumber, Contract, ethers, utils } from "ethers";
 import { task, types } from "hardhat/config";
+import { ERC20__factory } from "../../typechain-types";
 import { ChainId, getChainInfo } from "../../utils/ChainInfoUtils";
 import "../../utils/Util.tasks";
 import { addDust, delay, getAccounts, populateTxnParams, waitForGasPrice } from "../../utils/Utils";
@@ -142,4 +143,61 @@ task("lineaEchoDexDailyCheckin", "EchoDex daily check in")
                 );
                 console.log(error);
             }
+    });
+
+task("lineaContractInteractions", "Interact with erc-20 contracts")
+    .addParam("delay", "Add delay", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const network = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(network.chainId);
+
+        if (network.chainId != ChainId.lineaMainnet) {
+            throw new Error("Task allowed only on Linea mainnet chain");
+        }
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        const erc20Contracts = [
+            ERC20__factory.connect("0x7d43AABC515C356145049227CeE54B608342c0ad", hre.ethers.provider),
+            ERC20__factory.connect("0xe5D7C2a44FfDDf6b295A15c148167daaAf5Cf34f", hre.ethers.provider),
+            ERC20__factory.connect("0x176211869cA2b568f2A7D4EE941E073a821EE1ff", hre.ethers.provider),
+            ERC20__factory.connect("0x9201f3b9DfAB7C13Cd659ac5695D12D605B5F1e6", hre.ethers.provider),
+            ERC20__factory.connect("0xf5C6825015280CdfD0b56903F9F8B5A2233476F5", hre.ethers.provider),
+            ERC20__factory.connect("0x265B25e22bcd7f10a5bD6E6410F10537Cc7567e8", hre.ethers.provider),
+            ERC20__factory.connect("0xA219439258ca9da29E9Cc4cE5596924745e12B93", hre.ethers.provider),
+            ERC20__factory.connect("0x3aAB2285ddcDdaD8edf438C1bAB47e1a9D05a9b4", hre.ethers.provider),
+            ERC20__factory.connect("0x4AF15ec2A0BD43Db75dd04E62FAA3B8EF36b00d5", hre.ethers.provider),
+            ERC20__factory.connect("0x3b2F62d42DB19B30588648bf1c184865D4C3B1D6", hre.ethers.provider),
+        ];
+
+        for (const account of accounts) {
+            try {
+                console.log(`#${accounts.indexOf(account)} Address ${account.address}`);
+                const txParams = await populateTxnParams({ signer: account, chain: chainInfo });
+                for (const erc20 of erc20Contracts) {
+                    const tx = await erc20.connect(account).approve(erc20.address, BigNumber.from(0), {
+                        ...txParams,
+                    });
+                    console.log(`Approve ${await erc20.symbol()} tx ${chainInfo.explorer}${tx.hash}`);
+                    await delay(0.05);
+                }
+
+                if (taskArgs.delay != undefined) {
+                    await delay(taskArgs.delay);
+                }
+            } catch (error) {
+                console.log(
+                    `Error when process account #${accounts.indexOf(account)} Address: ${account.address}`
+                );
+                console.log(error);
+            }
+        }
     });
