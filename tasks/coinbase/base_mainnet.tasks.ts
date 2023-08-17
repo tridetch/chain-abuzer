@@ -271,9 +271,7 @@ task("baseMintOnchainSummerD4IchRUNFT", "Mint Onchain Summer Day Four NFT")
 
         const mintContract = new Contract(
             contractAddress,
-            [
-                "function mint(address _to,uint256 _phaseId,uint256 _quantity,bytes _signature) payable",
-            ],
+            ["function mint(address _to,uint256 _phaseId,uint256 _quantity,bytes _signature) payable"],
             hre.ethers.provider
         );
 
@@ -283,12 +281,10 @@ task("baseMintOnchainSummerD4IchRUNFT", "Mint Onchain Summer Day Four NFT")
 
                 var txParams = await populateTxnParams({ signer: account, chain: chainInfo });
 
-                const mintTx = await mintContract
-                    .connect(account)
-                    .mint(account.address, 0, 1, [], {
-                        value: utils.parseEther("0.0022"),
-                        ...txParams,
-                    });
+                const mintTx = await mintContract.connect(account).mint(account.address, 0, 1, [], {
+                    value: utils.parseEther("0.0022"),
+                    ...txParams,
+                });
 
                 console.log(`Mint txn: ${chainInfo.explorer}${mintTx.hash}`);
 
@@ -328,9 +324,7 @@ task("baseMintOnchainSummerD4OriginatorNFT", "Mint Onchain Summer Day Four NFT")
 
         const mintContract = new Contract(
             contractAddress,
-            [
-                "function mint(address _to,uint256 _phaseId,uint256 _quantity,bytes _signature) payable",
-            ],
+            ["function mint(address _to,uint256 _phaseId,uint256 _quantity,bytes _signature) payable"],
             hre.ethers.provider
         );
 
@@ -340,12 +334,10 @@ task("baseMintOnchainSummerD4OriginatorNFT", "Mint Onchain Summer Day Four NFT")
 
                 var txParams = await populateTxnParams({ signer: account, chain: chainInfo });
 
-                const mintTx = await mintContract
-                    .connect(account)
-                    .mint(account.address, 0, 1, [], {
-                        value: utils.parseEther("0.0011"),
-                        ...txParams,
-                    });
+                const mintTx = await mintContract.connect(account).mint(account.address, 0, 1, [], {
+                    value: utils.parseEther("0.0011"),
+                    ...txParams,
+                });
 
                 console.log(`Mint txn: ${chainInfo.explorer}${mintTx.hash}`);
 
@@ -385,9 +377,7 @@ task("baseMintOnchainSummerD4ParadiseNFT", "Mint Onchain Summer Day Four NFT")
 
         const mintContract = new Contract(
             contractAddress,
-            [
-                "function mint(address _to,uint256 _phaseId,uint256 _quantity,bytes _signature) payable",
-            ],
+            ["function mint(address _to,uint256 _phaseId,uint256 _quantity,bytes _signature) payable"],
             hre.ethers.provider
         );
 
@@ -397,12 +387,10 @@ task("baseMintOnchainSummerD4ParadiseNFT", "Mint Onchain Summer Day Four NFT")
 
                 var txParams = await populateTxnParams({ signer: account, chain: chainInfo });
 
-                const mintTx = await mintContract
-                    .connect(account)
-                    .mint(account.address, 0, 1, [], {
-                        value: utils.parseEther("0.00055"),
-                        ...txParams,
-                    });
+                const mintTx = await mintContract.connect(account).mint(account.address, 0, 1, [], {
+                    value: utils.parseEther("0.00055"),
+                    ...txParams,
+                });
 
                 console.log(`Mint txn: ${chainInfo.explorer}${mintTx.hash}`);
 
@@ -412,6 +400,72 @@ task("baseMintOnchainSummerD4ParadiseNFT", "Mint Onchain Summer Day Four NFT")
             } catch (error) {
                 console.log(
                     `\nError when process account #${accounts.indexOf(account)} Address: ${account.address}`
+                );
+                console.log(error);
+            }
+        }
+    });
+
+task("baseMintOnchainSummerZorbNFT", "Mint Onchain Summer Zorb NFT")
+    .addParam("delay", "Add random delay", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+        const targetAddress = "0xbd52c54ab5116b1d9326352f742e6544ffdeb2cb";
+
+        if (![ChainId.baseMainnet].includes(currentNetwork.chainId)) {
+            console.log(`Task supported only on Base mainnet!`);
+            return;
+        }
+        let mintContract = new Contract(
+            targetAddress,
+            [
+                "function mintWithRewards(address minter,uint256 tokenId,uint256 quantity,bytes minterArguments,address mintReferral) payable",
+            ],
+            hre.ethers.provider
+        );
+
+        const referral = "0x7bf90111Ad7C22bec9E9dFf8A01A44713CC1b1B6";
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+        for (const account of accounts) {
+            try {
+                var txParams = await populateTxnParams({ signer: account, chain: chainInfo });
+                let minterArgs = utils.hexZeroPad(utils.hexlify(account.address), 32);
+                const tx = await mintContract
+                    .connect(account)
+                    .mintWithRewards(
+                        "0xFF8B0f870ff56870Dc5aBd6cB3E6E89c8ba2e062",
+                        1,
+                        1,
+                        minterArgs,
+                        referral,
+                        {
+                            value: utils.parseEther("0.000777"),
+                            ...txParams,
+                        }
+                    );
+
+                console.log(
+                    `\nTask result:\n#${accounts.indexOf(account)} Address: ${account.address}\ntxn: ${
+                        chainInfo.explorer
+                    }${tx.hash}`
+                );
+
+                if (taskArgs.delay != undefined) {
+                    await delay(taskArgs.delay);
+                }
+            } catch (error) {
+                console.log(
+                    `Error when process account #${accounts.indexOf(account)} Address: ${account.address}`
                 );
                 console.log(error);
             }
