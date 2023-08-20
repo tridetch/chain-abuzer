@@ -155,7 +155,7 @@
   "zoraMainnetChainInfo":{
     "chainId": 7777777,
     "chainName": "ZORA Network",
-    "explorer": "https://explorer.zora.energy/txs/",
+    "explorer": "https://explorer.zora.energy/tx/",
     "wethAddress": "emptyWethAddress",
     "usdcAddress": "emptyUSDCAddress",
     "usdtAddress": ""
@@ -171,15 +171,15 @@
   "taikoAlpha3ChainInfo":{
     "chainId": 167005,
     "chainName": "TaikoA3",
-    "explorer": "https://explorer.test.taiko.xyz/tx",
+    "explorer": "https://explorer.test.taiko.xyz/tx/",
     "wethAddress": "emptyWethAddress",
     "usdcAddress": "emptyUSDCAddress",
     "usdtAddress": ""
   },
   "pgnSepoliaChainInfo":{
-    "chainId": 58008,
-    "chainName": "Public Goods Network Sepolia",
-    "explorer": "https://explorer.sepolia.publicgoods.network/tx",
+    "chainId": 424,
+    "chainName": "Public Goods Network",
+    "explorer": "https://explorer.publicgoods.network/tx/",
     "wethAddress": "emptyWethAddress",
     "usdcAddress": "emptyUSDCAddress",
     "usdtAddress": ""

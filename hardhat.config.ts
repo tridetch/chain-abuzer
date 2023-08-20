@@ -100,9 +100,8 @@ const config: HardhatUserConfig = {
         taikoAlpha3: {
             url: process.env.TAIKO_ALPHA_3 || "",
         },
-        pgnSepolia: {
-            url: process.env.PUBLIC_GOODS_NETWORK_SEPOLIA || "",
-            chainId: 58008
+        pgnMainnet: {
+            url: process.env.PUBLIC_GOODS_NETWORK_MAINNET || ""
         },
     },
 };
