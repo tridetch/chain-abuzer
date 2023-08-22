@@ -97,7 +97,7 @@ task("philandDailyQuest", "Philand dailty quest")
                             questResult.expiresIn,
                             { ...txParams }
                         );
-                        await claimTx.wait(5);
+                        await delay(0.15)
 
                         console.log(
                             `Claim quest ${couponInfo.logic} - tx ${chainInfo.explorer}${claimTx.hash}`
