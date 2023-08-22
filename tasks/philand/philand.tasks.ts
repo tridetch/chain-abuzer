@@ -72,7 +72,7 @@ task("philandDailyQuest", "Philand dailty quest")
                     }
 
                     console.log(`Transactions sended successfully! Wait when they will be indexed.`);
-                    await delay(0.2)
+                    await delay(0.2);
                 }
 
                 const questResult: QuestResult = (
@@ -97,11 +97,10 @@ task("philandDailyQuest", "Philand dailty quest")
                             questResult.expiresIn,
                             { ...txParams }
                         );
-                        await delay(0.15)
-
                         console.log(
                             `Claim quest ${couponInfo.logic} - tx ${chainInfo.explorer}${claimTx.hash}`
                         );
+                        await delay(0.15);
                     } catch (error) {
                         console.log(`Claim quest ${couponInfo.logic} failed. Already claimed?`);
                         // console.log(error);
