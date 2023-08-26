@@ -158,7 +158,7 @@ task("balancesCrossChain", "Show accounts balances")
             Address: string;
             Ethereum: string;
             Arbitrum: string;
-            Arb_nova: string;
+            Linea: string;
             Optimism: string;
             ZkEvm: string;
             ZksyncEra: string;
@@ -168,7 +168,7 @@ task("balancesCrossChain", "Show accounts balances")
 
         const ethProvider = new hre.ethers.providers.JsonRpcProvider(process.env.ETHEREUM_MAINNET_URL);
         const arbProvider = new hre.ethers.providers.JsonRpcProvider(process.env.ARBITRUM_MAINNET_URL);
-        const arbNovaProvider = new hre.ethers.providers.JsonRpcProvider(process.env.ARBITRUM_NOVA_URL);
+        const lineaProvider = new hre.ethers.providers.JsonRpcProvider(process.env.LINEA_MAINNET);
         const optimismProvider = new hre.ethers.providers.JsonRpcProvider(process.env.OPTIMISM_MAINNET_URL);
         const zkEvmProvider = new hre.ethers.providers.JsonRpcProvider(process.env.POLYGON_ZK_EVM_URL);
         const zksyncEraProvider = new hre.ethers.providers.JsonRpcProvider(process.env.ZKSYNC_ERA_URL);
@@ -180,8 +180,8 @@ task("balancesCrossChain", "Show accounts balances")
                 Address: account.address,
                 Ethereum: utils.formatEther(await ethProvider.getBalance(account.address)).substring(0, 8),
                 Arbitrum: utils.formatEther(await arbProvider.getBalance(account.address)).substring(0, 8),
-                Arb_nova: utils
-                    .formatEther(await arbNovaProvider.getBalance(account.address))
+                Linea: utils
+                    .formatEther(await lineaProvider.getBalance(account.address))
                     .substring(0, 8),
                 Optimism: utils
                     .formatEther(await optimismProvider.getBalance(account.address))

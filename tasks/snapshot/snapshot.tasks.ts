@@ -18,12 +18,11 @@ task("snapshotVote", "Cast vote on proposal")
         types.string
     )
     .setAction(async (taskArgs, hre) => {
-        const snapshotClient = new snapshot.Client712(SNAPSHOT_HUB);
-
         const accounts = await getAccounts(taskArgs, hre.ethers.provider);
 
         for (const account of accounts) {
             try {
+                const snapshotClient = new snapshot.Client712(SNAPSHOT_HUB);
                 console.log(
                     `\n#${accounts.indexOf(account)} Address: ${account.address}\nVoting on ${taskArgs.space}`
                 );

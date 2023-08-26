@@ -1,9 +1,9 @@
 import { ethers, utils } from "ethers";
 import { task, types } from "hardhat/config";
 import { ERC20__factory } from "../../typechain-types";
-import { ChainId } from "../../utils/ChainInfoUtils";
+import { ChainId, getChainInfo } from "../../utils/ChainInfoUtils";
 import "../../utils/Util.tasks";
-import { delay, getAccounts, waitForGasPrice } from "../../utils/Utils";
+import { delay, getAccounts, populateTxnParams, waitForGasPrice } from "../../utils/Utils";
 
 task("miscWithbackedCommunityNft", "Mint nft on optimism")
     .addParam("delay", "Add random delay", undefined, types.int, true)
@@ -635,18 +635,66 @@ task("mintManifoldSoundNft", "Mint nft")
 
         for (const account of accounts) {
             try {
-                const mintTx = await mintContract.connect(account).mint(
-                    "0xf970aAE088F1e18B2EC271ceE4d6F46E14597930",
-                    1030031600,
-                    0,
-                    [],
-                    account.address,
-                    {
-                    value: utils.parseEther("0.0005"),
-                    maxPriorityFeePerGas: ethers.utils.parseUnits("2", "wei"),
-                });
+                const mintTx = await mintContract
+                    .connect(account)
+                    .mint("0xf970aAE088F1e18B2EC271ceE4d6F46E14597930", 1030031600, 0, [], account.address, {
+                        value: utils.parseEther("0.0005"),
+                        maxPriorityFeePerGas: ethers.utils.parseUnits("2", "wei"),
+                    });
 
                 console.log(`Task result:\nAddress: ${account.address}\ntxn: ${mintTx.hash}\n`);
+
+                if (taskArgs.delay != undefined) {
+                    await delay(taskArgs.delay);
+                }
+            } catch (error) {
+                console.log(
+                    `Error when process account #${accounts.indexOf(account)} Address: ${account.address}`
+                );
+                console.log(error);
+            }
+        }
+    });
+
+task("mintEigenWorldNft", "Mint Eigen World nft")
+    .addParam("delay", "Add random delay", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const targetAddress = "0x8d0802559775C70fb505f22988a4FD4A4f6D3B62";
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        if (![ChainId.ethereumMainnet].includes(currentNetwork.chainId)) {
+            console.log(`Task supported only at ethereum mainnet!`);
+            return;
+        }
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        const mintContract = new ethers.Contract(
+            targetAddress,
+            ["function mint(string text_)"],
+            hre.ethers.provider
+        );
+
+        for (const account of accounts) {
+            try {
+                const txParams = await populateTxnParams({ signer: account, chain: chainInfo });
+                await waitForGasPrice({maxPriceInGwei: 15, provider: hre.ethers.provider})
+                const mintTx = await mintContract.connect(account).mint(account.address, {
+                    ...txParams,
+                });
+
+                console.log(
+                    `\n#${accounts.indexOf(account)} Address: ${account.address}\ntxn: ${chainInfo.explorer}${mintTx.hash}`
+                );
 
                 if (taskArgs.delay != undefined) {
                     await delay(taskArgs.delay);

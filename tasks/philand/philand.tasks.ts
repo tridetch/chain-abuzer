@@ -68,7 +68,7 @@ task("philandDailyQuest", "Philand dailty quest")
                         });
                         console.log(`Txn ${iteration}: ${chainInfo.explorer}${dailyTx.hash}`);
 
-                        await dailyTx.wait();
+                        await dailyTx.wait(2);
                     }
 
                     console.log(`Transactions sended successfully! Wait when they will be indexed.`);

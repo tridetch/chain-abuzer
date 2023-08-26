@@ -39,6 +39,9 @@ function getBridgeInfo(chainId: number) {
         case ChainId.baseMainnet:
             bridge = stargateBridgeInfo.base;
             break;
+        case ChainId.lineaMainnet:
+            bridge = stargateBridgeInfo.linea;
+            break;
         default:
             throw new Error(`Unsupported chain - ${chainId}`);
     }

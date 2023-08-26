@@ -8,6 +8,7 @@ export interface StargateInfo {
     polygon: BridgeInfo;
     avalanche: BridgeInfo;
     base: BridgeInfo;
+    linea: BridgeInfo;
 }
 
 export interface BridgeInfo {
@@ -75,5 +76,13 @@ export const stargateBridgeInfo: StargateInfo = {
         usdcPoolId: 1,
         usdtPoolId: undefined,
         refuelAmount: utils.parseEther("0.005"),
+    },
+    linea: {
+        chainId: "183",
+        routerEthAddress: "0x8731d54E9D02c286767d56ac03e8037C07e01e98",
+        routerErcAddress: "0x2F6F07CDcf3588944Bf4C42aC74ff24bF56e7590",
+        usdcPoolId: undefined,
+        usdtPoolId: undefined,
+        refuelAmount: utils.parseEther("0"),
     }
 };
