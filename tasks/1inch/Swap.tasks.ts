@@ -1,9 +1,10 @@
 import { BigNumber, utils } from "ethers";
 import { task, types } from "hardhat/config";
-import fetch from "node-fetch";
+import fetch, { Headers } from "node-fetch";
 import { ERC20__factory } from "../../typechain-types";
+import { getChainInfo } from "../../utils/ChainInfoUtils";
 import "../../utils/Util.tasks";
-import { addDust, delay, getAccounts } from "../../utils/Utils";
+import { addDust, delay, getAccounts, populateTxnParams } from "../../utils/Utils";
 
 export const OneInchTasks = {
     oneInchSwap: "1inchSwap",
@@ -26,10 +27,13 @@ task("1inchSwap", "Swap tokens on 1inch")
         types.string
     )
     .setAction(async (taskArgs, hre) => {
-        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
-
         const network = await hre.ethers.provider.getNetwork();
-        const apiBaseUrl = "https://api.1inch.io/v5.0/" + network.chainId;
+        const chainInfo = getChainInfo(network.chainId);
+
+        const apiBaseUrl = "https://api.1inch.dev/swap/v5.2/" + network.chainId;
+        const headers = new Headers();
+        headers.append(`accept`, `application/json`);
+        headers.append(`Authorization`, `Bearer ${process.env.ONE_INCH_API_KEY}`);
 
         const isNativeEth = taskArgs.fromToken == "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 
@@ -39,6 +43,7 @@ task("1inchSwap", "Swap tokens on 1inch")
         let tokenDecimals: number = isNativeEth ? 18 : await sellToken.decimals();
         const tokenName = isNativeEth ? "ETH" : await sellToken.name();
 
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
         for (const account of accounts) {
             try {
                 let amount: BigNumber;
@@ -65,17 +70,17 @@ task("1inchSwap", "Swap tokens on 1inch")
                 console.log(`\n#${accounts.indexOf(account)} Address ${account.address}`);
 
                 const swapParams = {
-                    fromTokenAddress: taskArgs.fromToken,
-                    toTokenAddress: taskArgs.toToken,
+                    src: taskArgs.fromToken,
+                    dst: taskArgs.toToken,
                     amount: amount.toString(),
-                    fromAddress: walletAddress,
+                    from: walletAddress,
                     slippage: 1,
-                    disableEstimate: false,
-                    allowPartialFill: false,
+                    // disableEstimate: false,
+                    // allowPartialFill: false,
                 };
 
                 const allowance: BigNumber = BigNumber.from(
-                    await checkAllowance(swapParams.fromTokenAddress, walletAddress)
+                    await checkAllowance(swapParams.src, walletAddress)
                 );
 
                 if (allowance.lt(swapParams.amount)) {
@@ -90,15 +95,14 @@ task("1inchSwap", "Swap tokens on 1inch")
                     // First, let's build the body of the transaction
                     const transactionForSign = await buildTxForApproveTradeWithRouter(
                         walletAddress,
-                        swapParams.fromTokenAddress,
+                        swapParams.src,
                         swapParams.amount.toString()
                     );
                     // console.log("Transaction for approve: ", transactionForSign);
 
                     // Send a transaction and get its hash
                     const approveTxHash = await signAndSendTransaction(account, transactionForSign);
-
-                    console.log("Approve tx hash: ", approveTxHash);
+                    console.log(`Approve tx: ${chainInfo.explorer}${approveTxHash}`);
                 }
 
                 // First, let's build the body of the transaction
@@ -109,8 +113,9 @@ task("1inchSwap", "Swap tokens on 1inch")
                 // console.log("Transaction for swap: ", swapTransaction);
 
                 // Send a transaction and get its hash
-                const swapTxHash = await signAndSendTransaction(account, swapTransaction);
-                console.log(`Swap transaction hash: ${swapTxHash}\n`);
+                const txParams = await populateTxnParams({ signer: account, chain: chainInfo });
+                const swapTxHash = await signAndSendTransaction(account, { ...swapTransaction, ...txParams });
+                console.log(`Swap transaction: ${chainInfo.explorer}${swapTxHash}`);
                 if (taskArgs.delay != undefined) {
                     await delay(taskArgs.delay);
                 }
@@ -126,7 +131,12 @@ task("1inchSwap", "Swap tokens on 1inch")
         }
 
         async function checkAllowance(tokenAddress: string, walletAddress: string) {
-            const res = await fetch(apiRequestUrl("/approve/allowance", { tokenAddress, walletAddress }));
+            await waitRateLimit();
+
+            const res = await fetch(apiRequestUrl("/approve/allowance", { tokenAddress, walletAddress }), {
+                headers: headers,
+            });
+
             const res_1 = await res.json();
             return res_1.allowance;
         }
@@ -135,7 +145,7 @@ task("1inchSwap", "Swap tokens on 1inch")
             // const rawTransaction = await account.signTransaction(transaction);
             // console.log(`Raw txn`, rawTransaction);
             const txn = await account.sendTransaction(transaction);
-            txn.wait();
+            await txn.wait();
             return txn.hash;
             // return await broadCastRawTransaction(rawTransaction);
         }
@@ -146,7 +156,8 @@ task("1inchSwap", "Swap tokens on 1inch")
                 amount ? { tokenAddress, amount } : { tokenAddress }
             );
 
-            const transaction = await fetch(url).then((res) => res.json());
+            await waitRateLimit();
+            const transaction = await fetch(url, { headers: headers }).then((res) => res.json());
 
             const calculatedGasLimit = await hre.ethers.provider.estimateGas({
                 ...transaction,
@@ -164,8 +175,11 @@ task("1inchSwap", "Swap tokens on 1inch")
         async function buildTxForSwap(swapParams: any) {
             const url = apiRequestUrl("/swap", swapParams);
 
-            return fetch(url)
-                .then((res) => res.json())
+            await waitRateLimit();
+            return fetch(url, { headers: headers })
+                .then((res) => {
+                    return res.json();
+                })
                 .then((res) => {
                     if ("error" in res) {
                         console.log(`\nSwap error responce`, res);
@@ -183,3 +197,7 @@ task("1inchSwap", "Swap tokens on 1inch")
                 });
         }
     });
+
+async function waitRateLimit() {
+    await new Promise((r) => setTimeout(r, 1100));
+}

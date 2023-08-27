@@ -100,7 +100,7 @@ task("philandDailyQuest", "Philand dailty quest")
                         console.log(
                             `Claim quest ${couponInfo.logic} - tx ${chainInfo.explorer}${claimTx.hash}`
                         );
-                        await delay(0.15);
+                        await delay(0.25);
                     } catch (error) {
                         console.log(`Claim quest ${couponInfo.logic} failed. Already claimed?`);
                         // console.log(error);

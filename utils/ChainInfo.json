@@ -116,8 +116,8 @@
     "chainId": 8453,
     "chainName": "Base Mainnet",
     "explorer": "https://basescan.org/tx/",
-    "wethAddress": "emptyWethAddress",
-    "usdcAddress": "emptyUsdcAddress",
+    "wethAddress": "0x4200000000000000000000000000000000000006",
+    "usdcAddress": "0xd9aaec86b65d86f6a7b5b1b0c42ffa531710b6ca",
     "usdtAddress": ""
   },
   "lineaGoerlyChainInfo":{

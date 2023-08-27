@@ -162,6 +162,7 @@ task("balancesCrossChain", "Show accounts balances")
             Optimism: string;
             ZkEvm: string;
             ZksyncEra: string;
+            Base: string;
         }
 
         const accounts = await getAccounts(taskArgs, hre.ethers.provider);
@@ -172,6 +173,7 @@ task("balancesCrossChain", "Show accounts balances")
         const optimismProvider = new hre.ethers.providers.JsonRpcProvider(process.env.OPTIMISM_MAINNET_URL);
         const zkEvmProvider = new hre.ethers.providers.JsonRpcProvider(process.env.POLYGON_ZK_EVM_URL);
         const zksyncEraProvider = new hre.ethers.providers.JsonRpcProvider(process.env.ZKSYNC_ERA_URL);
+        const baseProvider = new hre.ethers.providers.JsonRpcProvider(process.env.BASE_MAINNET_URL);
 
         let accountBalances: AccountInfo[] = [];
 
@@ -180,16 +182,15 @@ task("balancesCrossChain", "Show accounts balances")
                 Address: account.address,
                 Ethereum: utils.formatEther(await ethProvider.getBalance(account.address)).substring(0, 8),
                 Arbitrum: utils.formatEther(await arbProvider.getBalance(account.address)).substring(0, 8),
-                Linea: utils
-                    .formatEther(await lineaProvider.getBalance(account.address))
-                    .substring(0, 8),
                 Optimism: utils
                     .formatEther(await optimismProvider.getBalance(account.address))
                     .substring(0, 8),
-                ZkEvm: utils.formatEther(await zkEvmProvider.getBalance(account.address)).substring(0, 8),
+                Linea: utils.formatEther(await lineaProvider.getBalance(account.address)).substring(0, 8),
                 ZksyncEra: utils
                     .formatEther(await zksyncEraProvider.getBalance(account.address))
                     .substring(0, 8),
+                Base: utils.formatEther(await baseProvider.getBalance(account.address)).substring(0, 8),
+                ZkEvm: utils.formatEther(await zkEvmProvider.getBalance(account.address)).substring(0, 8),
             };
             accountBalances.push(accountInfo);
         }

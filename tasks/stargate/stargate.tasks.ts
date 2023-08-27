@@ -69,6 +69,7 @@ task("stargateBridgeETH", "Bridge ETH across networks")
     )
     .setAction(async (taskArgs, hre) => {
         const network = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(network.chainId)
         const accounts = await getAccounts(taskArgs, hre.ethers.provider);
 
         if (network.chainId! in [ChainId.arbitrumMainnet, ChainId.ethereumMainnet, ChainId.optimismMainnet]) {
@@ -136,7 +137,7 @@ task("stargateBridgeETH", "Bridge ETH across networks")
                     { value: amount.add(fee) }
                 );
 
-                console.log(`${hre.ethers.utils.formatEther(amount)} ETH bridged\nTxn ${bridgeTx.hash}`);
+                console.log(`${hre.ethers.utils.formatEther(amount)} ETH bridged\nTxn ${chainInfo.explorer}${bridgeTx.hash}`);
                 if (taskArgs.delay != undefined) {
                     await delay(taskArgs.delay);
                 }
