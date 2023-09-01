@@ -69,7 +69,7 @@ task("stargateBridgeETH", "Bridge ETH across networks")
     )
     .setAction(async (taskArgs, hre) => {
         const network = await hre.ethers.provider.getNetwork();
-        const chainInfo = getChainInfo(network.chainId)
+        const chainInfo = getChainInfo(network.chainId);
         const accounts = await getAccounts(taskArgs, hre.ethers.provider);
 
         if (network.chainId! in [ChainId.arbitrumMainnet, ChainId.ethereumMainnet, ChainId.optimismMainnet]) {
@@ -137,7 +137,11 @@ task("stargateBridgeETH", "Bridge ETH across networks")
                     { value: amount.add(fee) }
                 );
 
-                console.log(`${hre.ethers.utils.formatEther(amount)} ETH bridged\nTxn ${chainInfo.explorer}${bridgeTx.hash}`);
+                console.log(
+                    `${hre.ethers.utils.formatEther(amount)} ETH bridged\nTxn ${chainInfo.explorer}${
+                        bridgeTx.hash
+                    }`
+                );
                 if (taskArgs.delay != undefined) {
                     await delay(taskArgs.delay);
                 }
@@ -231,7 +235,8 @@ task("stargateBridgeUsdc", "Bridge USDC across networks")
                     amount = await usdcContract.balanceOf(account.address);
                 } else if (taskArgs.dust) {
                     amount = utils.parseUnits(
-                        addDust({ amount: taskArgs.amount, upToPercent: taskArgs.dust }).toString(), await usdcContract.decimals()
+                        addDust({ amount: taskArgs.amount, upToPercent: taskArgs.dust }).toString(),
+                        await usdcContract.decimals()
                     );
                 } else {
                     amount = utils.parseUnits(taskArgs.amount.toString(), decimals);
@@ -438,7 +443,7 @@ task("stargateStake", "Stake STG tokens on arbitrum chain")
     )
     .setAction(async (taskArgs, hre) => {
         const network = await hre.ethers.provider.getNetwork();
-        const chainInfo = getChainInfo(network.chainId)
+        const chainInfo = getChainInfo(network.chainId);
 
         if (network.chainId != ChainId.arbitrumMainnet)
             throw new Error("Task allowed only on arbitrum mainnet");
@@ -504,10 +509,12 @@ task("stargateStake", "Stake STG tokens on arbitrum chain")
                     );
                 }
 
-                const stakeTxn = await stgStakingContract
-                    .connect(account)
-                    .create_lock(amount, timestamp);
-                console.log(`${utils.formatUnits(amount, stgTokenDecimals)} staked. Txn ${chainInfo.explorer}${stakeTxn.hash}`);
+                const stakeTxn = await stgStakingContract.connect(account).create_lock(amount, timestamp);
+                console.log(
+                    `${utils.formatUnits(amount, stgTokenDecimals)} staked. Txn ${chainInfo.explorer}${
+                        stakeTxn.hash
+                    }`
+                );
 
                 if (taskArgs.delay) {
                     await delay(taskArgs.delay);
@@ -559,7 +566,7 @@ task("stargateStakeIncrease", "Stake STG tokens on arbitrum chain")
         );
 
         const timestamp = Date.parse(taskArgs.lockUntil) / 1000;
-        
+
         for (const account of accounts) {
             try {
                 let amount: BigNumber;

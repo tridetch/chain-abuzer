@@ -1,10 +1,12 @@
+import axios from "axios";
 import * as dotenv from "dotenv";
-import { BigNumber, utils } from "ethers";
+import { BigNumber, ethers, utils } from "ethers";
 import { task, types } from "hardhat/config";
 import fetch from "node-fetch";
 import { ERC20__factory } from "../../typechain-types";
-import { getChainInfo } from "../../utils/ChainInfoUtils";
+import { ChainId, getChainInfo } from "../../utils/ChainInfoUtils";
 import { addDust, delay, getAccounts, percentOf, waitForGasPrice } from "../../utils/Utils";
+import { refuelContractAbi } from "./RefuelContractAbi";
 
 dotenv.config();
 
@@ -321,3 +323,170 @@ async function getBridgeStatus(transactionHash: string, fromChainId: number, toC
     const json = await response.json();
     return json;
 }
+
+interface RefuelChainInfo {
+    success: boolean;
+    result: { name: string; chainId: number; isSendingEnabled: boolean; limits: RefuelLimit[] }[];
+}
+
+interface RefuelLimit {
+    chainId: number;
+    isEnabled: Boolean;
+    minAmount: string;
+    maxAmount: string;
+}
+
+function getRefuelContract(chainId: number): string {
+    let address;
+    switch (chainId) {
+        case ChainId.ethereumMainnet:
+            address = "0xb584D4bE1A5470CA1a8778E9B86c81e165204599";
+            break;
+        case ChainId.optimismMainnet:
+            address = "0x5800249621DA520aDFdCa16da20d8A5Fc0f814d8";
+            break;
+        case ChainId.binanceMainnet:
+            address = "0xBE51D38547992293c89CC589105784ab60b004A9";
+            break;
+        case ChainId.poligonMainnet:
+            address = "0xAC313d7491910516E06FBfC2A0b5BB49bb072D91";
+            break;
+        case ChainId.zkSyncEra:
+            address = "0x7Ee459D7fDe8b4a3C22b9c8C7aa52AbadDd9fFD5";
+            break;
+        case ChainId.zkEvm:
+            address = "0x555A64968E4803e27669D64e349Ef3d18FCa0895";
+            break;
+        case ChainId.baseMainnet:
+            address = "0xE8c5b8488FeaFB5df316Be73EdE3Bdc26571a773";
+            break;
+        case ChainId.arbitrumMainnet:
+            address = "0xc0E02AA55d10e38855e13B64A8E1387A04681A00";
+            break;
+        case ChainId.avalancheMainnet:
+            address = "0x040993fbF458b95871Cd2D73Ee2E09F4AF6d56bB";
+            break;
+        default:
+            throw new Error(`Unsupported chain - ${chainId}`);
+    }
+    return address;
+}
+
+task("bungeeBridgeETH", "Bridge ETH across networks")
+    .addParam("targetChainId", "Target chain id", undefined, types.int)
+    .addParam("amount", "Amount of ETH to deposit", undefined, types.float, true)
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
+    .addParam("dust", "Dust percentage", undefined, types.int, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const network = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(network.chainId);
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        if (
+            network.chainId! in
+            [
+                ChainId.ethereumMainnet,
+                ChainId.optimismMainnet,
+                ChainId.binanceMainnet,
+                ChainId.poligonMainnet,
+                ChainId.zkSyncEra,
+                ChainId.zkEvm,
+                ChainId.baseMainnet,
+                ChainId.arbitrumMainnet,
+                ChainId.avalancheMainnet,
+            ]
+        ) {
+            throw new Error("Task not supported on this networks");
+        }
+
+        let refuelContractAddress: string = getRefuelContract(network.chainId);
+
+        const refuelContract = new ethers.Contract(
+            refuelContractAddress,
+            refuelContractAbi.abi,
+            hre.ethers.provider
+        );
+
+        const chainStatus: RefuelChainInfo = (await axios.get(`https://refuel.socket.tech/chains`)).data;
+
+        if (chainStatus.success) {
+            const originChainInfo = chainStatus.result.find((info) => {
+                return info.chainId == network.chainId;
+            });
+
+            const targetChainInfo = originChainInfo?.limits.find((chainLimits) => {
+                return chainLimits.chainId == taskArgs.targetChainId;
+            });
+
+            if (!originChainInfo?.isSendingEnabled || !targetChainInfo?.isEnabled) {
+                console.log(
+                    `Not supported: Origin chain sending enabled = ${originChainInfo?.isSendingEnabled}; Destination chain enabled = ${targetChainInfo?.isEnabled}`
+                );
+                return;
+            }
+
+            const minAmount = BigNumber.from(targetChainInfo?.minAmount);
+            const maxAmount = BigNumber.from(targetChainInfo?.maxAmount);
+
+            const checkAmount = utils.parseEther(
+                addDust({ amount: taskArgs.amount, upToPercent: taskArgs.dust }).toString()
+            );
+
+            if (
+                checkAmount.lt(minAmount) ||
+                checkAmount.add(percentOf(checkAmount, taskArgs.dust || 0)).gt(maxAmount)
+            ) {
+                console.log(
+                    `Error amount ${utils.formatEther(checkAmount)} + dust ${
+                        taskArgs.dust
+                    }%\nMin = ${utils.formatEther(minAmount)}, Max = ${utils.formatEther(maxAmount)}`
+                );
+                return;
+            }
+
+            for (const account of accounts) {
+                try {
+                    console.log(`\n#${accounts.indexOf(account)} Address ${account.address}`);
+
+                    let amount: BigNumber;
+                    if (taskArgs.dust) {
+                        amount = utils.parseEther(
+                            addDust({ amount: taskArgs.amount, upToPercent: taskArgs.dust }).toString()
+                        );
+                    } else {
+                        amount = utils.parseEther(taskArgs.amount.toString());
+                    }
+
+                    const bridgeTx = await refuelContract
+                        .connect(account)
+                        .depositNativeToken(taskArgs.targetChainId, account.address, { value: amount });
+
+                    console.log(
+                        `${hre.ethers.utils.formatEther(amount)} native tokens refueled\nTxn ${
+                            chainInfo.explorer
+                        }${bridgeTx.hash}`
+                    );
+
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (error) {
+                    console.log(
+                        `Error when process account #${accounts.indexOf(account)} Address: ${account.address}`
+                    );
+                    console.log(error);
+                }
+            }
+        } else {
+            console.log(`Error ${JSON.stringify(chainStatus)}`);
+        }
+    });
