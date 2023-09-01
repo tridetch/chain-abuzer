@@ -165,7 +165,118 @@ task("holographMintSuperPositionNft", "Mint holograph Super Position NFT")
             try {
                 var txParams = await populateTxnParams({ signer: account, chain: chainInfo });
                 const tx = await mintContract.connect(account).purchase(1, {
-                    value: ethers.utils.parseEther("0.000056937732122"),
+                    value: ethers.utils.parseEther("0.000059401287374237"),
+                    ...txParams,
+                });
+
+                console.log(
+                    `\n#${accounts.indexOf(account)} Address: ${account.address}\ntxn: ${chainInfo.explorer}${
+                        tx.hash
+                    }`
+                );
+
+                if (taskArgs.delay != undefined) {
+                    await delay(taskArgs.delay);
+                }
+            } catch (error) {
+                console.log(
+                    `Error when process account #${accounts.indexOf(account)} Address: ${account.address}`
+                );
+                console.log(error);
+            }
+        }
+    });
+
+task("holographMintWhereWDWGFPositionNft", "Mint holograph WDWGF NFT")
+    .addParam("delay", "Add random delay", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+        const targetAddress = "0xcb0bb5d835a47584fda53f57bb4193b28d2738db";
+
+        if (
+            ![
+                ChainId.arbitrumMainnet,
+                ChainId.optimismMainnet,
+                ChainId.binanceMainnet,
+                ChainId.poligonMainnet,
+            ].includes(currentNetwork.chainId)
+        ) {
+            console.log(` Task supported only on Arbitrum, Optimism, Polygon, Binance Smart Chain!`);
+            return;
+        }
+
+        let mintContract = new Contract(
+            targetAddress,
+            ["function purchase(uint256 numberOfTokens) payable"],
+            hre.ethers.provider
+        );
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+        for (const account of accounts) {
+            try {
+                var txParams = await populateTxnParams({ signer: account, chain: chainInfo });
+                const tx = await mintContract.connect(account).purchase(1, {
+                    value: ethers.utils.parseEther("0.000059401287374237"),
+                    ...txParams,
+                });
+
+                console.log(
+                    `\n#${accounts.indexOf(account)} Address: ${account.address}\ntxn: ${chainInfo.explorer}${
+                        tx.hash
+                    }`
+                );
+
+                if (taskArgs.delay != undefined) {
+                    await delay(taskArgs.delay);
+                }
+            } catch (error) {
+                console.log(
+                    `Error when process account #${accounts.indexOf(account)} Address: ${account.address}`
+                );
+                console.log(error);
+            }
+        }
+    });
+
+task("holographMintLayerZeroNft", "Mint holograph Layer Zero NFT")
+    .addParam("delay", "Add random delay", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+        const targetAddress = "0x2c4bd4e25d83285f417e26a44069f41d1a8ad0e7";
+
+        if (![ChainId.poligonMainnet].includes(currentNetwork.chainId)) {
+            console.log(` Task supported only on Polygon!`);
+            return;
+        }
+
+        let mintContract = new Contract(
+            targetAddress,
+            ["function purchase(uint256 numberOfTokens) payable"],
+            hre.ethers.provider
+        );
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+        for (const account of accounts) {
+            try {
+                var txParams = await populateTxnParams({ signer: account, chain: chainInfo });
+                const tx = await mintContract.connect(account).purchase(1, {
+                    value: ethers.utils.parseEther("0.191523607137533"),
                     ...txParams,
                 });
 
