@@ -28,16 +28,25 @@ task("arbitrumBridge", "Bridge ETH to arbitrum network")
     )
     .setAction(async (taskArgs, hre) => {
         const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
 
-        if (![ChainId.ethereumMainnet, ChainId.ethereumGoerli].includes(currentNetwork.chainId)) {
+        if (
+            ![ChainId.ethereumMainnet, ChainId.ethereumGoerli, ChainId.ethereumSepolia].includes(
+                currentNetwork.chainId
+            )
+        ) {
             console.log("Bridge to Arbitrum supported only from Ethereum networks!");
             return;
         }
         const targetL2Network = getChainInfo(taskArgs.targetNetwork);
         if (
-            ![ChainId.arbitrumMainnet, ChainId.arbitrumNova, ChainId.arbitrumGoerli].includes(
-                targetL2Network.chainId
-            )
+            ![
+                ChainId.arbitrumMainnet,
+                ChainId.arbitrumNova,
+                ChainId.arbitrumGoerli,
+                ChainId.arbbitrumStylus,
+                ChainId.arbbitrumSepolia,
+            ].includes(targetL2Network.chainId)
         ) {
             console.log("Bridge only to Arbitrum networks!");
             return;
@@ -58,9 +67,10 @@ task("arbitrumBridge", "Bridge ETH to arbitrum network")
                         addDust({ amount: taskArgs.amount, upToPercent: taskArgs.dust }).toString()
                     );
                 } else {
-                    amount = utils.parseEther(taskArgs.amount);
+                    amount = utils.parseEther(taskArgs.amount.toString());
                 }
-                console.log(`Sending ${utils.formatEther(amount)} ETH from ${account.address} ...`);
+                console.log(`#${accounts.indexOf(account)} Address: ${account.address}`);
+                console.log(`Sending ${utils.formatEther(amount)} ...`);
 
                 const ethDepositTxResponse = await ethBridger.deposit({
                     amount: amount,
@@ -68,7 +78,7 @@ task("arbitrumBridge", "Bridge ETH to arbitrum network")
                 });
 
                 console.log(
-                    `Deposit result:\nAddress: ${account.address}\ntxn: ${ethDepositTxResponse.hash}\n`
+                    `Deposit result:\nAddress: ${account.address}\ntxn: ${chainInfo.explorer}${ethDepositTxResponse.hash}\n`
                 );
 
                 if (taskArgs.delay != undefined) {
@@ -258,7 +268,7 @@ task("arbitrumClaimDrop", "Claim drop")
 
 task("arbitrumDelegateArb", "Delegate ARB voting power to address")
     .addParam("delegateTo", "Address to delegate. Self by default", undefined, types.string, true) // Olimpio.eth address = 0xF4B0556B9B6F53E00A1FDD2b0478Ce841991D8fA
-    .addParam("delay", "Add random delay", undefined, types.int, true)
+    .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addOptionalParam(
@@ -440,7 +450,7 @@ task("arbitrumNovaContractInteractions", "Interact with erc-20 contracts")
     .setAction(async (taskArgs, hre) => {
         const arbiSwapAddress = "0x67844f0f0dd3D770ff29B0ACE50E35a853e4655E";
         const network = await hre.ethers.provider.getNetwork();
-        const chainInfo = getChainInfo(network.chainId)
+        const chainInfo = getChainInfo(network.chainId);
 
         if (network.chainId != ChainId.arbitrumNova) {
             throw new Error("Task allowed only on --network arbNova");

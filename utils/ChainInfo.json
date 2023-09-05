@@ -47,6 +47,22 @@
     "usdcAddress": "0x6775842AE82BF2F0f987b10526768Ad89d79536E",
     "usdtAddress": ""
   },
+  "arbitrumSepoliaChainInfo": {
+    "chainId": 421614,
+    "chainName": "Arbitrum Sepolia",
+    "explorer": "https://sepolia-explorer.arbitrum.io",
+    "wethAddress": "",
+    "usdcAddress": "",
+    "usdtAddress": ""
+  },
+  "arbitrumStylusChainInfo": {
+    "chainId": 23011913,
+    "chainName": "Arbitrum Stylus",
+    "explorer": "https://stylus-testnet-explorer.arbitrum.io/tx/",
+    "wethAddress": "",
+    "usdcAddress": "",
+    "usdtAddress": ""
+  },
   "binanceMainnetChainInfo":{
     "chainId": 56,
     "chainName": "Binance Mainnet",

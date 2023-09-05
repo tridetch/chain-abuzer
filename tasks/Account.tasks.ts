@@ -566,6 +566,7 @@ task("approve", "Approve token to spender")
     .addParam("tokenAddress", "Token address", undefined, types.string)
     .addParam("spenderAddress", "Spender address", undefined, types.string)
     .addParam("amount", "Amount to deposit", undefined, types.float, true)
+    .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
     .addFlag("all", "Use all balance of tokens")
     .addParam("delay", "Add delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
@@ -601,6 +602,8 @@ task("approve", "Approve token to spender")
 
             console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
 
+            await waitForGasPrice({maxPriceInGwei: taskArgs.gasPrice, provider: hre.ethers.provider})
+            
             const txParams = await populateTxnParams({ signer: account, chain: chainInfo });
             const tx = await tokenContract
                 .connect(account)

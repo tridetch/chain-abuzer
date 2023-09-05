@@ -39,6 +39,7 @@ const config: HardhatUserConfig = {
         },
         ethSepolia: {
             url: process.env.ETHEREUM_SEPOLIA_URL || "",
+            accounts: [`0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80`]
         },
         arbMainnet: {
             url: process.env.ARBITRUM_MAINNET_URL || "",
@@ -102,6 +103,12 @@ const config: HardhatUserConfig = {
         },
         pgnMainnet: {
             url: process.env.PUBLIC_GOODS_NETWORK_MAINNET || ""
+        },
+        arbStylus: {
+            url: process.env.ARBITRUM_STYLUS_TEST || ""
+        },
+        arbSepolia: {
+            url: process.env.ARBITRUM_SEPOLIA || ""
         },
     },
 };

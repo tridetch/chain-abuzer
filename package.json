@@ -1,5 +1,5 @@
 {
-  "name": "chain-abuzer",
+  "name": "arbitrum-abuse",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -25,7 +25,7 @@
     "typechain": "^8.1.1"
   },
   "dependencies": {
-    "@arbitrum/sdk": "^3.0.0",
+    "@arbitrum/sdk": "^3.1.10",
     "@ensdomains/ens-contracts": "^0.0.15",
     "@nomicfoundation/hardhat-chai-matchers": "^1.0.4",
     "@nomiclabs/hardhat-ethers": "^2.2.1",

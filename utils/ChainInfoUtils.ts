@@ -17,6 +17,8 @@ export enum ChainId {
     arbitrumMainnet = chainInfo.arbitrumMainnetChainInfo.chainId,
     arbitrumNova = chainInfo.arbitrumNovaChainInfo.chainId,
     arbitrumGoerli = chainInfo.arbitrumGoerliChainInfo.chainId,
+    arbbitrumSepolia = chainInfo.arbitrumSepoliaChainInfo.chainId,
+    arbbitrumStylus = chainInfo.arbitrumStylusChainInfo.chainId,
     binanceMainnet = chainInfo.binanceMainnetChainInfo.chainId,
     optimismMainnet = chainInfo.optimismMainnetChainInfo.chainId,
     poligonMainnet = chainInfo.polygonMainnetChainInfo.chainId,
@@ -81,6 +83,12 @@ export function getChainInfo(chainId: number): ChainInfo {
             return chainInfo.taikoAlpha3ChainInfo;
         case ChainId.pgnSepolia:
             return chainInfo.pgnSepoliaChainInfo;
+        case ChainId.arbbitrumStylus:
+            return chainInfo.arbitrumStylusChainInfo;
+        case ChainId.arbbitrumStylus:
+            return chainInfo.arbitrumStylusChainInfo;
+        case ChainId.arbbitrumSepolia:
+            return chainInfo.arbitrumSepoliaChainInfo;
         default:
             throw new Error("Unknown network!");
     }
