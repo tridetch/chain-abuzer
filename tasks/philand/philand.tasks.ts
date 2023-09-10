@@ -100,7 +100,8 @@ task("philandDailyQuest", "Philand dailty quest")
                         console.log(
                             `Claim quest ${couponInfo.logic} - tx ${chainInfo.explorer}${claimTx.hash}`
                         );
-                        await delay(0.25);
+                        await claimTx.wait();
+                        await delay(0.35);
                     } catch (error) {
                         console.log(`Claim quest ${couponInfo.logic} failed. Already claimed?`);
                         // console.log(error);
@@ -112,9 +113,7 @@ task("philandDailyQuest", "Philand dailty quest")
                     await delay(taskArgs.delay);
                 }
             } catch (error) {
-                console.log(
-                    `\nError when process account #${accounts.indexOf(account)} Address: ${account.address}`
-                );
+                console.log(`Error when process account`);
                 console.log(error);
             }
         }
