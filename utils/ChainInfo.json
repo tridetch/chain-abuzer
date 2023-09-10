@@ -154,8 +154,16 @@
   },
   "scrollAlphaChainInfo":{
     "chainId": 534353,
-    "chainName": "Scroll",
+    "chainName": "Scroll Alpha",
     "explorer": "https://blockscout.scroll.io/tx/",
+    "wethAddress": "emptyWethAddress",
+    "usdcAddress": "emptyUsdcAddress",
+    "usdtAddress": ""
+  },
+  "scrollSepoliaChainInfo":{
+    "chainId": 534351,
+    "chainName": "Scroll Sepolia",
+    "explorer": "https://sepolia-blockscout.scroll.io/tx/",
     "wethAddress": "emptyWethAddress",
     "usdcAddress": "emptyUsdcAddress",
     "usdtAddress": ""

@@ -4,7 +4,7 @@ import { ChainId, getChainInfo } from "../../utils/ChainInfoUtils";
 import "../../utils/Util.tasks";
 import { delay, getAccounts, populateTxnParams } from "../../utils/Utils";
 
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 
 interface QuestResult {
     message: string;
@@ -75,13 +75,19 @@ task("philandDailyQuest", "Philand dailty quest")
                     await delay(0.2);
                 }
 
-                const questResult: QuestResult = (
-                    await axios.get(
-                        `https://utils-api.phi.blue/v1/philand/dailyquest/verify?address=${account.address}`
-                    )
-                ).data;
+                let response: AxiosResponse | any = undefined;
+                let questResult: QuestResult | any = undefined;
 
-                // console.log(JSON.stringify(questResult));
+                try {
+                    response = await axios.get(
+                        `https://utils-api.phi.blue/v1/philand/dailyquest/verify?address=${account.address}`
+                    );
+                } catch (error: any) {
+                    console.log(`Error ${error.response.status} ${error.response.data.result}`);
+                    continue;
+                }
+
+                questResult = response.data;
 
                 for (const couponInfo of questResult.coupons) {
                     try {
@@ -104,7 +110,6 @@ task("philandDailyQuest", "Philand dailty quest")
                         await delay(0.35);
                     } catch (error) {
                         console.log(`Claim quest ${couponInfo.logic} failed. Already claimed?`);
-                        // console.log(error);
                     }
                 }
                 console.log(`Daily quests completed!`);

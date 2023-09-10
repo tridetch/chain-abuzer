@@ -11,7 +11,7 @@ import "./routes/GeneralRoutes.tasks";
 import "./socket_bungee/socket.tasks";
 import "./ens/ens.tasks";
 import "./misc/misc.tasks";
-import "./scroll/scroll.tasks";
+import "./scroll/scroll_sepolia.tasks";
 import "./ens/arbId.tasks";
 import "./ens/arbId.tasks";
 import "./ens/opNames.tasks";

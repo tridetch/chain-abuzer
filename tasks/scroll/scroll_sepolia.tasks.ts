@@ -1,7 +1,7 @@
 import { BigNumber, Contract, ethers, utils } from "ethers";
 import { task, types } from "hardhat/config";
 import { ERC20, ERC20__factory } from "../../typechain-types";
-import { ChainId } from "../../utils/ChainInfoUtils";
+import { ChainId, getChainInfo } from "../../utils/ChainInfoUtils";
 import "../../utils/Util.tasks";
 import { addDust, delay, getAccounts } from "../../utils/Utils";
 
@@ -18,13 +18,15 @@ task("scrollDeposit", "Bridge ETH to scroll")
         types.string
     )
     .setAction(async (taskArgs, hre) => {
-        const contractAddress = "0xe5e30e7c24e4dfcb281a682562e53154c15d3332";
         const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId)
 
-        if (![ChainId.ethereumGoerli].includes(currentNetwork.chainId)) {
-            console.log(` Task supported only on Ethereum goerli!`);
+        if (![ChainId.ethereumGoerli, ChainId.ethereumSepolia].includes(currentNetwork.chainId)) {
+            console.log(` Task supported only on Ethereum testnets!`);
             return;
         }
+
+        let contractAddress: string = "0x13FBE0D0e5552b8c9c4AE9e2435F38f37355998a";
 
         const bridgeContract = new Contract(
             contractAddress,
@@ -34,18 +36,18 @@ task("scrollDeposit", "Bridge ETH to scroll")
 
         const accounts = await getAccounts(taskArgs, hre.ethers.provider);
 
-        const gasLimit = utils.parseEther("0.0000106");
+        let gasLimit: BigNumber = utils.parseEther("0.000168");
 
         for (const account of accounts) {
             try {
                 let amount: BigNumber = utils.parseEther(taskArgs.amount.toString());
 
-                const tx = await bridgeContract.connect(account).depositETH(amount, 40000, {
+                const tx = await bridgeContract.connect(account).depositETH(amount, 168000, {
                     value: amount.add(gasLimit),
                 });
 
                 console.log(
-                    `Task result:\nAddress: #${accounts.indexOf(account)} ${account.address}\ntxn: ${
+                    `Task result:\nAddress: #${accounts.indexOf(account)} ${account.address}\ntxn: ${chainInfo.explorer}${
                         tx.hash
                     }\n`
                 );
@@ -62,7 +64,7 @@ task("scrollDeposit", "Bridge ETH to scroll")
         }
     });
 
-task("scrollWithdraw", "Bridge ETH to goerli")
+task("scrollWithdraw", "Withdraw ETH from scroll")
     .addParam("delay", "Add random delay", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
@@ -73,30 +75,36 @@ task("scrollWithdraw", "Bridge ETH to goerli")
         types.string
     )
     .setAction(async (taskArgs, hre) => {
-        const targetAddress = "0x6d79Aa2e4Fbf80CF8543Ad97e294861853fb0649";
         const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
 
-        if (![ChainId.scrollAlphaGoerli].includes(currentNetwork.chainId)) {
-            console.log(` Task supported only on Ethereum goerli!`);
+        if (![ChainId.scrollSepolia, ChainId.scrollAlphaGoerli].includes(currentNetwork.chainId)) {
+            console.log(` Task supported only on Scroll!`);
             return;
         }
+
+        let contractAddress: string = "0x9aD3c5617eCAa556d6E166787A97081907171230";
+
+        const bridgeContract = new Contract(
+            contractAddress,
+            ["function withdrawETH(uint256 ,uint256 _gasLimit) payable"],
+            hre.ethers.provider
+        );
 
         const accounts = await getAccounts(taskArgs, hre.ethers.provider);
 
         for (const account of accounts) {
             try {
-                const callData = `0xc7cdea3700000000000000000000000000000000000000000000000000b1a2bc2ec500000000000000000000000000000000000000000000000000000000000000009c40`;
+                let amount: BigNumber = utils.parseEther(taskArgs.amount.toString());
 
-                const tx = await account.sendTransaction({
-                    to: targetAddress,
-                    data: callData,
-                    value: utils.parseEther("0.03174805304448"),
+                const tx = await bridgeContract.connect(account).depositETH(amount, 0, {
+                    value: amount,
                 });
 
                 console.log(
                     `Task result:\nAddress: #${accounts.indexOf(account)} ${account.address}\ntxn: ${
-                        tx.hash
-                    }\n`
+                        chainInfo.explorer
+                    }${tx.hash}\n`
                 );
 
                 if (taskArgs.delay != undefined) {
@@ -109,6 +117,7 @@ task("scrollWithdraw", "Bridge ETH to goerli")
                 console.log(error);
             }
         }
+    
     });
 
 task("scrollSend", "Send ETH to address")
@@ -125,9 +134,10 @@ task("scrollSend", "Send ETH to address")
     )
     .setAction(async (taskArgs, hre) => {
         const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId)
 
-        if (![ChainId.scrollAlphaGoerli].includes(currentNetwork.chainId)) {
-            console.log(`Task supported only on Ethereum goerli!`);
+        if (![ChainId.scrollSepolia, ChainId.scrollAlphaGoerli].includes(currentNetwork.chainId)) {
+            console.log(`Task supported only on Scroll!`);
             return;
         }
 
@@ -150,7 +160,7 @@ task("scrollSend", "Send ETH to address")
                 });
 
                 console.log(
-                    `Task result:\nAddress: #${accounts.indexOf(account)} ${account.address}\ntxn: ${
+                    `Task result:\nAddress: #${accounts.indexOf(account)} ${account.address}\ntxn: ${chainInfo.explorer}${
                         tx.hash
                     }\n`
                 );
@@ -182,8 +192,9 @@ task("scrollAaveSupplyEth", "Supply ETH to AAVE")
     .setAction(async (taskArgs, hre) => {
         const contractAddress = "0x57ce905CfD7f986A929A26b006f797d181dB706e";
         const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId)
 
-        if (![ChainId.scrollAlphaGoerli].includes(currentNetwork.chainId)) {
+        if (![ChainId.scrollSepolia, ChainId.scrollAlphaGoerli].includes(currentNetwork.chainId)) {
             console.log(` Task supported only on --network scrollAlpha`);
             return;
         }
@@ -207,7 +218,7 @@ task("scrollAaveSupplyEth", "Supply ETH to AAVE")
                     });
 
                 console.log(
-                    `Task result:\nAddress: #${accounts.indexOf(account)} ${account.address}\ntxn: ${
+                    `Task result:\nAddress: #${accounts.indexOf(account)} ${account.address}\ntxn: ${chainInfo.explorer}${
                         tx.hash
                     }\n`
                 );
@@ -237,8 +248,9 @@ task("scrollAaveSupplyTokens", "Supply tokens")
     .setAction(async (taskArgs, hre) => {
         const targetAddress = "0x48914C788295b5db23aF2b5F0B3BE775C4eA9440";
         const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId)
 
-        if (![ChainId.scrollAlphaGoerli].includes(currentNetwork.chainId)) {
+        if (![ChainId.scrollSepolia, ChainId.scrollAlphaGoerli].includes(currentNetwork.chainId)) {
             console.log(`Task supported only at --network scrollAlpha`);
             return;
         }
@@ -286,7 +298,7 @@ task("scrollAaveSupplyTokens", "Supply tokens")
                         to: targetAddress,
                         data: sendCallData,
                     });
-                    console.log(`${await token.name()} Deposit txn: ${tx.hash}`);
+                    console.log(`${await token.name()} Deposit txn: ${chainInfo.explorer}${tx.hash}`);
                 }
 
                 if (taskArgs.delay != undefined) {
@@ -313,8 +325,9 @@ task("scrollAaveFaucet", "Request test assets")
     )
     .setAction(async (taskArgs, hre) => {
         const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId)
 
-        if (![ChainId.scrollAlphaGoerli].includes(currentNetwork.chainId)) {
+        if (![ChainId.scrollSepolia, ChainId.scrollAlphaGoerli].includes(currentNetwork.chainId)) {
             console.log(`Task supported only at --network scrollAlpha`);
             return;
         }
@@ -342,7 +355,7 @@ task("scrollAaveFaucet", "Request test assets")
             { amount: "1", contract: ERC20__factory.connect(wbtcTokenAddress, hre.ethers.provider) },
         ];
 
-        const faucetContract = new Contract("0x357A307A8036D54b454BD15B3B1A0fE4B9e8A561", [
+        const faucetContract = new Contract("0x2F826FD1a0071476330a58dD1A9B36bcF7da832d", [
             "function mint(address token, address to, uint256 amount)",
         ]);
 
@@ -361,7 +374,7 @@ task("scrollAaveFaucet", "Request test assets")
                             ethers.utils.parseUnits(mintInfo.amount, await mintInfo.contract.decimals())
                         );
 
-                    console.log(`Mint ${await mintInfo.contract.symbol()} txn: ${mintTx.hash}`);
+                    console.log(`Mint ${await mintInfo.contract.symbol()} txn: ${chainInfo.explorer}${mintTx.hash}`);
                     await delay(0.05);
                 }
 

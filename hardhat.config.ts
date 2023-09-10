@@ -86,6 +86,9 @@ const config: HardhatUserConfig = {
         scrollAlpha: {
             url: process.env.SCROLL_ALPHA_URL || "",
         },
+        scrollSepolia: {
+            url: process.env.SCROLL_SEPOLIA_URL || "",
+        },
         lineaGoerli: {
             url: process.env.LINEA_GOERLI || "",
         },

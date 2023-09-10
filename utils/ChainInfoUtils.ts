@@ -29,6 +29,7 @@ export enum ChainId {
     lineaGoerli = chainInfo.lineaGoerlyChainInfo.chainId,
     lineaMainnet = chainInfo.lineaMainnetChainInfo.chainId,
     scrollAlphaGoerli = chainInfo.scrollAlphaChainInfo.chainId,
+    scrollSepolia = chainInfo.scrollSepoliaChainInfo.chainId,
     zkSyncEra = chainInfo.zksyncEraChainInfo.chainId,
     zkEvm = chainInfo.polygonZkEvmChainInfo.chainId,
     zoraMainnet = chainInfo.zoraMainnetChainInfo.chainId,
@@ -39,33 +40,35 @@ export enum ChainId {
 
 export function getChainInfo(chainId: number): ChainInfo {
     switch (chainId) {
-        case 1:
+        case ChainId.ethereumMainnet:
             return chainInfo.ethereumMainnetChainInfo;
-        case 5:
+        case ChainId.ethereumGoerli:
             return chainInfo.ethereumGoerliChainInfo;
-        case 10:
+        case ChainId.optimismMainnet:
             return chainInfo.optimismMainnetChainInfo;
-        case 42161:
+        case ChainId.arbitrumMainnet:
             return chainInfo.arbitrumMainnetChainInfo;
-        case 42170:
+        case ChainId.arbitrumNova:
             return chainInfo.arbitrumNovaChainInfo;
-        case 421613:
+        case ChainId.arbitrumGoerli:
             return chainInfo.arbitrumGoerliChainInfo;
-        case 56:
+        case ChainId.binanceMainnet:
             return chainInfo.binanceMainnetChainInfo;
-        case 137:
+        case ChainId.poligonMainnet:
             return chainInfo.polygonMainnetChainInfo;
-        case 250:
+        case ChainId.fantomMainnet:
             return chainInfo.fantomMainnetChainInfo;
         case ChainId.baseGoerli:
             return chainInfo.baseGoerliChainInfo;
         case ChainId.baseMainnet:
             return chainInfo.baseMainnetChainInfo;
-        case 534353:
+        case ChainId.scrollAlphaGoerli:
             return chainInfo.scrollAlphaChainInfo;
-        case 324:
+        case ChainId.scrollSepolia:
+            return chainInfo.scrollSepoliaChainInfo;
+        case ChainId.zkSyncEra:
             return chainInfo.zksyncEraChainInfo;
-        case 43114:
+        case ChainId.avalancheMainnet:
             return chainInfo.avalancheMainnetChainInfo;
         case ChainId.lineaGoerli:
             return chainInfo.lineaGoerlyChainInfo;
