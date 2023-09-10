@@ -12,8 +12,8 @@ export const ArbitrumTasks = {
 
 task("arbitrumSepoliaBridge", "Bridge ETH Sepolia to arbitrum sepolia network")
     .addParam("amount", "Amount of ETH", undefined, types.float)
-    .addParam("dust", "Dust percentage", undefined, types.int, true)
-    .addParam("delay", "Add random delay", undefined, types.int, true)
+    .addParam("dust", "Dust percentage", undefined, types.float, true)
+    .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addOptionalParam(
@@ -80,8 +80,8 @@ task("arbitrumSepoliaBridge", "Bridge ETH Sepolia to arbitrum sepolia network")
 
 task("arbitrumStylusBridge", "Bridge ETH to arbitrum stylus network")
     .addParam("amount", "Amount of ETH", undefined, types.float)
-    .addParam("dust", "Dust percentage", undefined, types.int, true)
-    .addParam("delay", "Add random delay", undefined, types.int, true)
+    .addParam("dust", "Dust percentage", undefined, types.float, true)
+    .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addOptionalParam(
