@@ -76,7 +76,7 @@ task("arbitrumSepoliaBridge", "Bridge ETH Sepolia to arbitrum sepolia network")
         console.log("\nAll funds sent across the bridge");
     });
 
-task("arbitrumStylusBridge", "Bridge ETH to arbitrum stylus network")
+task("arbitrumStylusSepoliaBridge", "Bridge ETH to arbitrum stylus network")
     .addParam("amount", "Amount of ETH", undefined, types.float)
     .addParam("dust", "Dust percentage", undefined, types.float, true)
     .addParam("delay", "Add random delay", undefined, types.float, true)
@@ -139,7 +139,7 @@ task("arbitrumStylusBridge", "Bridge ETH to arbitrum stylus network")
         console.log("All funds sent across the bridge");
     });
 
-task("arbitrumStylusMintOnchainPowerNFT", "Mint Onchain Power NFT")
+task("arbitrumStylusSepoliaMintOnchainPowerNFT", "Mint Onchain Power NFT")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
