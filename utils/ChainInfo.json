@@ -55,9 +55,9 @@
     "usdcAddress": "",
     "usdtAddress": ""
   },
-  "arbitrumStylusChainInfo": {
+  "arbitrumStylusSepoliaChainInfo": {
     "chainId": 23011913,
-    "chainName": "Arbitrum Stylus",
+    "chainName": "Arbitrum Stylus Sepolia",
     "explorer": "https://stylus-testnet-explorer.arbitrum.io/tx/",
     "wethAddress": "",
     "usdcAddress": "",

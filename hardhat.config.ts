@@ -107,7 +107,7 @@ const config: HardhatUserConfig = {
         pgnMainnet: {
             url: process.env.PUBLIC_GOODS_NETWORK_MAINNET || ""
         },
-        arbStylus: {
+        arbStylusSepolia: {
             url: process.env.ARBITRUM_STYLUS_TEST || ""
         },
         arbSepolia: {

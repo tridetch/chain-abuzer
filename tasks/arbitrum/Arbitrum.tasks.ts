@@ -44,7 +44,7 @@ task("arbitrumBridge", "Bridge ETH to arbitrum network")
                 ChainId.arbitrumMainnet,
                 ChainId.arbitrumNova,
                 ChainId.arbitrumGoerli,
-                ChainId.arbbitrumStylus,
+                ChainId.arbbitrumStylusSepolia,
                 ChainId.arbbitrumSepolia,
             ].includes(targetL2Network.chainId)
         ) {

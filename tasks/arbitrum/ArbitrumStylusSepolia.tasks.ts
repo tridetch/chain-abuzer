@@ -55,15 +55,13 @@ task("arbitrumSepoliaBridge", "Bridge ETH Sepolia to arbitrum sepolia network")
                 console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
                 console.log(`Sending ${utils.formatEther(amount)} ETH from ${account.address} ...`);
 
-                const txParams = populateTxnParams({signer: account, chain: chainInfo})
+                const txParams = populateTxnParams({ signer: account, chain: chainInfo });
                 const ethDepositTxResponse = await bridgeContract.connect(account).depositEth({
                     value: amount,
-                    ...txParams
+                    ...txParams,
                 });
 
-                console.log(
-                    `Deposit txn: ${chainInfo.explorer}${ethDepositTxResponse.hash}`
-                );
+                console.log(`Deposit txn: ${chainInfo.explorer}${ethDepositTxResponse.hash}`);
 
                 if (taskArgs.delay != undefined) {
                     await delay(taskArgs.delay);
@@ -111,24 +109,22 @@ task("arbitrumStylusBridge", "Bridge ETH to arbitrum stylus network")
 
         for (const account of accounts) {
             try {
-              let amount: BigNumber;
-              if (taskArgs.dust) {
-                amount = utils.parseEther(
-                  addDust({ amount: taskArgs.amount, upToPercent: taskArgs.dust }).toString()
-                  );
+                let amount: BigNumber;
+                if (taskArgs.dust) {
+                    amount = utils.parseEther(
+                        addDust({ amount: taskArgs.amount, upToPercent: taskArgs.dust }).toString()
+                    );
                 } else {
-                  amount = utils.parseEther(taskArgs.amount.toString());
+                    amount = utils.parseEther(taskArgs.amount.toString());
                 }
                 console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
                 console.log(`Sending ${utils.formatEther(amount)} ETH from ${account.address} ...`);
-                
-                const ethDepositTxResponse = await bridgeContract.connect(account).depositEth({
-                  value: amount
-              });
 
-                console.log(
-                    `Deposit txn: ${chainInfo.explorer}${ethDepositTxResponse.hash}\n`
-                );
+                const ethDepositTxResponse = await bridgeContract.connect(account).depositEth({
+                    value: amount,
+                });
+
+                console.log(`Deposit txn: ${chainInfo.explorer}${ethDepositTxResponse.hash}\n`);
 
                 if (taskArgs.delay != undefined) {
                     await delay(taskArgs.delay);
@@ -141,6 +137,59 @@ task("arbitrumStylusBridge", "Bridge ETH to arbitrum stylus network")
             }
         }
         console.log("All funds sent across the bridge");
+    });
+
+task("arbitrumStylusMintOnchainPowerNFT", "Mint Onchain Power NFT")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const contractAddress = "0xA02573c4Ad15c16b48f10842aaC9c9eA405B65A3";
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        if (![ChainId.arbbitrumStylusSepolia].includes(currentNetwork.chainId)) {
+            console.log("Task available only at Arbitrum Stylus Sepolia network!");
+            return;
+        }
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        const mintContract = new Contract(
+            contractAddress,
+            ["function mint(uint256 _mintAmount) payable"],
+            hre.ethers.provider
+        );
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                var txParams = await populateTxnParams({ signer: account, chain: chainInfo });
+
+                const mintTx = await mintContract.connect(account).mint(1, {
+                    value: utils.parseEther("0.00023"),
+                    ...txParams,
+                });
+
+                console.log(`Mint txn: ${chainInfo.explorer}${mintTx.hash}`);
+
+                if (taskArgs.delay != undefined) {
+                    await delay(taskArgs.delay);
+                }
+            } catch (error) {
+                console.log(
+                    `\nError when process account #${accounts.indexOf(account)} Address: ${account.address}`
+                );
+                console.log(error);
+            }
+        }
     });
 
 /* task("arbitrumStylusContractInteractions", "Interact with erc-20 contracts")
