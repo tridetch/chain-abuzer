@@ -812,3 +812,54 @@ task("zksyncCheckLibertasNft", "Check LIBERTAS OMNIBUS Nft balance")
             }
         }
     });
+
+task("zksyncTevaeraMintOnftBundleNft", "Mint Tevaera ONFT bundle")
+    .addParam("delay", "Add random delay", undefined, types.int, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const targetAddress = "0x5dE117628B5062F56f37d8fB6603524C7189D892";
+        const network = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(network.chainId);
+
+        if (network.chainId != ChainId.zkSyncEra) {
+            throw new Error("Task allowed only on zkSyncEra chain");
+        }
+
+        const zkProvider = new zksync.Provider(ZKSYNC_MAINNET_RPC);
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        /* Request from faucet */
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                const zkWallet = new zksync.Wallet(account.privateKey, zkProvider, hre.ethers.provider);
+                const callData = `0x410404b7`;
+
+                const tx = await zkWallet.sendTransaction({
+                    to: targetAddress,
+                    data: callData,
+                    value: ethers.utils.parseEther("0.0009")
+                });
+                await tx.wait();
+
+                console.log(`Mint tx ${chainInfo.explorer}${tx.hash}`);
+
+                if (taskArgs.delay != undefined) {
+                    await delay(taskArgs.delay);
+                }
+            } catch (error) {
+                console.log(
+                    `Error when process account`
+                );
+                console.log(error);
+            }
+        }
+    });
