@@ -11,6 +11,7 @@ task("bridgeToZoraMainnet", "Bridge ETH to ZORA mainnet")
     .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -83,6 +84,7 @@ task("withdrawFromZoraMainnet", "Withdraw ETH from ZORA mainnet")
     .addParam("delay", "Add delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -147,6 +149,7 @@ task("mintZoraTheSourceOfLightNft", "Mint THE SOURCE OF LIGHT Nft")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -202,6 +205,7 @@ task("mintZoraGitcoinImpactNft", "Mint Gitcoin Impact Report 01: PDF Onchain")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -256,6 +260,7 @@ task("mintZoraRainbowNft", "Mint Rainbow Zorb Energy")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -276,7 +281,7 @@ task("mintZoraRainbowNft", "Mint Rainbow Zorb Energy")
             ["function purchase(uint256 quantity) payable"],
             hre.ethers.provider
         );
-        
+
         const accounts = await getAccounts(taskArgs, hre.ethers.provider);
         for (const account of accounts) {
             try {

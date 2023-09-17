@@ -8,6 +8,7 @@ task("holographMintHFWCnft", "Mint holograph How far we've come NFT")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -66,6 +67,7 @@ task("holographMintAzuroCnft", "Mint holograph How far we've come NFT")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -132,6 +134,7 @@ task("holographMintSuperPositionNft", "Mint holograph Super Position NFT")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -191,6 +194,7 @@ task("holographMintWhereWDWGFPositionNft", "Mint holograph WDWGF NFT")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -250,6 +254,7 @@ task("holographMintLayerZeroNft", "Mint holograph Layer Zero NFT")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -302,6 +307,7 @@ task("holographMint###Nft", "Mint ### NFT")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -355,6 +361,7 @@ task("holographMintNft", "Mint holograph NFT by contract address")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",

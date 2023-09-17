@@ -61,6 +61,7 @@ task("stargateBridgeETH", "Bridge ETH across networks")
     .addParam("dust", "Dust percentage", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -164,6 +165,7 @@ task("stargateBridgeUsdc", "Bridge USDC across networks")
     .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -303,6 +305,7 @@ task("stargateBridgeUsdt", "Bridge USDT across networks")
     .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -435,6 +438,7 @@ task("stargateStake", "Stake STG tokens on arbitrum chain")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -542,6 +546,7 @@ task("stargateStakeIncrease", "Stake STG tokens on arbitrum chain")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -641,6 +646,7 @@ task("stargateStakeIncreaseUnlockDate", "Increase unlock date")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -690,6 +696,7 @@ task("stargateStakeIncreaseUnlockDate", "Increase unlock date")
 task("stargateStakingBalances", "Show stargate staking balances")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -731,6 +738,7 @@ task("stargateStakingWithdraw", "Withdraw tokens from stargate staking")
     .addParam("delay", "Add delay between operations", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",

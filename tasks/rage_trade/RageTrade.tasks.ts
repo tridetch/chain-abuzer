@@ -18,6 +18,7 @@ export const RageTradeTasks = {
 task("rageAccountsInfo", "Print Rage Trade accounts info")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -51,6 +52,7 @@ task("rageCreateAccounts", "Create accounts for trade")
     .addParam("delay", "Add delay", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -85,6 +87,7 @@ task("rageDepositTradingAccount", "Deposi funds to account")
     .addParam("delay", "Add delay", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -150,6 +153,7 @@ task("rageAddLiquidity8020", "Add USDC liquidity to pool")
     .addParam("delay", "Add delay", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -220,6 +224,7 @@ task("rageAddLiquidityDnRiskOnVault", "Add USDC liquidity to pool")
     .addParam("delay", "Add delay", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -285,6 +290,7 @@ task("rageWithdrawLiquidityDnRiskOnVault", "Withdraw USDC liquidity from pool")
     .addParam("delay", "Add delay", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -356,6 +362,7 @@ task("rageLiquidityBalances", "Print account balances")
     .addParam("delay", "Add delay", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -409,7 +416,7 @@ task("rageLiquidityBalances", "Print account balances")
                         .connect(account)
                         .redeem(balance, account.address, account.address);
                     console.log(`Reedem from yeld contract ${withdrawTxn.hash}`);
-                    await withdrawTxn.wait()
+                    await withdrawTxn.wait();
 
                     // // Get balance of LP tokent
                     const lpTokenAmount = await tricriptoLpToken.connect(account).balanceOf(account.address);
@@ -417,7 +424,7 @@ task("rageLiquidityBalances", "Print account balances")
                         .connect(account)
                         .approve(curveCryptoSwapDepositZap.address, lpTokenAmount);
                     console.log(`Approve txn ${approveTxn.hash}`);
-                    await approveTxn.wait()
+                    await approveTxn.wait();
 
                     // Withdraw liquidity in one ETH
                     const withdrawEthTxn = await curveCryptoSwapDepositZap

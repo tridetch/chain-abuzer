@@ -29,6 +29,7 @@ task("philandCheckXp", "Philand check XP")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -77,6 +78,7 @@ task("philandDailyQuest", "Philand dailty quest")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -177,6 +179,7 @@ task("philandQuestAutoClaimer", "Philand claim all awailable quests")
     .addFlag("skipCheck", "Skip check for new awailable quests")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -318,8 +321,7 @@ task("philandQuestAutoClaimer", "Philand claim all awailable quests")
                     response = await axios.get(
                         `https://utils-api.phi.blue/v1/philand/account/achieved_quest?address=${account.address}`
                     );
-                } catch (error: any) {
-                }
+                } catch (error: any) {}
 
                 console.log(`All quests claimed! Current progress ${response.data.expGain} XP.`);
 

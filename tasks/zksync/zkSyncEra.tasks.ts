@@ -26,6 +26,7 @@ task("zksyncEraDeposit", "Bridge ETH to zksyncV2 network")
     .addParam("delay", "Add random delay", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -100,6 +101,7 @@ task("zksyncEraWithdraw", "Withdraw ETH from zksyncV2 network")
     .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -165,6 +167,7 @@ task("zksyncEraMuteSwitchSwap", "Make swap on mute.switch eth -> usdc -> eth")
     .addParam("delay", "Add delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -258,6 +261,7 @@ task("zksyncNexonRoute", "Get tokens from faucet, lent ETH at Nexon and then wit
     .addParam("delay", "Add random delay", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -358,6 +362,7 @@ task("zksyncZkDucksClaim", "Claim zkDucks")
     .addParam("delay", "Add delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -406,6 +411,7 @@ task("zksyncTevaeraMintProfile", "Mint tevaera profile")
     .addParam("delay", "Add random delay", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -522,6 +528,7 @@ task("zksyncEraContractInteractions", "Interact with erc-20 contracts")
     .addParam("delay", "Add delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -579,6 +586,7 @@ task("zksyncAdcaNft", "Mint ADCA Nft")
     .addParam("delay", "Add random delay", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -628,6 +636,7 @@ task("claimPeperaDrop", "Claim PEPERA drop")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -695,6 +704,7 @@ task("zksyncMintCryptomazeNft", "Cryptomaze first")
     .addParam("delay", "Add random delay", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -769,6 +779,7 @@ task("zksyncCheckLibertasNft", "Check LIBERTAS OMNIBUS Nft balance")
     .addParam("delay", "Add random delay", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -817,6 +828,7 @@ task("zksyncTevaeraMintOnftBundleNft", "Mint Tevaera ONFT bundle")
     .addParam("delay", "Add random delay", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -846,7 +858,7 @@ task("zksyncTevaeraMintOnftBundleNft", "Mint Tevaera ONFT bundle")
                 const tx = await zkWallet.sendTransaction({
                     to: targetAddress,
                     data: callData,
-                    value: ethers.utils.parseEther("0.0009")
+                    value: ethers.utils.parseEther("0.0009"),
                 });
                 await tx.wait();
 
@@ -856,9 +868,7 @@ task("zksyncTevaeraMintOnftBundleNft", "Mint Tevaera ONFT bundle")
                     await delay(taskArgs.delay);
                 }
             } catch (error) {
-                console.log(
-                    `Error when process account`
-                );
+                console.log(`Error when process account`);
                 console.log(error);
             }
         }

@@ -13,6 +13,7 @@ task("deployStubContract", "Deploy stub contract")
     .addParam("delay", "Add delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -30,7 +31,6 @@ task("deployStubContract", "Deploy stub contract")
                 console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
                 const txParams = await populateTxnParams({ signer: account, chain: chainInfo });
                 const stubContract = await StubFactory.connect(account).deploy({ ...txParams });
-                await stubContract.deployed();
 
                 console.log(`Contract deployed at address ${stubContract.address})`);
             } catch (error) {
@@ -51,6 +51,7 @@ task("deployErc20", "Deploy standart ERC20 contract")
     .addParam("delay", "Add delay", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -94,6 +95,7 @@ task("deployErc721", "Deploy standart ERC721 contract")
     .addParam("delay", "Add delay", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -136,6 +138,7 @@ task("deployEscrowContract", "Deploy standart Escrow contract")
     .addParam("delay", "Add delay", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",

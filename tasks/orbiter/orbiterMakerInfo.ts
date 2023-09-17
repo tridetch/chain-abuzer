@@ -1,5 +1,5 @@
-// export const MAKER_ADDRESS = "0x80c67432656d59144ceff962e8faf8926599bcf8";
-export const MAKER_ADDRESS = "0xe4edb277e41dc89ab076a1f049f4a3efa700bce8"; //SECOND
+export const MAKER_ADDRESS = "0x80c67432656d59144ceff962e8faf8926599bcf8";
+// export const MAKER_ADDRESS = "0xe4edb277e41dc89ab076a1f049f4a3efa700bce8"; //SECOND
 
 export interface OrbiterBridgeInfo {
     name: string;

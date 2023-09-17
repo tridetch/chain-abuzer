@@ -11,6 +11,7 @@ task("scrollDeposit", "Bridge ETH to scroll")
     .addParam("dust", "Dust percentage", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -19,7 +20,7 @@ task("scrollDeposit", "Bridge ETH to scroll")
     )
     .setAction(async (taskArgs, hre) => {
         const currentNetwork = await hre.ethers.provider.getNetwork();
-        const chainInfo = getChainInfo(currentNetwork.chainId)
+        const chainInfo = getChainInfo(currentNetwork.chainId);
 
         if (![ChainId.ethereumGoerli, ChainId.ethereumSepolia].includes(currentNetwork.chainId)) {
             console.log(` Task supported only on Ethereum testnets!`);
@@ -47,9 +48,9 @@ task("scrollDeposit", "Bridge ETH to scroll")
                 });
 
                 console.log(
-                    `Task result:\nAddress: #${accounts.indexOf(account)} ${account.address}\ntxn: ${chainInfo.explorer}${
-                        tx.hash
-                    }\n`
+                    `Task result:\nAddress: #${accounts.indexOf(account)} ${account.address}\ntxn: ${
+                        chainInfo.explorer
+                    }${tx.hash}\n`
                 );
 
                 if (taskArgs.delay != undefined) {
@@ -68,6 +69,7 @@ task("scrollWithdraw", "Withdraw ETH from scroll")
     .addParam("delay", "Add random delay", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -117,7 +119,6 @@ task("scrollWithdraw", "Withdraw ETH from scroll")
                 console.log(error);
             }
         }
-    
     });
 
 task("scrollSend", "Send ETH to address")
@@ -126,6 +127,7 @@ task("scrollSend", "Send ETH to address")
     .addParam("dust", "Dust percentage", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -134,7 +136,7 @@ task("scrollSend", "Send ETH to address")
     )
     .setAction(async (taskArgs, hre) => {
         const currentNetwork = await hre.ethers.provider.getNetwork();
-        const chainInfo = getChainInfo(currentNetwork.chainId)
+        const chainInfo = getChainInfo(currentNetwork.chainId);
 
         if (![ChainId.scrollSepolia, ChainId.scrollAlphaGoerli].includes(currentNetwork.chainId)) {
             console.log(`Task supported only on Scroll!`);
@@ -160,9 +162,9 @@ task("scrollSend", "Send ETH to address")
                 });
 
                 console.log(
-                    `Task result:\nAddress: #${accounts.indexOf(account)} ${account.address}\ntxn: ${chainInfo.explorer}${
-                        tx.hash
-                    }\n`
+                    `Task result:\nAddress: #${accounts.indexOf(account)} ${account.address}\ntxn: ${
+                        chainInfo.explorer
+                    }${tx.hash}\n`
                 );
 
                 if (taskArgs.delay != undefined) {
@@ -183,6 +185,7 @@ task("scrollAaveSupplyEth", "Supply ETH to AAVE")
     .addParam("dust", "Dust percentage", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -192,7 +195,7 @@ task("scrollAaveSupplyEth", "Supply ETH to AAVE")
     .setAction(async (taskArgs, hre) => {
         const contractAddress = "0x57ce905CfD7f986A929A26b006f797d181dB706e";
         const currentNetwork = await hre.ethers.provider.getNetwork();
-        const chainInfo = getChainInfo(currentNetwork.chainId)
+        const chainInfo = getChainInfo(currentNetwork.chainId);
 
         if (![ChainId.scrollSepolia, ChainId.scrollAlphaGoerli].includes(currentNetwork.chainId)) {
             console.log(` Task supported only on --network scrollAlpha`);
@@ -218,9 +221,9 @@ task("scrollAaveSupplyEth", "Supply ETH to AAVE")
                     });
 
                 console.log(
-                    `Task result:\nAddress: #${accounts.indexOf(account)} ${account.address}\ntxn: ${chainInfo.explorer}${
-                        tx.hash
-                    }\n`
+                    `Task result:\nAddress: #${accounts.indexOf(account)} ${account.address}\ntxn: ${
+                        chainInfo.explorer
+                    }${tx.hash}\n`
                 );
 
                 if (taskArgs.delay != undefined) {
@@ -239,6 +242,7 @@ task("scrollAaveSupplyTokens", "Supply tokens")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -248,7 +252,7 @@ task("scrollAaveSupplyTokens", "Supply tokens")
     .setAction(async (taskArgs, hre) => {
         const targetAddress = "0x48914C788295b5db23aF2b5F0B3BE775C4eA9440";
         const currentNetwork = await hre.ethers.provider.getNetwork();
-        const chainInfo = getChainInfo(currentNetwork.chainId)
+        const chainInfo = getChainInfo(currentNetwork.chainId);
 
         if (![ChainId.scrollSepolia, ChainId.scrollAlphaGoerli].includes(currentNetwork.chainId)) {
             console.log(`Task supported only at --network scrollAlpha`);
@@ -317,6 +321,7 @@ task("scrollAaveFaucet", "Request test assets")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -325,7 +330,7 @@ task("scrollAaveFaucet", "Request test assets")
     )
     .setAction(async (taskArgs, hre) => {
         const currentNetwork = await hre.ethers.provider.getNetwork();
-        const chainInfo = getChainInfo(currentNetwork.chainId)
+        const chainInfo = getChainInfo(currentNetwork.chainId);
 
         if (![ChainId.scrollSepolia, ChainId.scrollAlphaGoerli].includes(currentNetwork.chainId)) {
             console.log(`Task supported only at --network scrollAlpha`);
@@ -374,7 +379,9 @@ task("scrollAaveFaucet", "Request test assets")
                             ethers.utils.parseUnits(mintInfo.amount, await mintInfo.contract.decimals())
                         );
 
-                    console.log(`Mint ${await mintInfo.contract.symbol()} txn: ${chainInfo.explorer}${mintTx.hash}`);
+                    console.log(
+                        `Mint ${await mintInfo.contract.symbol()} txn: ${chainInfo.explorer}${mintTx.hash}`
+                    );
                     await delay(0.05);
                 }
 

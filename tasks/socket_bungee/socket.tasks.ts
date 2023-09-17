@@ -35,7 +35,8 @@ task("bungeeBridge", "Bridge token between networks")
     .addParam("toChainId", "Destination chain id", undefined, types.int)
     .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.int)
-    .addOptionalParam("endAccount", "Ending account index", undefined, types.int)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize account execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -380,6 +381,7 @@ task("bungeeRefuel", "Bridge gas token across networks")
     .addParam("dust", "Dust percentage", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -437,13 +439,15 @@ task("bungeeRefuel", "Bridge gas token across networks")
             const minAmount = BigNumber.from(targetChainInfo?.minAmount);
             const maxAmount = BigNumber.from(targetChainInfo?.maxAmount);
 
-            const checkAmount = utils.parseEther(taskArgs.amount.toString())
+            const checkAmount = utils.parseEther(taskArgs.amount.toString());
 
             if (
                 checkAmount.lt(minAmount) ||
                 checkAmount.add(percentOf(checkAmount, taskArgs.dust || 0)).gt(maxAmount)
             ) {
-                console.log(`Max = ${utils.formatEther(checkAmount.add(percentOf(checkAmount, taskArgs.dust || 0)))}`);
+                console.log(
+                    `Max = ${utils.formatEther(checkAmount.add(percentOf(checkAmount, taskArgs.dust || 0)))}`
+                );
                 console.log(
                     `Error amount ${utils.formatEther(checkAmount)} + dust ${
                         taskArgs.dust
@@ -459,11 +463,11 @@ task("bungeeRefuel", "Bridge gas token across networks")
                     let amount: BigNumber;
                     if (taskArgs.all) {
                         const fullBalance = await hre.ethers.provider.getBalance(account.address);
-                        const minimumBalance = utils
-                            .parseEther(addDust({ amount: taskArgs.minBalance, upToPercent: 30 }).toString())
+                        const minimumBalance = utils.parseEther(
+                            addDust({ amount: taskArgs.minBalance, upToPercent: 30 }).toString()
+                        );
                         amount = fullBalance.sub(minimumBalance);
-                    }
-                    else if (taskArgs.dust) {
+                    } else if (taskArgs.dust) {
                         amount = utils.parseEther(
                             addDust({ amount: taskArgs.amount, upToPercent: taskArgs.dust }).toString()
                         );

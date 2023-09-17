@@ -35,6 +35,7 @@ export async function getSafes(
 task("gnosisBalances", "Print Gnosis Safe accounts")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -67,6 +68,7 @@ task("gnosisCreateAccounts", "Create Gnosis wallets")
     .addParam("delay", "Add delay", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -76,18 +78,18 @@ task("gnosisCreateAccounts", "Create Gnosis wallets")
     .setAction(async (taskArgs, hre) => {
         const provider = hre.ethers.provider;
         const network = await provider.getNetwork();
-        const chainInfo = getChainInfo(network.chainId)
+        const chainInfo = getChainInfo(network.chainId);
 
         const [signer, ...accounts] = await getAccounts(taskArgs, hre.ethers.provider);
 
-        let deployedSafes: SafeInfo[] = []
+        let deployedSafes: SafeInfo[] = [];
 
         try {
             deployedSafes = require(`./DeployedSafes_${chainInfo.chainName}.json`);
         } catch {
             // ignore
         }
-        
+
         const filePath = `./tasks/gnosis_safe/DeployedSafes_${chainInfo.chainName}.json`;
 
         try {
@@ -126,7 +128,7 @@ task("gnosisCreateAccounts", "Create Gnosis wallets")
                 signerOrProvider: account,
             });
 
-            const config: SafeFactoryConfig = {ethAdapter: ethAdapter}
+            const config: SafeFactoryConfig = { ethAdapter: ethAdapter };
             const safeFactory = await SafeFactory.create({ ethAdapter });
             const safeAccountConfig: SafeAccountConfig = {
                 owners: [account.address, secondOwner.address],
@@ -150,6 +152,7 @@ task("gnosisDeposit", "Deposit ETH to gnosis safe wallet")
     .addParam("delay", "Add delay", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",

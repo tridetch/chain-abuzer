@@ -6,11 +6,7 @@ import { getChainInfo } from "../../utils/ChainInfoUtils";
 import "../../utils/Util.tasks";
 import { addDust, delay, getAccounts, populateTxnParams } from "../../utils/Utils";
 
-export const OneInchTasks = {
-    oneInchSwap: "1inchSwap",
-};
-
-task("1inchSwap", "Swap tokens on 1inch")
+task("uniswap", "Swap tokens on 1inch")
     .addParam("amount", "Amount of tokens to swap", undefined, types.float, true)
     .addFlag("all", "Use all balance of tokens")
     .addParam("minBalance", "Minimum balance after using all funds", undefined, types.float, true)
@@ -30,19 +26,6 @@ task("1inchSwap", "Swap tokens on 1inch")
     .setAction(async (taskArgs, hre) => {
         const network = await hre.ethers.provider.getNetwork();
         const chainInfo = getChainInfo(network.chainId);
-
-        const apiBaseUrl = "https://api.1inch.dev/swap/v5.2/" + network.chainId;
-        const headers = new Headers();
-        headers.append(`accept`, `application/json`);
-        headers.append(`Authorization`, `Bearer ${process.env.ONE_INCH_API_KEY}`);
-
-        const isNativeEth = taskArgs.fromToken == "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
-
-        let sellToken: any = isNativeEth
-            ? undefined
-            : ERC20__factory.connect(taskArgs.fromToken, hre.ethers.provider);
-        let tokenDecimals: number = isNativeEth ? 18 : await sellToken.decimals();
-        const tokenName = isNativeEth ? "ETH" : await sellToken.name();
 
         const accounts = await getAccounts(taskArgs, hre.ethers.provider);
         for (const account of accounts) {
@@ -67,23 +50,6 @@ task("1inchSwap", "Swap tokens on 1inch")
                     continue;
                 }
 
-                const walletAddress = account.address;
-                console.log(`\n#${accounts.indexOf(account)} Address ${account.address}`);
-
-                const swapParams = {
-                    src: taskArgs.fromToken,
-                    dst: taskArgs.toToken,
-                    amount: amount.toString(),
-                    from: walletAddress,
-                    slippage: 1,
-                    // disableEstimate: false,
-                    // allowPartialFill: false,
-                };
-
-                const allowance: BigNumber = BigNumber.from(
-                    await checkAllowance(swapParams.src, walletAddress)
-                );
-
                 if (allowance.lt(swapParams.amount)) {
                     console.log(
                         `Swap amount - ${utils.formatUnits(
@@ -106,17 +72,6 @@ task("1inchSwap", "Swap tokens on 1inch")
                     console.log(`Approve tx: ${chainInfo.explorer}${approveTxHash}`);
                 }
 
-                // First, let's build the body of the transaction
-                const swapTransaction = await buildTxForSwap(swapParams);
-                console.log(
-                    `Swapping ${utils.formatUnits(swapParams.amount, tokenDecimals)} ${tokenName} tokens ...`
-                );
-                // console.log("Transaction for swap: ", swapTransaction);
-
-                // Send a transaction and get its hash
-                const txParams = await populateTxnParams({ signer: account, chain: chainInfo });
-                const swapTxHash = await signAndSendTransaction(account, { ...swapTransaction, ...txParams });
-                console.log(`Swap transaction: ${chainInfo.explorer}${swapTxHash}`);
                 if (taskArgs.delay != undefined) {
                     await delay(taskArgs.delay);
                 }

@@ -8,6 +8,7 @@ task("zkEvmContractInteractions", "Interact with erc-20 contracts")
     .addParam("delay", "Add delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -17,7 +18,7 @@ task("zkEvmContractInteractions", "Interact with erc-20 contracts")
     .setAction(async (taskArgs, hre) => {
         const quickSwapAddress = "0xF6Ad3CcF71Abb3E12beCf6b3D2a74C963859ADCd";
         const network = await hre.ethers.provider.getNetwork();
-        const chainInfo = getChainInfo(network.chainId)
+        const chainInfo = getChainInfo(network.chainId);
 
         if (network.chainId != ChainId.zkEvm) {
             throw new Error("Task allowed only on zkEvm chain");

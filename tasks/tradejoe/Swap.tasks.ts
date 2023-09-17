@@ -19,6 +19,7 @@ task("1inchSwap", "Swap tokens on 1inch")
     .addParam("toToken", "Token to buy", undefined, types.string)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
