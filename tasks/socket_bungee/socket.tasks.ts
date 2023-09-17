@@ -372,7 +372,7 @@ function getRefuelContract(chainId: number): string {
     return address;
 }
 
-task("bungeeBridgeETH", "Bridge ETH across networks")
+task("bungeeRefuel", "Bridge gas token across networks")
     .addParam("targetChainId", "Target chain id", undefined, types.int)
     .addParam("amount", "Amount of ETH to deposit", undefined, types.float, true)
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
@@ -437,14 +437,13 @@ task("bungeeBridgeETH", "Bridge ETH across networks")
             const minAmount = BigNumber.from(targetChainInfo?.minAmount);
             const maxAmount = BigNumber.from(targetChainInfo?.maxAmount);
 
-            const checkAmount = utils.parseEther(
-                addDust({ amount: taskArgs.amount, upToPercent: taskArgs.dust }).toString()
-            );
+            const checkAmount = utils.parseEther(taskArgs.amount.toString())
 
             if (
                 checkAmount.lt(minAmount) ||
                 checkAmount.add(percentOf(checkAmount, taskArgs.dust || 0)).gt(maxAmount)
             ) {
+                console.log(`Max = ${utils.formatEther(checkAmount.add(percentOf(checkAmount, taskArgs.dust || 0)))}`);
                 console.log(
                     `Error amount ${utils.formatEther(checkAmount)} + dust ${
                         taskArgs.dust
@@ -458,7 +457,13 @@ task("bungeeBridgeETH", "Bridge ETH across networks")
                     console.log(`\n#${accounts.indexOf(account)} Address ${account.address}`);
 
                     let amount: BigNumber;
-                    if (taskArgs.dust) {
+                    if (taskArgs.all) {
+                        const fullBalance = await hre.ethers.provider.getBalance(account.address);
+                        const minimumBalance = utils
+                            .parseEther(addDust({ amount: taskArgs.minBalance, upToPercent: 30 }).toString())
+                        amount = fullBalance.sub(minimumBalance);
+                    }
+                    else if (taskArgs.dust) {
                         amount = utils.parseEther(
                             addDust({ amount: taskArgs.amount, upToPercent: taskArgs.dust }).toString()
                         );
