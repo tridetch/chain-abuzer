@@ -1,12 +1,12 @@
+import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
 import { EthersAdapter, SafeAccountConfig, SafeFactory, SafeFactoryConfig } from "@safe-global/protocol-kit";
 import { EthAdapter } from "@safe-global/safe-core-sdk-types";
-import { SignerWithAddress } from "@nomiclabs/hardhat-ethers/signers";
-import { ethers, utils, Wallet } from "ethers";
+import { Wallet, ethers, utils } from "ethers";
 import * as fs from "fs";
 import { task, types } from "hardhat/config";
+import { getChainInfo } from "../../utils/ChainInfoUtils";
 import "../../utils/Util.tasks";
 import { addDust, delay, getAccounts } from "../../utils/Utils";
-import { getChainInfo } from "../../utils/ChainInfoUtils";
 
 export const GnosisSafeTasks = {
     gnosisBalances: "gnosisBalances",
@@ -93,6 +93,7 @@ task("gnosisCreateAccounts", "Create Gnosis wallets")
         const filePath = `./tasks/gnosis_safe/DeployedSafes_${chainInfo.chainName}.json`;
 
         try {
+            console.log(`\n#${accounts.indexOf(accounts[1])} Address: ${accounts[1].address}`);
             await createSafe(signer, accounts[1]);
             if (taskArgs.delay != undefined) {
                 await delay(taskArgs.delay);
@@ -103,6 +104,7 @@ task("gnosisCreateAccounts", "Create Gnosis wallets")
         }
 
         for (const account of accounts) {
+            console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
             try {
                 await createSafe(account, signer);
                 if (taskArgs.delay != undefined) {
@@ -136,7 +138,7 @@ task("gnosisCreateAccounts", "Create Gnosis wallets")
             };
             const safeSdk = await safeFactory.deploySafe({ safeAccountConfig });
 
-            console.log(`Safe deployed for address ${account.address}\n`);
+            console.log(`Safe deployed`);
 
             deployedSafes.push({
                 safeAddress: await safeSdk.getAddress(),
