@@ -755,7 +755,7 @@ task("mintFunCustomNft", "Mint custom NFT on MintFun")
 
                 const mintTx = await account.sendTransaction({
                     to: mintContract.address,
-                    data: "0xa0712d6800000000000000000000000000000000000000000000000000000000000000010021fb3f",
+                    data: "0xa0712d68000000000000000000000000000000000000000000000000000000000000000a0021fb3f",
                     ...txParams,
                 });
 
