@@ -42,6 +42,9 @@ export async function getAccounts(
     if (taskArgs.accountIndex != undefined) {
         accounts = [accounts[taskArgs.accountIndex]];
     }
+    if (taskArgs.randomize) {
+        accounts = shuffle(accounts);
+    }
     return accounts;
 }
 
@@ -110,16 +113,25 @@ export async function populateTxnParams({
     switch (chain.chainId) {
         case ChainId.optimismMainnet:
             txRequest.maxPriorityFeePerGas = ethers.utils.parseUnits("1", "wei");
-            txRequest.gasPrice = undefined // 
+            txRequest.gasPrice = undefined; // eip-1559 transaction do not support gasPrice
             break;
         case ChainId.baseMainnet:
             txRequest.maxPriorityFeePerGas = ethers.utils.parseUnits("0.0001", "gwei");
-            txRequest.gasPrice = undefined // 
+            txRequest.gasPrice = undefined; // eip-1559 transaction do not support gasPrice
             break;
         case ChainId.zoraMainnet:
-            txRequest.maxPriorityFeePerGas = ethers.utils.parseUnits("0.005", "gwei");
+            txRequest.maxPriorityFeePerGas = ethers.utils.parseUnits("0.001", "gwei");
+            txRequest.gasPrice = undefined; // eip-1559 transaction do not support gasPrice
             break;
     }
 
     return txRequest;
+}
+
+export const shuffle = <T>(array: T[]) => {
+    return array.sort(() => Math.random() - 0.5);
+};
+
+export function toHexZeroPad(string: string): string {
+    return utils.hexZeroPad(utils.hexlify(string), 32);
 }

@@ -2,7 +2,7 @@ import { BigNumber, Contract, utils } from "ethers";
 import { task, types } from "hardhat/config";
 import { ChainId, getChainInfo } from "../../utils/ChainInfoUtils";
 import "../../utils/Util.tasks";
-import { addDust, delay, getAccounts, waitForGasPrice } from "../../utils/Utils";
+import { addDust, delay, getAccounts, populateTxnParams, toHexZeroPad, waitForGasPrice } from "../../utils/Utils";
 
 task("bridgeToZoraMainnet", "Bridge ETH to ZORA mainnet")
     .addParam("amount", "Amount to send", undefined, types.float)
@@ -295,6 +295,140 @@ task("mintZoraRainbowNft", "Mint Rainbow Zorb Energy")
                     `Task result:\n#${accounts.indexOf(account)} Address: ${account.address}\ntxn: ${
                         chainInfo.explorer
                     }${tx.hash}\n`
+                );
+
+                if (taskArgs.delay != undefined) {
+                    await delay(taskArgs.delay);
+                }
+            } catch (error) {
+                console.log(
+                    `Error when process account #${accounts.indexOf(account)} Address: ${account.address}`
+                );
+                console.log(error);
+            }
+        }
+    });
+
+task("zoraMintEnjoyEthereumNft", "Mint Enjoy Ethereum+ NFT")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+        const targetAddress = "0xc51bA90509E1d3a5CB5A78E21705A844ABfb8172";
+
+        if (![ChainId.zoraMainnet].includes(currentNetwork.chainId)) {
+            console.log(`Task supported only on Zora mainnet!`);
+            return;
+        }
+        let mintContract = new Contract(
+            targetAddress,
+            [
+                "function mintWithRewards(address minter,uint256 tokenId,uint256 quantity,bytes minterArguments,address mintReferral) payable",
+            ],
+            hre.ethers.provider
+        );
+
+        const referral = "0x0000000000000000000000000000000000000000";
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+        for (const account of accounts) {
+            try {
+                var txParams = await populateTxnParams({ signer: account, chain: chainInfo });
+                let minterArgs = toHexZeroPad(account.address);
+                const tx = await mintContract
+                    .connect(account)
+                    .mintWithRewards(
+                        "0x04e2516a2c207e84a1839755675dfd8ef6302f0a",
+                        1,
+                        1,
+                        minterArgs,
+                        referral,
+                        {
+                            value: utils.parseEther("0.000777"),
+                            ...txParams,
+                        }
+                    );
+
+                console.log(
+                    `\nTask result:\n#${accounts.indexOf(account)} Address: ${account.address}\ntxn: ${
+                        chainInfo.explorer
+                    }${tx.hash}`
+                );
+
+                if (taskArgs.delay != undefined) {
+                    await delay(taskArgs.delay);
+                }
+            } catch (error) {
+                console.log(
+                    `Error when process account #${accounts.indexOf(account)} Address: ${account.address}`
+                );
+                console.log(error);
+            }
+        }
+    });
+
+task("zoraMintFarcasterElephantNft", "Mint Farcaster Elephant NFT")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+        const targetAddress = "0xb9A2F7762c890B243C92348cBB2b1FF31e4D7fDa";
+
+        if (![ChainId.zoraMainnet].includes(currentNetwork.chainId)) {
+            console.log(`Task supported only on Zora mainnet!`);
+            return;
+        }
+        let mintContract = new Contract(
+            targetAddress,
+            [
+                "function mintWithRewards(address minter,uint256 tokenId,uint256 quantity,bytes minterArguments,address mintReferral) payable",
+            ],
+            hre.ethers.provider
+        );
+
+        const referral = "0x0000000000000000000000000000000000000000";
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+        for (const account of accounts) {
+            try {
+                var txParams = await populateTxnParams({ signer: account, chain: chainInfo });
+                let minterArgs = toHexZeroPad(account.address);
+                const tx = await mintContract
+                    .connect(account)
+                    .mintWithRewards(
+                        "0x04e2516a2c207e84a1839755675dfd8ef6302f0a",
+                        1,
+                        1,
+                        minterArgs,
+                        referral,
+                        {
+                            value: utils.parseEther("0.000777"),
+                            ...txParams,
+                        }
+                    );
+
+                console.log(
+                    `\nTask result:\n#${accounts.indexOf(account)} Address: ${account.address}\ntxn: ${
+                        chainInfo.explorer
+                    }${tx.hash}`
                 );
 
                 if (taskArgs.delay != undefined) {

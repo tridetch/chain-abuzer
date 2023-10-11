@@ -723,3 +723,54 @@ task("mintEigenWorldNft", "Mint Eigen World nft")
             }
         }
     });
+
+    task("mintFunCustomNft", "Mint custom NFT on MintFun")
+    .addParam("delay", "Add random delay", undefined, types.float, true)
+    .addParam("contractAddress", "Contract address of NFT", undefined, types.string, false)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        const mintContract = new ethers.Contract(
+            taskArgs.contractAddress,
+            ["function mint(uint256 amount)"],
+            hre.ethers.provider
+        );
+
+        for (const account of accounts) {
+            try {
+                const txParams = await populateTxnParams({ signer: account, chain: chainInfo });
+                await waitForGasPrice({ maxPriceInGwei: 15, provider: hre.ethers.provider });
+
+                const mintTx = await mintContract.connect(account).mint(1, {
+                    ...txParams,
+                });
+
+                console.log(
+                    `\n#${accounts.indexOf(account)} Address: ${account.address}\ntxn: ${chainInfo.explorer}${
+                        mintTx.hash
+                    }`
+                );
+
+                if (taskArgs.delay != undefined) {
+                    await delay(taskArgs.delay);
+                }
+            } catch (error) {
+                console.log(
+                    `Error when process account #${accounts.indexOf(account)} Address: ${account.address}`
+                );
+                console.log(error);
+            }
+        }
+    });
