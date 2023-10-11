@@ -1,4 +1,4 @@
-import { ethers, utils } from "ethers";
+import { BigNumber, ethers, utils } from "ethers";
 import { task, types } from "hardhat/config";
 import { ERC20__factory } from "../../typechain-types";
 import { ChainId, getChainInfo } from "../../utils/ChainInfoUtils";
@@ -724,7 +724,7 @@ task("mintEigenWorldNft", "Mint Eigen World nft")
         }
     });
 
-    task("mintFunCustomNft", "Mint custom NFT on MintFun")
+task("mintFunCustomNft", "Mint custom NFT on MintFun")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addParam("contractAddress", "Contract address of NFT", undefined, types.string, false)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
@@ -753,7 +753,9 @@ task("mintEigenWorldNft", "Mint Eigen World nft")
                 const txParams = await populateTxnParams({ signer: account, chain: chainInfo });
                 await waitForGasPrice({ maxPriceInGwei: 15, provider: hre.ethers.provider });
 
-                const mintTx = await mintContract.connect(account).mint(1, {
+                const mintTx = await account.sendTransaction({
+                    to: mintContract.address,
+                    data: "0xa0712d6800000000000000000000000000000000000000000000000000000000000000010021fb3f",
                     ...txParams,
                 });
 
