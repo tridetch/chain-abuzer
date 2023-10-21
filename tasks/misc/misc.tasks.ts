@@ -3,7 +3,7 @@ import { task, types } from "hardhat/config";
 import { ERC20__factory } from "../../typechain-types";
 import { ChainId, getChainInfo } from "../../utils/ChainInfoUtils";
 import "../../utils/Util.tasks";
-import { delay, getAccounts, populateTxnParams, waitForGasPrice } from "../../utils/Utils";
+import { delay, getAccounts, populateTxnParams, toHexZeroPad, waitForGasPrice } from "../../utils/Utils";
 
 task("miscWithbackedCommunityNft", "Mint nft on optimism")
     .addParam("delay", "Add random delay", undefined, types.int, true)

@@ -117,10 +117,12 @@ export async function populateTxnParams({
             break;
         case ChainId.baseMainnet:
             txRequest.maxPriorityFeePerGas = ethers.utils.parseUnits("0.0001", "gwei");
+            txRequest.maxFeePerGas = ethers.utils.parseUnits("0.0001", "gwei");
             txRequest.gasPrice = undefined; // eip-1559 transaction do not support gasPrice
             break;
         case ChainId.zoraMainnet:
             txRequest.maxPriorityFeePerGas = ethers.utils.parseUnits("0.001", "gwei");
+            txRequest.maxFeePerGas = ethers.utils.parseUnits("0.001", "gwei");
             txRequest.gasPrice = undefined; // eip-1559 transaction do not support gasPrice
             break;
     }

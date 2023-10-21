@@ -735,7 +735,7 @@ task("stargateStakingBalances", "Show stargate staking balances")
     });
 
 task("stargateStakingWithdraw", "Withdraw tokens from stargate staking")
-    .addParam("delay", "Add delay between operations", undefined, types.int, true)
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
