@@ -5,7 +5,7 @@ import { ChainId, getChainInfo } from "../../utils/ChainInfoUtils";
 import "../../utils/Util.tasks";
 import { addDust, delay, getAccounts } from "../../utils/Utils";
 
-task("scrollDeposit", "Bridge ETH to scroll")
+task("scrollSepoliaDeposit", "Bridge ETH to scroll")
     .addParam("amount", "Amount to bridge", undefined, types.float, true)
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addParam("dust", "Dust percentage", undefined, types.int, true)
@@ -65,7 +65,7 @@ task("scrollDeposit", "Bridge ETH to scroll")
         }
     });
 
-task("scrollWithdraw", "Withdraw ETH from scroll")
+task("scrollSepoliaWithdraw", "Withdraw ETH from scroll")
     .addParam("delay", "Add random delay", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
@@ -121,7 +121,7 @@ task("scrollWithdraw", "Withdraw ETH from scroll")
         }
     });
 
-task("scrollSend", "Send ETH to address")
+task("scrollSepoliaSend", "Send ETH to address")
     .addParam("amount", "Amount to send", undefined, types.float, true)
     .addParam("delay", "Add random delay", undefined, types.int, true)
     .addParam("dust", "Dust percentage", undefined, types.int, true)
@@ -179,7 +179,7 @@ task("scrollSend", "Send ETH to address")
         }
     });
 
-task("scrollAaveSupplyEth", "Supply ETH to AAVE")
+task("scrollSepoliaAaveSupplyEth", "Supply ETH to AAVE")
     .addParam("amount", "Amount to send", undefined, types.float, true)
     .addParam("delay", "Add random delay", undefined, types.int, true)
     .addParam("dust", "Dust percentage", undefined, types.int, true)
@@ -238,7 +238,7 @@ task("scrollAaveSupplyEth", "Supply ETH to AAVE")
         }
     });
 
-task("scrollAaveSupplyTokens", "Supply tokens")
+task("scrollSepoliaAaveSupplyTokens", "Supply tokens")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
@@ -317,7 +317,7 @@ task("scrollAaveSupplyTokens", "Supply tokens")
         }
     });
 
-task("scrollAaveFaucet", "Request test assets")
+task("scrollSepoliaAaveFaucet", "Request test assets")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)

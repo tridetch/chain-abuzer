@@ -83,6 +83,9 @@ const config: HardhatUserConfig = {
         baseMainnet: {
             url: process.env.BASE_MAINNET_URL || "",
         },
+        scrollMainnet: {
+            url: process.env.SCROLL_MAINNET_URL || "",
+        },
         scrollAlpha: {
             url: process.env.SCROLL_ALPHA_URL || "",
         },

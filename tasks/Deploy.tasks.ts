@@ -33,6 +33,7 @@ task("deployStubContract", "Deploy stub contract")
                 const stubContract = await StubFactory.connect(account).deploy({ ...txParams });
 
                 console.log(`Contract deployed at address ${stubContract.address})`);
+                console.log(`tx: ${chainInfo.explorer}${stubContract.deployTransaction.hash}`);
             } catch (error) {
                 console.log(
                     `Error when process account #${accounts.indexOf(account)} Address: ${account.address}`
@@ -46,8 +47,8 @@ task("deployStubContract", "Deploy stub contract")
     });
 
 task("deployErc20", "Deploy standart ERC20 contract")
-    .addParam("name", "Add delay", undefined, types.string, false)
-    .addParam("symbol", "Add delay", undefined, types.string, false)
+    .addParam("name", "Add delay", "Wrapped ETH", types.string, true)
+    .addParam("symbol", "Add delay", "WETH", types.string, true)
     .addParam("delay", "Add delay", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
@@ -76,7 +77,9 @@ task("deployErc20", "Deploy standart ERC20 contract")
                     { ...txParams }
                 );
                 await erc20StubContract.deployed();
+
                 console.log(`Contract deployed at address: ${erc20StubContract.address})`);
+                console.log(`tx: ${chainInfo.explorer}${erc20StubContract.deployTransaction.hash}`);
             } catch (error) {
                 console.log(
                     `Error when process account #${accounts.indexOf(account)} Address: ${account.address}`
@@ -122,6 +125,7 @@ task("deployErc721", "Deploy standart ERC721 contract")
                 );
                 await erc721StubContract.deployed();
                 console.log(`Contract deployed at address: ${erc721StubContract.address}`);
+                console.log(`tx: ${chainInfo.explorer}${erc721StubContract.deployTransaction.hash}`);
             } catch (error) {
                 console.log(
                     `Error when process account #${accounts.indexOf(account)} Address: ${account.address}`
@@ -163,6 +167,7 @@ task("deployEscrowContract", "Deploy standart Escrow contract")
                 });
                 await escrowStubContract.deployed();
                 console.log(`Contract deployed at address: ${escrowStubContract.address}`);
+                console.log(`tx: ${chainInfo.explorer}${escrowStubContract.deployTransaction.hash}`);
             } catch (error) {
                 console.log(
                     `Error when process account #${accounts.indexOf(account)} Address: ${account.address}`

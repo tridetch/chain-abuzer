@@ -100,9 +100,9 @@
     "chainId": 1101,
     "chainName": "PolygonZkEvm",
     "explorer": "https://zkevm.polygonscan.com/tx/",
-    "wethAddress": "emptyWethAddress",
+    "wethAddress": "0x4f9a0e7fd2bf6067db6994cf12e4495df938e6e9",
     "usdcAddress": "emptyUsdcAddress",
-    "usdtAddress": ""
+    "usdtAddress": "emptyUsdtAddress"
   },
   "fantomMainnetChainInfo":{
     "chainId": 250,
@@ -110,15 +110,15 @@
     "explorer": "https://ftmscan.com/tx/",
     "wethAddress": "0x74b23882a30290451a17c44f4f05243b6b58c76d",
     "usdcAddress": "0x04068da6c83afcfa0e13ba15a6696662335d5b75",
-    "usdtAddress": ""
+    "usdtAddress": "emptyUsdtAddress"
   },
   "avalancheMainnetChainInfo":{
     "chainId": 43114,
     "chainName": "Avalanche",
     "explorer": "https://snowtrace.io/tx/",
-    "wethAddress": "",
+    "wethAddress": "0x49d5c2bdffac6ce2bfdb6640f4f80f226bc10bab",
     "usdcAddress": "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
-    "usdtAddress": ""
+    "usdtAddress": "emptyUsdtAddress"
   },
   "baseGoerliChainInfo":{
     "chainId": 84531,
@@ -134,23 +134,31 @@
     "explorer": "https://basescan.org/tx/",
     "wethAddress": "0x4200000000000000000000000000000000000006",
     "usdcAddress": "0xd9aaec86b65d86f6a7b5b1b0c42ffa531710b6ca",
-    "usdtAddress": ""
+    "usdtAddress": "emptyUsdtAddress"
   },
   "lineaGoerlyChainInfo":{
     "chainId": 59140,
-    "chainName": "LineaGoerly",
+    "chainName": "Linea Goerly",
     "explorer": "https://goerli.lineascan.build/tx/",
     "wethAddress": "0x2C1b868d6596a18e32E61B901E4060C872647b6C",
     "usdcAddress": "emptyUsdcAddress",
-    "usdtAddress": ""
+    "usdtAddress": "emptyUsdtAddress"
   },
   "lineaMainnetChainInfo":{
     "chainId": 59144,
-    "chainName": "LineaMainnet",
+    "chainName": "Linea Mainnet",
     "explorer": "https://lineascan.build/tx/",
-    "wethAddress": "emptyAddress",
+    "wethAddress": "0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f",
     "usdcAddress": "emptyUsdcAddress",
     "usdtAddress": "emptyAddress"
+  },
+  "scrollMainnet":{
+    "chainId": 534352,
+    "chainName": "Scroll Mainnet",
+    "explorer": "https://scrollscan.com/tx/",
+    "wethAddress": "0x5300000000000000000000000000000000000004",
+    "usdcAddress": "0x06efdbff2a14a7c8e15944d1f4a48f9f95f663a4",
+    "usdtAddress": "emptyWethAddress"
   },
   "scrollAlphaChainInfo":{
     "chainId": 534353,
@@ -158,7 +166,7 @@
     "explorer": "https://blockscout.scroll.io/tx/",
     "wethAddress": "emptyWethAddress",
     "usdcAddress": "emptyUsdcAddress",
-    "usdtAddress": ""
+    "usdtAddress": "emptyAddress"
   },
   "scrollSepoliaChainInfo":{
     "chainId": 534351,
@@ -166,15 +174,15 @@
     "explorer": "https://sepolia-blockscout.scroll.io/tx/",
     "wethAddress": "emptyWethAddress",
     "usdcAddress": "emptyUsdcAddress",
-    "usdtAddress": ""
+    "usdtAddress": "emptyAddress"
   },
   "zksyncEraChainInfo":{
     "chainId": 324,
     "chainName": "ZksyncEra",
     "explorer": "https://explorer.zksync.io/tx/",
-    "wethAddress": "emptyWethAddress",
+    "wethAddress": "0x5aea5775959fbc2557cc8789bc1bf90a239d9a91",
     "usdcAddress": "0x3355df6D4c9C3035724Fd0e3914dE96A5a83aaf4",
-    "usdtAddress": ""
+    "usdtAddress": "emptyAddress"
   },
   "zoraMainnetChainInfo":{
     "chainId": 7777777,
@@ -182,7 +190,7 @@
     "explorer": "https://explorer.zora.energy/tx/",
     "wethAddress": "emptyWethAddress",
     "usdcAddress": "emptyUSDCAddress",
-    "usdtAddress": ""
+    "usdtAddress": "emptyAddress"
   },
   "zoraTestnetChainInfo":{
     "chainId": 999,

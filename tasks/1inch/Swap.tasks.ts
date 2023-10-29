@@ -4,7 +4,7 @@ import fetch, { Headers } from "node-fetch";
 import { ERC20__factory } from "../../typechain-types";
 import { getChainInfo } from "../../utils/ChainInfoUtils";
 import "../../utils/Util.tasks";
-import { addDust, delay, getAccounts, populateTxnParams } from "../../utils/Utils";
+import { addDust, delay, getAccounts, populateTxnParams, waitForGasPrice } from "../../utils/Utils";
 
 export const OneInchTasks = {
     oneInchSwap: "1inchSwap",
@@ -16,6 +16,7 @@ task("1inchSwap", "Swap tokens on 1inch")
     .addParam("minBalance", "Minimum balance after using all funds", undefined, types.float, true)
     .addParam("dust", "Dust percentage", undefined, types.int, true)
     .addParam("delay", "Add delay", undefined, types.float, true)
+    .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
     .addParam("fromToken", "Token to sell", "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE", types.string)
     .addParam("toToken", "Token to buy", "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE", types.string) // ETH 0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
@@ -84,6 +85,8 @@ task("1inchSwap", "Swap tokens on 1inch")
                     await checkAllowance(swapParams.src, walletAddress)
                 );
 
+                await waitForGasPrice({ maxPriceInGwei: taskArgs.gasPrice, provider: hre.ethers.provider });
+                
                 if (allowance.lt(swapParams.amount)) {
                     console.log(
                         `Swap amount - ${utils.formatUnits(

@@ -537,6 +537,7 @@ task("zksyncEraContractInteractions", "Interact with erc-20 contracts")
     )
     .setAction(async (taskArgs, hre) => {
         const network = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(network.chainId)
 
         if (network.chainId != ChainId.zkSyncEra) {
             throw new Error("Task allowed only on zksyncEra chain");
@@ -566,7 +567,7 @@ task("zksyncEraContractInteractions", "Interact with erc-20 contracts")
 
                 for (const erc20 of erc20Contracts) {
                     const tx = await erc20.connect(account).approve(erc20.address, BigNumber.from(0));
-                    console.log(`Approve ${await erc20.symbol()} tx ${tx.hash}`);
+                    console.log(`Approve ${await erc20.symbol()} tx ${chainInfo.explorer}${tx.hash}`);
                     await delay(0.1);
                 }
 

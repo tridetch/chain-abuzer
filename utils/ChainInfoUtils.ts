@@ -28,6 +28,7 @@ export enum ChainId {
     baseMainnet = chainInfo.baseMainnetChainInfo.chainId,
     lineaGoerli = chainInfo.lineaGoerlyChainInfo.chainId,
     lineaMainnet = chainInfo.lineaMainnetChainInfo.chainId,
+    scrollMainnet = chainInfo.scrollMainnet.chainId,
     scrollAlphaGoerli = chainInfo.scrollAlphaChainInfo.chainId,
     scrollSepolia = chainInfo.scrollSepoliaChainInfo.chainId,
     zkSyncEra = chainInfo.zksyncEraChainInfo.chainId,
@@ -62,6 +63,8 @@ export function getChainInfo(chainId: number): ChainInfo {
             return chainInfo.baseGoerliChainInfo;
         case ChainId.baseMainnet:
             return chainInfo.baseMainnetChainInfo;
+        case ChainId.scrollMainnet:
+            return chainInfo.scrollMainnet;
         case ChainId.scrollAlphaGoerli:
             return chainInfo.scrollAlphaChainInfo;
         case ChainId.scrollSepolia:

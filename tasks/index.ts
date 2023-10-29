@@ -12,6 +12,7 @@ import "./socket_bungee/socket.tasks";
 import "./ens/ens.tasks";
 import "./misc/misc.tasks";
 import "./scroll/scroll_sepolia.tasks";
+import "./scroll/scroll.tasks";
 import "./ens/arbId.tasks";
 import "./ens/arbId.tasks";
 import "./ens/opNames.tasks";
@@ -37,4 +38,5 @@ import "./coinbase/base_mainnet.tasks"
 import "./coinbase/base_mainnet_summer.tasks"
 import "./philand/philand.tasks"
 import "./arbitrum/ArbitrumStylusSepolia.tasks"
+import "./starknet/startknet.tasks"
 import "./uniswap/uniswap.tasks"
