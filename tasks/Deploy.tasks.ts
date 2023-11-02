@@ -1,7 +1,7 @@
 import { task, types } from "hardhat/config";
 import { getChainInfo } from "../utils/ChainInfoUtils";
 import "../utils/Util.tasks";
-import { delay, getAccounts, populateTxnParams } from "../utils/Utils";
+import { delay, getAccounts, populateTxnParams, waitForGasPrice } from "../utils/Utils";
 
 export const DeployTasks = {
     deployStubContract: "deployStubContract",
@@ -11,6 +11,7 @@ export const DeployTasks = {
 
 task("deployStubContract", "Deploy stub contract")
     .addParam("delay", "Add delay", undefined, types.float, true)
+    .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
@@ -29,10 +30,16 @@ task("deployStubContract", "Deploy stub contract")
         for (const account of accounts) {
             try {
                 console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+                
+                await waitForGasPrice({
+                    maxPriceInGwei: taskArgs.gasPrice,
+                    provider: hre.ethers.provider,
+                });
+
                 const txParams = await populateTxnParams({ signer: account, chain: chainInfo });
                 const stubContract = await StubFactory.connect(account).deploy({ ...txParams });
 
-                console.log(`Contract deployed at address ${stubContract.address})`);
+                console.log(`Contract deployed at address ${stubContract.address}`);
                 console.log(`tx: ${chainInfo.explorer}${stubContract.deployTransaction.hash}`);
             } catch (error) {
                 console.log(

@@ -19,7 +19,7 @@ const ZKSYNC_MAINNET_RPC = "https://zksync2-mainnet.zksync.io/";
 
 task("zksyncEraDeposit", "Bridge ETH to zksyncV2 network")
     .addParam("amount", "Amount of ETH", undefined, types.float, true)
-    .addFlag("dust", "Dust percentage")
+    .addParam("dust", "Dust percentage", undefined, types.int, true)
     .addFlag("all", "Use all amount")
     .addParam("minBalance", "Minimum balance after using all funds", undefined, types.float, true)
     .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
@@ -35,6 +35,7 @@ task("zksyncEraDeposit", "Bridge ETH to zksyncV2 network")
     )
     .setAction(async (taskArgs, hre) => {
         const network = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(network.chainId);
 
         if (network.chainId != ChainId.ethereumMainnet) {
             throw new Error("Task allowed only on ethereum chain");
@@ -75,7 +76,9 @@ task("zksyncEraDeposit", "Bridge ETH to zksyncV2 network")
                 console.log(
                     `\n#${accounts.indexOf(account)} ${ethers.utils.formatEther(
                         amount
-                    )} bridget from address ${zkWallet.address}\nTxn ${depositHandle.hash}`
+                    )} bridget from address ${zkWallet.address}\nTxn ${chainInfo.explorer}${
+                        depositHandle.hash
+                    }`
                 );
 
                 if (taskArgs.delay != undefined) {
@@ -94,7 +97,7 @@ task("zksyncEraDeposit", "Bridge ETH to zksyncV2 network")
 
 task("zksyncEraWithdraw", "Withdraw ETH from zksyncV2 network")
     .addParam("amount", "Amount of ETH", undefined, types.float, true)
-    .addFlag("dust", "Dust percentage")
+    .addParam("dust", "Dust percentage", undefined, types.int, true)
     .addFlag("all", "Use all amount")
     .addParam("minBalance", "Minimum balance after using all funds", undefined, types.float, true)
     .addParam("delay", "Add random delay", undefined, types.float, true)
@@ -110,6 +113,7 @@ task("zksyncEraWithdraw", "Withdraw ETH from zksyncV2 network")
     )
     .setAction(async (taskArgs, hre) => {
         const network = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(network.chainId);
 
         const zkProvider = new zksync.Provider(ZKSYNC_MAINNET_RPC);
         const ethMainnetProvider = new hre.ethers.providers.JsonRpcProvider(process.env.ETHEREUM_MAINNET_URL);
@@ -120,19 +124,23 @@ task("zksyncEraWithdraw", "Withdraw ETH from zksyncV2 network")
                 const zkWallet = new zksync.Wallet(account.privateKey, zkProvider, hre.ethers.provider);
 
                 let amount: BigNumber;
-                if (taskArgs.dust) {
+                if (taskArgs.all) {
+                    const balance = await zkWallet.getBalance();
+
+                    const minBalance = ethers.utils.parseEther(
+                        addDust({ amount: taskArgs.minBalance, upToPercent: taskArgs.dust }).toString()
+                    );
+
+                    amount = balance.sub(minBalance);
+                } else if (taskArgs.dust) {
                     amount = ethers.utils.parseEther(
                         addDust({ amount: taskArgs.amount, upToPercent: taskArgs.dust }).toString()
                     );
-                } else if (taskArgs.all) {
-                    const balance = await zkWallet.getBalance();
-                    const minBalance = ethers.utils.parseEther(
-                        addDust({ amount: taskArgs.minBalance }).toString()
-                    );
-                    amount = balance.sub(minBalance);
                 } else {
                     amount = ethers.utils.parseEther(taskArgs.amount.toString());
                 }
+
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
 
                 await waitForGasPrice({ maxPriceInGwei: taskArgs.gasPrice, provider: ethMainnetProvider });
 
@@ -144,9 +152,9 @@ task("zksyncEraWithdraw", "Withdraw ETH from zksyncV2 network")
                 });
 
                 console.log(
-                    `\n${ethers.utils.formatEther(amount)} bridget from address ${zkWallet.address}\nTxn ${
-                        withdrawHandle.hash
-                    }`
+                    `${ethers.utils.formatEther(amount)} bridget\nTxn ${
+                        chainInfo.explorer
+                    }${withdrawHandle.hash}`
                 );
 
                 if (taskArgs.delay != undefined) {
@@ -537,7 +545,7 @@ task("zksyncEraContractInteractions", "Interact with erc-20 contracts")
     )
     .setAction(async (taskArgs, hre) => {
         const network = await hre.ethers.provider.getNetwork();
-        const chainInfo = getChainInfo(network.chainId)
+        const chainInfo = getChainInfo(network.chainId);
 
         if (network.chainId != ChainId.zkSyncEra) {
             throw new Error("Task allowed only on zksyncEra chain");

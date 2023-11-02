@@ -2,7 +2,7 @@ import { BigNumber, ethers, utils } from "ethers";
 import { task, types } from "hardhat/config";
 import { ERC20__factory } from "../../typechain-types";
 import { ChainId, getChainInfo } from "../../utils/ChainInfoUtils";
-import { addDust, delay, getAccounts, waitForGasPrice } from "../../utils/Utils";
+import { addDust, delay, getAccounts, populateTxnParams, waitForGasPrice } from "../../utils/Utils";
 import routerErcAbi from "./RouterErcAbi.json";
 import routerEthAbi from "./RouterEthAbi.json";
 import stargateRouterAbi from "./StargateRouterAbi.json";
@@ -129,13 +129,14 @@ task("stargateBridgeETH", "Bridge ETH across networks")
                 console.log(`\n#${accounts.indexOf(account)} Address ${account.address}`);
                 console.log(`Fee ${utils.formatEther(fee)}`);
 
+                var txParams = await populateTxnParams({ signer: account, chain: chainInfo });
                 const bridgeTx = await routerEthContract.connect(account).swapETH(
                     targetBridgeInfo.chainId, //_dstChainId (uint16)
                     account.address, //_refundAddress (address)
                     account.address, //_toAddress (bytes)
                     amount, //_amountLD (uint256)
                     amount.div(BigNumber.from(100)).mul(BigNumber.from(95)), //_minAmountLD (uint256)
-                    { value: amount.add(fee) }
+                    { value: amount.add(fee), ...txParams }
                 );
 
                 console.log(
@@ -261,7 +262,9 @@ task("stargateBridgeUsdc", "Bridge USDC across networks")
                             nonce: account.getTransactionCount(),
                             gasPrice: account.getGasPrice(),
                         });
-                    console.log(`Not enought allowance. Approve tokens tx ${approveTx.hash}`);
+                    console.log(
+                        `Not enought allowance. Approve tokens tx ${chainInfo.explorer}${approveTx.hash}`
+                    );
                     await approveTx.wait();
                 }
 
@@ -280,7 +283,9 @@ task("stargateBridgeUsdc", "Bridge USDC across networks")
                     { value: fee, nonce: account.getTransactionCount(), gasPrice: account.getGasPrice() } // "fee" is the native gas to pay for the cross chain message fee. see
                 );
                 console.log(
-                    `${hre.ethers.utils.formatUnits(amount, decimals)} USDC bridged\nTxn ${bridgeTx.hash}`
+                    `${hre.ethers.utils.formatUnits(amount, decimals)} USDC bridged\nTxn ${
+                        chainInfo.explorer
+                    }${bridgeTx.hash}`
                 );
 
                 if (taskArgs.delay != undefined) {
@@ -297,6 +302,7 @@ task("stargateBridgeUsdc", "Bridge USDC across networks")
 
 task("stargateBridgeUsdt", "Bridge USDT across networks")
     .addParam("targetChainId", "Target chain id", undefined, types.int)
+    .addFlag("toUsdc", "Swap to USDC")
     .addParam("amount", "Amount of tokens", undefined, types.float, true)
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addFlag("all", "Use all balance of tokens")
@@ -344,6 +350,10 @@ task("stargateBridgeUsdt", "Bridge USDT across networks")
 
         const refuelAmount = taskArgs.refuel ? targetBridgeInfo.refuelAmount : BigNumber.from(0);
 
+        if (taskArgs.toUsdc && targetBridgeInfo.usdcPoolId == undefined) {
+            console.log(`Swap to USDC unavailable for this route`);
+        }
+
         for (const account of accounts) {
             try {
                 console.log(`\n#${accounts.indexOf(account)} Address ${account.address}`);
@@ -390,16 +400,24 @@ task("stargateBridgeUsdt", "Bridge USDT across networks")
                             nonce: account.getTransactionCount(),
                             gasPrice: account.getGasPrice(),
                         });
-                    console.log(`Not enought allowance. Approve tokens tx ${approveTx.hash}`);
+                    console.log(
+                        `Not enought allowance. Approve tokens tx ${chainInfo.explorer}${approveTx.hash}`
+                    );
                     await approveTx.wait();
                 }
 
                 await waitForGasPrice({ maxPriceInGwei: taskArgs.gasPrice, provider: hre.ethers.provider });
 
+                let targetPoolId = targetBridgeInfo.usdtPoolId;
+
+                if (taskArgs.toUsdc) {
+                    targetPoolId = targetBridgeInfo.usdcPoolId;
+                }
+
                 const bridgeTx = await routerErcContract.connect(account).swap(
                     targetBridgeInfo.chainId, // destination chainId
                     originBridgeInfo.usdtPoolId, // source poolId
-                    targetBridgeInfo.usdtPoolId, // destination poolId
+                    targetPoolId, // destination poolId
                     account.address, // refund address. extra gas (if any) is returned to this address
                     amount, // quantity to swap
                     amount.div(BigNumber.from(100)).mul(BigNumber.from(95)), // the min qty you would accept on the destination
@@ -409,7 +427,9 @@ task("stargateBridgeUsdt", "Bridge USDT across networks")
                     { value: fee, nonce: account.getTransactionCount(), gasPrice: account.getGasPrice() } // "fee" is the native gas to pay for the cross chain message fee. see
                 );
                 console.log(
-                    `${hre.ethers.utils.formatUnits(amount, decimals)} USDT bridged\nTxn ${bridgeTx.hash}`
+                    `${hre.ethers.utils.formatUnits(amount, decimals)} USDT bridged\nTxn ${
+                        chainInfo.explorer
+                    }${bridgeTx.hash}`
                 );
 
                 if (taskArgs.delay != undefined) {
@@ -508,8 +528,8 @@ task("stargateStake", "Stake STG tokens on arbitrum chain")
                     await approveTxn.wait();
                     console.log(
                         `Add allowance ${utils.formatUnits(missingAllowance, stgTokenDecimals)}. Txn ${
-                            approveTxn.hash
-                        }`
+                            chainInfo.explorer
+                        }${approveTxn.hash}`
                     );
                 }
 
@@ -555,6 +575,7 @@ task("stargateStakeIncrease", "Stake STG tokens on arbitrum chain")
     )
     .setAction(async (taskArgs, hre) => {
         const network = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(network.chainId);
 
         if (network.chainId != ChainId.arbitrumMainnet)
             throw new Error("Task allowed only on arbitrum mainnet");
@@ -614,8 +635,8 @@ task("stargateStakeIncrease", "Stake STG tokens on arbitrum chain")
                     await approveTxn.wait();
                     console.log(
                         `Add allowance ${utils.formatUnits(missingAllowance, stgTokenDecimals)}. Txn ${
-                            approveTxn.hash
-                        }`
+                            chainInfo.explorer
+                        }${approveTxn.hash}`
                     );
                 }
 
@@ -626,7 +647,7 @@ task("stargateStakeIncrease", "Stake STG tokens on arbitrum chain")
                     `#${accounts.indexOf(account)} ${utils.formatUnits(
                         amount,
                         stgTokenDecimals
-                    )} staked from address ${account.address}. Txn ${stakeTxn.hash}`
+                    )} staked from address ${account.address}. Txn ${chainInfo.explorer}${stakeTxn.hash}`
                 );
 
                 if (taskArgs.delay) {
@@ -655,6 +676,7 @@ task("stargateStakeIncreaseUnlockDate", "Increase unlock date")
     )
     .setAction(async (taskArgs, hre) => {
         const network = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(network.chainId);
 
         if (network.chainId != ChainId.arbitrumMainnet)
             throw new Error("Task allowed only on arbitrum mainnet");
@@ -677,8 +699,8 @@ task("stargateStakeIncreaseUnlockDate", "Increase unlock date")
                     .increase_unlock_time(BigNumber.from(taskArgs.unlockDate));
                 console.log(
                     `#${accounts.indexOf(account)} ${account.address}. Unlock date increased. Txn ${
-                        stakeTxn.hash
-                    }`
+                        chainInfo.explorer
+                    }${stakeTxn.hash}`
                 );
 
                 if (taskArgs.delay) {
@@ -746,6 +768,8 @@ task("stargateStakingWithdraw", "Withdraw tokens from stargate staking")
         types.string
     )
     .setAction(async (taskArgs, hre) => {
+        const network = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(network.chainId);
         const accounts = await getAccounts(taskArgs, hre.ethers.provider);
 
         const stgToken = ERC20__factory.connect(STG_TOKEN_ADDRESS, hre.ethers.provider);
@@ -762,8 +786,8 @@ task("stargateStakingWithdraw", "Withdraw tokens from stargate staking")
                 const withdrawTxn = await stgStakingContract.connect(account).withdraw();
                 console.log(
                     `\n#${accounts.indexOf(account)} Address ${account.address} Tokens withdrawed\nTxn ${
-                        withdrawTxn.hash
-                    }`
+                        chainInfo.explorer
+                    }${withdrawTxn.hash}`
                 );
                 if (taskArgs.delay) {
                     await delay(taskArgs.delay);

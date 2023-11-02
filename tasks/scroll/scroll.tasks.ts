@@ -50,7 +50,9 @@ task("scrollDeposit", "Bridge ETH to scroll")
             try {
                 let amount: BigNumber;
                 if (taskArgs.all) {
-                    const minBalance = utils.parseEther(addDust({ amount: taskArgs.minBalance }).toString());
+                    const minBalance = utils.parseEther(
+                        addDust({ amount: taskArgs.minBalance, upToPercent: taskArgs.dust }).toString()
+                    );
                     amount = (await account.getBalance()).sub(minBalance);
                 } else if (taskArgs.dust) {
                     amount = utils.parseUnits(

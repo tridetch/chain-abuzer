@@ -93,7 +93,7 @@ task("orbiterBridge", "Bridge funds across networks")
                         fullBalance = await account.getBalance();
                     }
                     const minimumBalance = utils.parseEther(
-                        addDust({ amount: taskArgs.minBalance }).toString()
+                        addDust({ amount: taskArgs.minBalance, upToPercent: taskArgs.dust }).toString()
                     );
                     amount = fullBalance.sub(minimumBalance);
                 } else if (taskArgs.dust) {
@@ -169,67 +169,3 @@ task("orbiterBridge", "Bridge funds across networks")
             }
         }
     });
-
-/* task("orbiterFarmTxnCount", "Farm transactions count in orbiter bridge")
-    .addParam("targetChainId", `Target chain id ${JSON.stringify(OrbiterBridges)}`, undefined, types.int)
-    .addParam("delay", "Add delay between operations", undefined, types.float, true)
-    .addParam("amount", "Amount of ETH to deposit", undefined, types.float, true)
-    .addParam("minBalance", "Minimum balance after using all funds", undefined, types.float, true)
-    .addParam("dust", "Dust percentage", 5, types.int, true)
-    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
-    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
-    .addOptionalParam(
-        "accountIndex",
-        "Index of the account for which it will be executed",
-        undefined,
-        types.string
-    )
-    .setAction(async (taskArgs, hre) => {
-        const ethProvider = new hre.ethers.providers.JsonRpcProvider(process.env.ETHEREUM_MAINNET_URL);
-        const network = await hre.ethers.provider.getNetwork();
-        const currentChainInfo = getChainInfo(network.chainId);
-        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
-
-        const chainInfo = getChainInfo((await hre.ethers.provider.getNetwork()).chainId);
-        var bridgeInfo = getBridgeInfo(taskArgs.targetChainId);
-
-        if (!bridgeInfo) {
-            console.log(`Brigde not supported to chain id ${taskArgs.targetChainId}`);
-            return;
-        }
-
-        for (const account of accounts) {
-            console.log(`\n#${accounts.indexOf(account)} Address ${account.address}`);
-            try {
-                let amount: BigNumber = utils.parseEther(
-                    addDust({ amount: taskArgs.amount, upToPercent: taskArgs.dust }).toString()
-                );
-
-                if (amount.lt(MINIMUM_BRIDGE_AMOUNT)) {
-                    console.log(
-                        `Amount ${utils.formatEther(amount)} lower then minimum (${utils.formatEther(
-                            MINIMUM_BRIDGE_AMOUNT
-                        )})`
-                    );
-                    continue;
-                }
-                while (condition) {
-                    
-                }
-                await hre.run("orbiterBridge", {
-                    ...taskArgs,
-                    tokenAddress: gmxProtocolInfo.sbfGmxAddress,
-                });
-
-                if (taskArgs.delay != undefined) {
-                    await delay(taskArgs.delay);
-                }
-            } catch (error) {
-                console.log(
-                    `Error when process account #${accounts.indexOf(account)} Address: ${account.address}`
-                );
-                console.log(error);
-            }
-        }
-    }); */

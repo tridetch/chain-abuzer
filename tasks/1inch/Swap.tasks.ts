@@ -76,7 +76,7 @@ task("1inchSwap", "Swap tokens on 1inch")
                     dst: taskArgs.toToken,
                     amount: amount.toString(),
                     from: walletAddress,
-                    slippage: 1,
+                    slippage: 0.5,
                     // disableEstimate: false,
                     // allowPartialFill: false,
                 };

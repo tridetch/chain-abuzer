@@ -47,8 +47,8 @@ task("uniswapTrade", "Swap tokens on Uniswap")
             return;
         }
 
-        const v3SwapRouterAddress = getV3SwapRouterAddress(chainInfo.chainId)
-        
+        const v3SwapRouterAddress = getV3SwapRouterAddress(chainInfo.chainId);
+
         const isNativeEth = taskArgs.fromToken == "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE";
 
         let sellToken: any = isNativeEth
@@ -107,9 +107,10 @@ task("uniswapTrade", "Swap tokens on Uniswap")
                         );
 
                         // Send a transaction and get its hash
+                        var txParams = await populateTxnParams({ signer: account, chain: chainInfo });
                         const approveTxHash = await tokenContract
                             .connect(account)
-                            .approve(v3SwapRouterAddress, amount);
+                            .approve(v3SwapRouterAddress, amount, { ...txParams });
                         console.log(`Approve tx: ${chainInfo.explorer}${approveTxHash.hash}`);
                         await approveTxHash.wait(2);
                     }
@@ -160,7 +161,7 @@ task("uniswapTrade", "Swap tokens on Uniswap")
             const currencyAmount = CurrencyAmount.fromRawAmount(tokenIn, amount.toString());
 
             const route = await router.route(currencyAmount, tokenOut, TradeType.EXACT_INPUT, options);
-            
+
             if (route) {
                 console.log(`You'll get ${route.quote.toFixed()} of ${tokenOut.symbol}`);
 

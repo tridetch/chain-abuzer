@@ -4,7 +4,7 @@ import { subtask, task, types } from "hardhat/config";
 import { ERC20__factory } from "../typechain-types";
 import { ChainId, getChainInfo } from "../utils/ChainInfoUtils";
 import "../utils/Util.tasks";
-import { addDust, delay, getAccounts, populateTxnParams, waitForGasPrice } from "../utils/Utils";
+import { addDust, delay, getAccounts, populateTxnParams, shuffle, waitForGasPrice } from "../utils/Utils";
 
 dotenv.config();
 
@@ -331,8 +331,10 @@ task("disperseEth", "Disperse ETH from main account to all others")
 //     });
 
 task("wrapEth", "Wrap native ETH to WETH")
-    .addParam("amount", "Amount to wrap", undefined, types.float)
+    .addParam("amount", "Amount to wrap", undefined, types.float, true)
+    .addFlag("all", "Use all balance of tokens")
     .addParam("dust", "Dust percentage", undefined, types.int, true)
+    .addParam("minBalance", "Minimum balance after using all funds", undefined, types.float, true)
     .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
     .addParam("delay", "Add delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
@@ -353,12 +355,15 @@ task("wrapEth", "Wrap native ETH to WETH")
         for (const account of accounts) {
             try {
                 let amount: BigNumber;
-                if (taskArgs.dust) {
+                if (taskArgs.all) {
+                    const minBalance = utils.parseEther(addDust({ amount: taskArgs.minBalance }).toString());
+                    amount = (await account.getBalance()).sub(minBalance);
+                } else if (taskArgs.dust) {
                     amount = utils.parseUnits(
-                        addDust({ amount: taskArgs.amount, upToPercent: taskArgs.dust }).toString()
+                        addDust({ amount: taskArgs.amount, upToPercent: taskArgs.addDust }).toString()
                     );
                 } else {
-                    amount = utils.parseUnits(taskArgs.amount.toString(), await wethContract.decimals());
+                    amount = utils.parseUnits(taskArgs.amount.toString());
                 }
 
                 const balance = await account.getBalance();
@@ -370,11 +375,15 @@ task("wrapEth", "Wrap native ETH to WETH")
 
                     const txn = await wethContract.connect(account).deposit({ value: amount });
                     console.log(
-                        `Deposit ${utils.formatUnits(amount)} WETH to ${account.address} txn: ${txn.hash}`
+                        `#${accounts.indexOf(account)} Deposit ${utils.formatUnits(amount)} WETH to ${
+                            account.address
+                        } txn: ${chainInfo.explorer}${txn.hash}`
                     );
                 } else {
                     console.log(
-                        `Skip ${account.address} - not enought funds (${utils.formatEther(balance)})`
+                        `#${accounts.indexOf(account)} Skip ${
+                            account.address
+                        } - not enought funds (${utils.formatEther(balance)})`
                     );
                 }
                 if (taskArgs.delay != undefined) {
@@ -425,12 +434,20 @@ task("unwrapEth", "Unwrap WETH to native ether")
                     });
 
                     const txn = await wethContract.connect(account).withdraw(amount);
-                    console.log(`Address: ${account.address} WETH withdraw txn: ${txn.hash}`);
+                    console.log(
+                        `#${accounts.indexOf(account)} Address: ${account.address} WETH withdraw txn: ${
+                            chainInfo.explorer
+                        }${txn.hash}`
+                    );
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
                 } else {
-                    console.log(`Skip ${account.address} - not enought funds (${utils.formatUnits(amount)})`);
-                }
-                if (taskArgs.delay != undefined) {
-                    await delay(taskArgs.delay);
+                    console.log(
+                        `#${accounts.indexOf(account)} ${
+                            account.address
+                        } Skip - not enought funds (${utils.formatUnits(amount)})`
+                    );
                 }
             } catch (error) {
                 console.log(
@@ -659,5 +676,83 @@ task("testRpcMethod", "Test rpc")
         } catch (error) {
             console.log(`Error when process account`);
             console.log(error);
+        }
+    });
+
+task("ethereumContractInteractions", "Interact with erc-20 contracts")
+    .addParam("delay", "Add delay", undefined, types.float, true)
+    .addParam("interactions", "Number of contracts to interact", undefined, types.int, true)
+    .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const network = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(network.chainId);
+
+        if (network.chainId != ChainId.ethereumMainnet) {
+            throw new Error("Task allowed only on Ethereum Mainnet");
+        }
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        const erc20Contracts = [
+            ERC20__factory.connect("0xdac17f958d2ee523a2206206994597c13d831ec7", hre.ethers.provider),
+            ERC20__factory.connect("0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", hre.ethers.provider),
+            ERC20__factory.connect("0xae7ab96520de3a18e5e111b5eaab095312d7fe84", hre.ethers.provider),
+            ERC20__factory.connect("0x514910771af9ca656af840dff83e8264ecf986ca", hre.ethers.provider),
+            ERC20__factory.connect("0x2260fac5e5542a773aa44fbcfedf7c193bc2c599", hre.ethers.provider),
+            ERC20__factory.connect("0x6b175474e89094c44da98b954eedeac495271d0f", hre.ethers.provider),
+            ERC20__factory.connect("0x1f9840a85d5af5bf1d1762f925bdaddc4201f984", hre.ethers.provider),
+            ERC20__factory.connect("0xae78736cd615f374d3085123a210448e74fc6393", hre.ethers.provider),
+            ERC20__factory.connect("0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2", hre.ethers.provider),
+            ERC20__factory.connect("0xd33526068d116ce69f19a9ee46f0bd304f21a51f", hre.ethers.provider),
+            ERC20__factory.connect("0x111111111117dc0aa78b770fa6a738034120c302", hre.ethers.provider),
+            ERC20__factory.connect("0x6810e776880c02933d47db1b9fc05908e5386b96", hre.ethers.provider),
+            ERC20__factory.connect("0x6123b0049f904d730db3c36a31167d9d4121fa6b", hre.ethers.provider),
+            ERC20__factory.connect("0xdeFA4e8a7bcBA345F687a2f1456F5Edd9CE97202", hre.ethers.provider),
+            ERC20__factory.connect("0x582d872a1b094fc48f5de31d3b73f2d9be47def1", hre.ethers.provider),
+        ];
+
+        const spenderAddress = "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45"; //Uniswap
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address ${account.address}`);
+
+                var erc20Shuffled = shuffle(erc20Contracts);
+
+                if (taskArgs.interactions <= erc20Shuffled.length) {
+                    erc20Shuffled = erc20Shuffled.slice(undefined, taskArgs.interactions)
+                }
+                
+                for (const erc20 of erc20Shuffled) {
+                    await waitForGasPrice({
+                        maxPriceInGwei: taskArgs.gasPrice,
+                        provider: hre.ethers.provider,
+                    });
+
+                    var txParams = await populateTxnParams({ signer: account, chain: chainInfo });
+                    const tx = await erc20
+                        .connect(account)
+                        .approve(spenderAddress, BigNumber.from(0), { ...txParams });
+                    console.log(`Approve ${await erc20.symbol()} tx ${chainInfo.explorer}${tx.hash}`);
+                    await delay(0.1);
+                }
+
+                if (taskArgs.delay != undefined) {
+                    await delay(taskArgs.delay);
+                }
+            } catch (error) {
+                console.log(
+                    `Error when process account #${accounts.indexOf(account)} Address: ${account.address}`
+                );
+                console.log(error);
+            }
         }
     });

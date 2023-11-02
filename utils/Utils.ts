@@ -106,6 +106,8 @@ export async function populateTxnParams({
 }: TxnParams): Promise<ethers.providers.TransactionRequest> {
     var txRequest: ethers.providers.TransactionRequest = {};
 
+    if (chain.chainId == ChainId.ethereumMainnet) return txRequest;
+
     txRequest.gasPrice = (await signer.getGasPrice())
         .div(BigNumber.from(100))
         .mul(BigNumber.from(100 + increaseGasPercent));
