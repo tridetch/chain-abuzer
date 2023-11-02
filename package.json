@@ -29,7 +29,7 @@
     "@nomiclabs/hardhat-ethers": "^2.2.1",
     "@nomiclabs/hardhat-etherscan": "^3.1.2",
     "@ragetrade/sdk": "^1.0.0-alpha.33",
-    "@snapshot-labs/snapshot.js": "^0.4.86",
+    "@snapshot-labs/snapshot.js": "^0.8.1",
     "@traderjoe-xyz/sdk": "^3.0.7",
     "@traderjoe-xyz/sdk-v2": "^1.1.0",
     "@typechain/hardhat": "^6.1.4",
