@@ -718,6 +718,21 @@ task("ethereumContractInteractions", "Interact with erc-20 contracts")
             ERC20__factory.connect("0x6123b0049f904d730db3c36a31167d9d4121fa6b", hre.ethers.provider),
             ERC20__factory.connect("0xdeFA4e8a7bcBA345F687a2f1456F5Edd9CE97202", hre.ethers.provider),
             ERC20__factory.connect("0x582d872a1b094fc48f5de31d3b73f2d9be47def1", hre.ethers.provider),
+            ERC20__factory.connect("0xb50721bcf8d664c30412cfbc6cf7a15145234ad1", hre.ethers.provider),
+            ERC20__factory.connect("0x7fc66500c84a76ad7e9c93437bfc5ac33e2ddae9", hre.ethers.provider),
+            ERC20__factory.connect("0xe28b3b32b6c345a34ff64674606124dd5aceca30", hre.ethers.provider),
+            ERC20__factory.connect("0x9f8f72aa9304c8b593d555f12ef6589cc3a579a2", hre.ethers.provider),
+            ERC20__factory.connect("0xc944e90c64b2c07662a292be6244bdf05cda44a7", hre.ethers.provider),
+            ERC20__factory.connect("0xae78736cd615f374d3085123a210448e74fc6393", hre.ethers.provider),
+            ERC20__factory.connect("0xf57e7e7c23978c3caec3c3548e3d615c346e79ff", hre.ethers.provider),
+            ERC20__factory.connect("0xc011a73ee8576fb46f5e1c5751ca3b9fe0af2a6f", hre.ethers.provider),
+            ERC20__factory.connect("0x0f5d2fb29fb7d3cfee444a200298f468908cc942", hre.ethers.provider),
+            ERC20__factory.connect("0xbb0e17ef65f82ab018d8edd776e8dd940327b28b", hre.ethers.provider),
+            ERC20__factory.connect("0xd1d2eb1b1e90b638588728b4130137d262c87cae", hre.ethers.provider),
+            ERC20__factory.connect("0xd533a949740bb3306d119cc777fa900ba034cd52", hre.ethers.provider),
+            ERC20__factory.connect("0x7d1afa7b718fb893db30a3abc0cfc608aacfebb0", hre.ethers.provider),
+            ERC20__factory.connect("0x0000000000085d4780b73119b644ae5ecd22b376", hre.ethers.provider),
+            ERC20__factory.connect("0x4fabb145d64652a948d72533023f6e7a623c7c53", hre.ethers.provider),
         ];
 
         const spenderAddress = "0x68b3465833fb72A70ecDF485E0e4C7bD8665Fc45"; //Uniswap
