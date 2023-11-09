@@ -469,3 +469,56 @@ task("holographMintForgetAboutTimeNft", "Mint Forget About Time NFT")
             }
         }
     });
+
+task("holographMintDreamTravelNft", "Mint Dream Travel NFT")
+    .addParam("delay", "Add random delay", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+        const targetAddress = "0x7d213E53953a8dDe1dD08413699fEaC0292685E6";
+
+        if (![ChainId.zoraMainnet].includes(currentNetwork.chainId)) {
+            console.log(`Task supported only on Zora!`);
+            return;
+        }
+
+        let mintContract = new Contract(
+            targetAddress,
+            ["function purchase(uint256 numberOfTokens) payable"],
+            hre.ethers.provider
+        );
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+        for (const account of accounts) {
+            try {
+                var txParams = await populateTxnParams({ signer: account, chain: chainInfo });
+                const tx = await mintContract.connect(account).purchase(1, {
+                    value: ethers.utils.parseEther("0.000042000000000001"),
+                    ...txParams,
+                });
+
+                console.log(
+                    `\n#${accounts.indexOf(account)} Address: ${account.address}\ntxn: ${chainInfo.explorer}${
+                        tx.hash
+                    }`
+                );
+
+                if (taskArgs.delay != undefined) {
+                    await delay(taskArgs.delay);
+                }
+            } catch (error) {
+                console.log(
+                    `Error when process account #${accounts.indexOf(account)} Address: ${account.address}`
+                );
+                console.log(error);
+            }
+        }
+    });
