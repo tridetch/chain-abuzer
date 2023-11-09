@@ -3,7 +3,7 @@ import { task, types } from "hardhat/config";
 import { ERC20__factory } from "../../typechain-types";
 import { ChainId, getChainInfo } from "../../utils/ChainInfoUtils";
 import "../../utils/Util.tasks";
-import { addDust, delay, getAccounts, populateTxnParams, waitForGasPrice } from "../../utils/Utils";
+import { addDust, delay, getAccounts, populateTxnParams, shuffle, waitForGasPrice } from "../../utils/Utils";
 
 task("baseMainnetBridge", "Bridge ETH to base network")
     .addParam("amount", "Amount of ETH to deposit", undefined, types.float, true)
@@ -131,8 +131,62 @@ task("baseGenesisBuilderNFT", "Mint Genesis Builder NFT")
         }
     });
 
+task("baseMintLayerZeroExpedition", "Mint MintDAO LayerZero EXPEDITION NFT")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const contractAddress = "0x10498cbbe46946ca5b0d86cb5a5b225000a7a3a7";
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        if (![ChainId.baseMainnet].includes(currentNetwork.chainId)) {
+            console.log("Task available only at Base mainnet network!");
+            return;
+        }
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                const calldata = `0xe912512000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000`;
+
+                const txParams = populateTxnParams({ signer: account, chain: chainInfo });
+
+                const mintTx = await account.sendTransaction({
+                    to: contractAddress,
+                    data: calldata,
+                    value: utils.parseEther("0.001234267542150659"),
+                    ...txParams,
+                });
+
+                console.log(`Mint txn: ${chainInfo.explorer}${mintTx.hash}`);
+
+                if (taskArgs.delay != undefined) {
+                    await delay(taskArgs.delay);
+                }
+            } catch (error) {
+                console.log(
+                    `\nError when process account #${accounts.indexOf(account)} Address: ${account.address}`
+                );
+                console.log(error);
+            }
+        }
+    });
+
 task("baseContractInteractions", "Interact with erc-20 contracts")
     .addParam("delay", "Add delay", undefined, types.float, true)
+    .addParam("interactions", "Number of contracts to interact", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
@@ -168,7 +222,13 @@ task("baseContractInteractions", "Interact with erc-20 contracts")
             try {
                 console.log(`\n#${accounts.indexOf(account)} Address ${account.address}`);
 
-                for (const erc20 of erc20Contracts) {
+                var erc20Shuffled = shuffle(erc20Contracts);
+
+                if (taskArgs.interactions <= erc20Shuffled.length) {
+                    erc20Shuffled = erc20Shuffled.slice(undefined, taskArgs.interactions)
+                }
+                
+                for (const erc20 of erc20Shuffled) {
                     const txParams = await populateTxnParams({ signer: account, chain: chainInfo });
                     const tx = await erc20
                         .connect(account)

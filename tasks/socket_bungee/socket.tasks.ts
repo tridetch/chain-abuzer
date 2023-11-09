@@ -376,6 +376,8 @@ function getRefuelContract(chainId: number): string {
 task("bungeeRefuel", "Bridge gas token across networks")
     .addParam("targetChainId", "Target chain id", undefined, types.int)
     .addParam("amount", "Amount of ETH to deposit", undefined, types.float, true)
+    .addFlag("all", "All balance")
+    .addParam("minBalance", "Minimum balance after using all funds", undefined, types.float, true)
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
     .addParam("dust", "Dust percentage", undefined, types.int, true)
@@ -436,26 +438,6 @@ task("bungeeRefuel", "Bridge gas token across networks")
                 return;
             }
 
-            const minAmount = BigNumber.from(targetChainInfo?.minAmount);
-            const maxAmount = BigNumber.from(targetChainInfo?.maxAmount);
-
-            const checkAmount = utils.parseEther(taskArgs.amount.toString());
-
-            if (
-                checkAmount.lt(minAmount) ||
-                checkAmount.add(percentOf(checkAmount, taskArgs.dust || 0)).gt(maxAmount)
-            ) {
-                console.log(
-                    `Max = ${utils.formatEther(checkAmount.add(percentOf(checkAmount, taskArgs.dust || 0)))}`
-                );
-                console.log(
-                    `Error amount ${utils.formatEther(checkAmount)} + dust ${
-                        taskArgs.dust
-                    }%\nMin = ${utils.formatEther(minAmount)}, Max = ${utils.formatEther(maxAmount)}`
-                );
-                return;
-            }
-
             for (const account of accounts) {
                 try {
                     console.log(`\n#${accounts.indexOf(account)} Address ${account.address}`);
@@ -464,7 +446,7 @@ task("bungeeRefuel", "Bridge gas token across networks")
                     if (taskArgs.all) {
                         const fullBalance = await hre.ethers.provider.getBalance(account.address);
                         const minimumBalance = utils.parseEther(
-                            addDust({ amount: taskArgs.minBalance, upToPercent: 30 }).toString()
+                            addDust({ amount: taskArgs.minBalance, upToPercent: taskArgs.dust }).toString()
                         );
                         amount = fullBalance.sub(minimumBalance);
                     } else if (taskArgs.dust) {
@@ -475,6 +457,26 @@ task("bungeeRefuel", "Bridge gas token across networks")
                         amount = utils.parseEther(taskArgs.amount.toString());
                     }
 
+                    const minAmount = BigNumber.from(targetChainInfo?.minAmount);
+                    const maxAmount = BigNumber.from(targetChainInfo?.maxAmount);
+        
+                    const checkAmount = amount;
+        
+                    if (
+                        checkAmount.lt(minAmount) ||
+                        checkAmount.add(percentOf(checkAmount, taskArgs.dust || 0)).gt(maxAmount)
+                    ) {
+                        console.log(
+                            `Max = ${utils.formatEther(checkAmount.add(percentOf(checkAmount, taskArgs.dust || 0)))}`
+                        );
+                        console.log(
+                            `Error amount ${utils.formatEther(checkAmount)} + dust ${
+                                taskArgs.dust
+                            }%\nMin = ${utils.formatEther(minAmount)}, Max = ${utils.formatEther(maxAmount)}`
+                        );
+                        return;
+                    }
+        
                     const bridgeTx = await refuelContract
                         .connect(account)
                         .depositNativeToken(taskArgs.targetChainId, account.address, { value: amount });

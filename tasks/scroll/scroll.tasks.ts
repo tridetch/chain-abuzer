@@ -155,6 +155,7 @@ task("scrollMintHelloScrollNft", "Mint Hello Scroll NFT from Omnisea")
 
 task("scrollContractInteractions", "Interact with erc-20 contracts")
     .addParam("delay", "Add delay", undefined, types.float, true)
+    .addParam("interactions", "Number of contracts to interact", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
@@ -190,7 +191,11 @@ task("scrollContractInteractions", "Interact with erc-20 contracts")
             try {
                 console.log(`#${accounts.indexOf(account)} Address ${account.address}`);
 
-                const erc20Shuffled = shuffle(erc20Contracts);
+                var erc20Shuffled = shuffle(erc20Contracts);
+
+                if (taskArgs.interactions <= erc20Shuffled.length) {
+                    erc20Shuffled = erc20Shuffled.slice(undefined, taskArgs.interactions)
+                }
 
                 for (const erc20 of erc20Shuffled) {
                     var txParams = await populateTxnParams({ signer: account, chain: chainInfo });

@@ -181,7 +181,7 @@ task("syncSwapTrade", "Swap tokens on Syncswap")
                             .connect(account)
                             .approve(syncSwapContracts.routerContract.address, amount, { ...txParams });
                         console.log(`Approve tx: ${chainInfo.explorer}${approveTxHash.hash}`);
-                        await approveTxHash.wait(2);
+                        await approveTxHash.wait();
                     }
                 }
                 // The router will handle the deposit to the pool's vault account.

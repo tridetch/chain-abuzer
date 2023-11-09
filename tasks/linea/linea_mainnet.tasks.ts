@@ -4,7 +4,7 @@ import { task, types } from "hardhat/config";
 import { ERC20__factory } from "../../typechain-types";
 import { ChainId, getChainInfo } from "../../utils/ChainInfoUtils";
 import "../../utils/Util.tasks";
-import { addDust, delay, getAccounts, populateTxnParams, waitForGasPrice } from "../../utils/Utils";
+import { addDust, delay, getAccounts, populateTxnParams, shuffle, waitForGasPrice } from "../../utils/Utils";
 
 dotenv.config();
 
@@ -149,6 +149,7 @@ task("lineaEchoDexDailyCheckin", "EchoDex daily check in")
 
 task("lineaContractInteractions", "Interact with erc-20 contracts")
     .addParam("delay", "Add delay", undefined, types.float, true)
+    .addParam("interactions", "Number of contracts to interact", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
@@ -184,8 +185,15 @@ task("lineaContractInteractions", "Interact with erc-20 contracts")
         for (const account of accounts) {
             try {
                 console.log(`#${accounts.indexOf(account)} Address ${account.address}`);
-                const txParams = await populateTxnParams({ signer: account, chain: chainInfo });
-                for (const erc20 of erc20Contracts) {
+                
+                var erc20Shuffled = shuffle(erc20Contracts);
+
+                if (taskArgs.interactions <= erc20Shuffled.length) {
+                    erc20Shuffled = erc20Shuffled.slice(undefined, taskArgs.interactions)
+                }
+
+                for (const erc20 of erc20Shuffled) {
+                    const txParams = await populateTxnParams({ signer: account, chain: chainInfo });
                     const tx = await erc20.connect(account).approve(erc20.address, BigNumber.from(0), {
                         ...txParams,
                     });

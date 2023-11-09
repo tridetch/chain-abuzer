@@ -6,7 +6,7 @@ import { task, types } from "hardhat/config";
 import * as zksync from "zksync-web3";
 import { ERC20__factory } from "../../typechain-types";
 import { ChainId, getChainInfo } from "../../utils/ChainInfoUtils";
-import { addDust, dateInSeconds, delay, getAccounts, waitForGasPrice } from "../../utils/Utils";
+import { addDust, dateInSeconds, delay, getAccounts, shuffle, waitForGasPrice } from "../../utils/Utils";
 
 dotenv.config();
 
@@ -534,6 +534,7 @@ task("zksyncL0MintNft", "Mint L0 nft")
 
 task("zksyncEraContractInteractions", "Interact with erc-20 contracts")
     .addParam("delay", "Add delay", undefined, types.float, true)
+    .addParam("interactions", "Number of contracts to interact", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
@@ -572,6 +573,12 @@ task("zksyncEraContractInteractions", "Interact with erc-20 contracts")
         for (const account of accounts) {
             try {
                 console.log(`#${accounts.indexOf(account)} Address ${account.address}`);
+
+                var erc20Shuffled = shuffle(erc20Contracts);
+
+                if (taskArgs.interactions <= erc20Shuffled.length) {
+                    erc20Shuffled = erc20Shuffled.slice(undefined, taskArgs.interactions)
+                }
 
                 for (const erc20 of erc20Contracts) {
                     const tx = await erc20.connect(account).approve(erc20.address, BigNumber.from(0));
