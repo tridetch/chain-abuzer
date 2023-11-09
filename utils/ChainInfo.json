@@ -28,7 +28,7 @@
     "chainName": "Arbitrum Mainnet",
     "explorer": "https://arbiscan.io/tx/",
     "wethAddress": "0x82aF49447D8a07e3bd95BD0d56f35241523fBab1",
-    "usdcAddress": "0xFF970A61A04b1cA14834A43f5dE4533eBDDB5CC8",
+    "usdcAddress": "0xaf88d065e77c8cc2239327c5edb3a432268e5831",
     "usdtAddress": "0xfd086bc7cd5c481dcc9c85ebe478a1c0b69fcbb9"
   },
   "arbitrumNovaChainInfo": {
@@ -77,7 +77,7 @@
     "chainName": "Optimism Mainnet",
     "explorer": "https://optimistic.etherscan.io/tx/",
     "wethAddress": "0x4200000000000000000000000000000000000006",
-    "usdcAddress": "0x7f5c764cbc14f9669b88837ca1490cca17c31607",
+    "usdcAddress": "0x0b2c639c533813f4aa9d7837caf62653d097ff85",
     "usdtAddress": ""
   },
   "zksyncGoerliTestnetChainInfo":{
