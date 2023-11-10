@@ -1,6 +1,7 @@
 import { BigNumber, utils } from "ethers";
 import { task, types } from "hardhat/config";
 import { ERC20__factory } from "../../typechain-types";
+import { getChainInfo } from "../../utils/ChainInfoUtils";
 import "../../utils/Util.tasks";
 import { delay, getAccounts } from "../../utils/Utils";
 import { gmxProtocolInfo } from "./gmxProtocolInfo";
@@ -101,8 +102,11 @@ task("gmxUnstake", "Unstake GMX tokens")
         undefined,
         types.string
     )
-    .addParam("delay", "Add delay", undefined, types.int, true)
+    .addParam("delay", "Add delay", undefined, types.float, true)
     .setAction(async (taskArgs, hre) => {
+        const network = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(network.chainId);
+
         const accounts = await getAccounts(taskArgs, hre.ethers.provider);
 
         const sbfGMX = ERC20__factory.connect(gmxProtocolInfo.sbfGmxAddress, hre.ethers.provider);
@@ -115,15 +119,34 @@ task("gmxUnstake", "Unstake GMX tokens")
             hre.ethers.provider
         );
 
+        const gmxRewardTracker = new hre.ethers.Contract(
+            gmxProtocolInfo.gmxRewardRouterTrackerAddress,
+            gmxProtocolInfo.gmxRewardRouterTrackerAbi,
+            hre.ethers.provider
+        );
+
         for (const account of accounts) {
             try {
-                let amount: BigNumber = await sbfGMX.connect(account).balanceOf(account.address);
+                console.log(`\n#${accounts.indexOf(account)} Address ${account.address}`);
+
+                let stakedAmount: BigNumber = await gmxRewardTracker
+                    .connect(account)
+                    .stakedAmounts(account.address);
+                let cumulativeRewards: BigNumber = await gmxRewardTracker
+                    .connect(account)
+                    .cumulativeRewards(account.address);
+
+                const amount = stakedAmount.sub(cumulativeRewards);
+
+                if (amount.isZero()) {
+                    console.log(`Skip zero balance`);
+                    continue;
+                }
 
                 console.log(`Unstaking ${utils.formatUnits(amount, sbfGmxDecimals)} GMX ...`);
 
                 const txn = await gmxRewardRouter.connect(account).unstakeGmx(amount);
-                console.log(`Unstake txn: ${txn.hash}`);
-                console.log("\n");
+                console.log(`Unstake txn: ${chainInfo.explorer}${txn.hash}`);
 
                 if (taskArgs.delay != undefined) {
                     await delay(taskArgs.delay);
@@ -138,7 +161,7 @@ task("gmxUnstake", "Unstake GMX tokens")
     });
 
 task("gmxCompound", "Compound rewards from stake")
-    .addParam("delay", "Add delay in minutes", undefined, types.int, true)
+    .addParam("delay", "Add delay in minutes", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")

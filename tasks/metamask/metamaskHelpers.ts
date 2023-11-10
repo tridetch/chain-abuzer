@@ -1,5 +1,3 @@
-import { ethers } from "ethers";
-import { ChainId } from "../../utils/ChainInfoUtils";
 
 export interface MetamaskBridgeInfo {
     estimatedProcessingTimeInSeconds: string;
@@ -22,4 +20,14 @@ export interface BridgeStep {
         displayName: string;
     };
     destChainId: number;
+}
+
+export interface MetamaskSwapInfo {
+    aggregator: string;
+    trade: {
+        data: string;
+        from: string;
+        to: string;
+        value: string;
+    };
 }

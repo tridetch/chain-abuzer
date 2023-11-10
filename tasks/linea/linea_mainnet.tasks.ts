@@ -182,6 +182,8 @@ task("lineaContractInteractions", "Interact with erc-20 contracts")
             ERC20__factory.connect("0x3b2F62d42DB19B30588648bf1c184865D4C3B1D6", hre.ethers.provider),
         ];
 
+        const metamaskRouterAddress = "0x9dDA6Ef3D919c9bC8885D5560999A3640431e8e6"
+        
         for (const account of accounts) {
             try {
                 console.log(`#${accounts.indexOf(account)} Address ${account.address}`);
@@ -194,7 +196,7 @@ task("lineaContractInteractions", "Interact with erc-20 contracts")
 
                 for (const erc20 of erc20Shuffled) {
                     const txParams = await populateTxnParams({ signer: account, chain: chainInfo });
-                    const tx = await erc20.connect(account).approve(erc20.address, BigNumber.from(0), {
+                    const tx = await erc20.connect(account).approve(metamaskRouterAddress, BigNumber.from(0), {
                         ...txParams,
                     });
                     console.log(`Approve ${await erc20.symbol()} tx ${chainInfo.explorer}${tx.hash}`);
