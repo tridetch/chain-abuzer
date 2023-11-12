@@ -3,3 +3,4 @@ coverage
 coverage.json
 temp.json
 private_keys_e.json
+ItractAuthCache.json
