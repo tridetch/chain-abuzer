@@ -42,23 +42,26 @@ export const InteractApiUrls = {
     LineaCampaignInfo: "https://api.intract.io/api/qv1/journey/fetch",
 };
 
+export var AuthCache: AuthInfo[] = [];
+
 interface AuthArgs {
     account: ethers.Wallet;
     referralCode?: string | null;
 }
 export async function authenticate({ account, referralCode = null }: AuthArgs): Promise<AuthInfo> {
     // Check for existing auth info
-    let authCaches: AuthInfo[] = [];
 
-    try {
-        authCaches = require(`./ItractAuthCache.json`);
-    } catch {
-        // ignore
+    if (AuthCache.length == 0) {
+        try {
+            AuthCache = require(`./ItractAuthCache.json`);
+        } catch {
+            // ignore
+        }
     }
 
     const filePath = `./tasks/intract/ItractAuthCache.json`;
 
-    var authInfo = authCaches.find((info) => info.address == account.address);
+    var authInfo = AuthCache.find((info) => info.address == account.address);
 
     var tommorow = new Date();
     tommorow.setDate(tommorow.getDate() + 1);
@@ -110,17 +113,18 @@ export async function authenticate({ account, referralCode = null }: AuthArgs): 
     authInfo = { address: account.address, userId: userId, token: authToken, expires: expDate.toISOString() };
 
     // update cache
-    authCaches = authCaches.filter((it) => it.address != account.address);
-    authCaches.push(authInfo);
+    AuthCache = AuthCache.filter((it) => it.address != account.address);
 
-    fs.writeFileSync(filePath, JSON.stringify(authCaches));
+    AuthCache.push(authInfo);
+
+    fs.writeFileSync(filePath, JSON.stringify(AuthCache));
 
     return authInfo;
 }
 export function getWalletRequestPayload(
     signature: string,
     address: string,
-    referralCode: string|null
+    referralCode: string | null
 ): WalletRequestPayload {
     return {
         signature: signature,
