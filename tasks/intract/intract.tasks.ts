@@ -17,10 +17,11 @@ import {
     DailyCehckInResponsePayload,
     SetWalletResponsePayload,
     UserResponsePayload as SuperUserResponsePayload,
-    UserCampaingInfo
+    UserCampaingInfo,
 } from "./intractApiModels";
 
 task("intractRegisterAndSetAddress", "Register account and set primary address")
+    .addParam("referralCode", "Referral code", null, types.string, true)
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
@@ -41,7 +42,10 @@ task("intractRegisterAndSetAddress", "Register account and set primary address")
             try {
                 console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
 
-                const authInfo = await authenticate(account);
+                const authInfo = await authenticate({
+                    account: account,
+                    referralCode: taskArgs.referralCode,
+                });
 
                 const getLineaCampaingUserResponse: AxiosResponse<UserCampaingInfo> = await axios.get(
                     InteractApiUrls.GetLineaUserCampaing,
@@ -108,7 +112,7 @@ task("intractDailyCheckIn", "Daily check in")
             try {
                 console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
 
-                const authInfo = await authenticate(account);
+                const authInfo = await authenticate({account: account});
 
                 try {
                     const checkInResponse: AxiosResponse<DailyCehckInResponsePayload> = await axios.post(
@@ -158,7 +162,7 @@ task("intractStatistics", "Show account statistics")
             try {
                 console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
 
-                const authInfo = await authenticate(account);
+                const authInfo = await authenticate({account: account});
 
                 try {
                     const superUserResponse: SuperUserResponsePayload = await getSuperUserInfo(
@@ -172,7 +176,7 @@ task("intractStatistics", "Show account statistics")
                         authInfo.token
                     );
                     console.log(
-                        `Linea campaign stats:\nTotal XP: ${lineaCampaignUserResponse.totalXp}; Current streak: ${lineaCampaignUserResponse?.lineaStreak?.streakCount}; Longest streak: ${lineaCampaignUserResponse?.lineaStreak?.longestStreakCount};`
+                        `Linea campaign stats:\nTotal XP: ${lineaCampaignUserResponse.totalXp}; Current streak: ${lineaCampaignUserResponse?.lineaStreak?.streakCount}; Longest streak: ${lineaCampaignUserResponse?.lineaStreak?.longestStreakCount}; Last activity ${lineaCampaignUserResponse?.lineaStreak?.streakTimestamp}`
                     );
                 } catch (e: any) {
                     console.log(e.message);
@@ -208,7 +212,7 @@ task("intractLineaDailyQuiz", "Daily quiz")
             try {
                 console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
 
-                const authInfo = await authenticate(account);
+                const authInfo = await authenticate({account: account});
                 const lineaUserInfo = await getLineaCampaingUserInfo(authInfo.token);
                 try {
                     const quizResponse: AxiosResponse = await axios.post(
@@ -257,7 +261,7 @@ task("intractVerifyWave1MetamaskBridge", "Verify Wave 1 Metamask Bridge")
             try {
                 console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
 
-                const authInfo = await authenticate(account);
+                const authInfo = await authenticate({ account: account });
 
                 const verifyPayload = {
                     campaignId: "654a0e8d95c012164b1f1620",
@@ -372,7 +376,7 @@ task("intractClaimWave1MetamaskBridge", "Claim Wave 1 Metamask Bridge")
             try {
                 console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
                 try {
-                    const authInfo = await authenticate(account);
+                    const authInfo = await authenticate({account: account});
                     await claimTask(authInfo.token, campaignId, taskId);
                     if (taskArgs.delay != undefined) {
                         await delay(taskArgs.delay);
@@ -408,7 +412,7 @@ task("intractVerifyWave1MetamaskSwap", "Verify Wave 1 Metamask Swap")
             try {
                 console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
 
-                const authInfo = await authenticate(account);
+                const authInfo = await authenticate({account: account});
 
                 const verifyPayload = {
                     campaignId: "654a0e8d95c012164b1f1620",
@@ -524,7 +528,7 @@ task("intractClaimWave1MetamaskSwap", "Claim Wave 1 Metamask Swap")
             try {
                 console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
                 try {
-                    const authInfo = await authenticate(account);
+                    const authInfo = await authenticate({account: account});
                     await claimTask(authInfo.token, campaignId, taskId);
                     if (taskArgs.delay != undefined) {
                         await delay(taskArgs.delay);

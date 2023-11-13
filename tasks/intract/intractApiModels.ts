@@ -134,7 +134,7 @@ export interface UserCampaingInfo {
     lineaStreak: {
         streakCount: number;
         longestStreakCount: number;
-        streakTimestamp: Date;
+        streakTimestamp: String;
         isFirstTimeMarked: boolean;
     };
     lineaWalletAddress: string;

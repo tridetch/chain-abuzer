@@ -42,7 +42,11 @@ export const InteractApiUrls = {
     LineaCampaignInfo: "https://api.intract.io/api/qv1/journey/fetch",
 };
 
-export async function authenticate(account: ethers.Wallet): Promise<AuthInfo> {
+interface AuthArgs {
+    account: ethers.Wallet;
+    referralCode?: string | null;
+}
+export async function authenticate({ account, referralCode = null }: AuthArgs): Promise<AuthInfo> {
     // Check for existing auth info
     let authCaches: AuthInfo[] = [];
 
@@ -81,7 +85,7 @@ export async function authenticate(account: ethers.Wallet): Promise<AuthInfo> {
 
     const walletResponse: AxiosResponse<UserResponsePayload> = await axios.post(
         InteractApiUrls.Wallet,
-        getWalletRequestPayload(signedMessage, account.address)
+        getWalletRequestPayload(signedMessage, account.address, referralCode)
     );
     // console.log(walletResponse);
 
@@ -113,7 +117,11 @@ export async function authenticate(account: ethers.Wallet): Promise<AuthInfo> {
 
     return authInfo;
 }
-export function getWalletRequestPayload(signature: string, address: string): WalletRequestPayload {
+export function getWalletRequestPayload(
+    signature: string,
+    address: string,
+    referralCode: string|null
+): WalletRequestPayload {
     return {
         signature: signature,
         userAddress: address,
@@ -136,9 +144,9 @@ export function getWalletRequestPayload(signature: string, address: string): Wal
         width: "590px",
         reAuth: false,
         connector: "metamask",
-        referralCode: REFERRAL_INFO.referralCode,
-        referralLink: REFERRAL_INFO.referralLink,
-        referralSource: REFERRAL_INFO.referralSource,
+        referralCode: referralCode,
+        referralLink: referralCode ? REFERRAL_INFO.referralLink : null,
+        referralSource: referralCode ? REFERRAL_INFO.referralSource : null,
     };
 }
 
@@ -224,10 +232,10 @@ export async function verifyTask(token: string, payload: any, preconditionTasks:
 
         var isPreconditionsCompleted = true;
         for (const taskId of preconditionTasks) {
-            const completedTask = campaignInfo.events.find((e) => e.taskId == taskId);
+            const completedTask = campaignInfo.events.find((e) => e.taskId === taskId);
             if (!completedTask) {
                 isPreconditionsCompleted = false;
-            } else if (!completedTask.isVerified || !completedTask.isForceVerified) {
+            } else if (!completedTask.isVerified) {
                 isPreconditionsCompleted = false;
             }
         }
