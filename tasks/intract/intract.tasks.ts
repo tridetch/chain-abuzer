@@ -21,7 +21,7 @@ import {
 } from "./intractApiModels";
 
 task("intractRegisterAndSetAddress", "Register account and set primary address")
-    .addParam("referralCode", "Referral code", null, types.string, true)
+    .addParam("referralCode", "Referral code", undefined, types.string, true)
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
