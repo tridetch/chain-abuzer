@@ -112,7 +112,7 @@ task("intractDailyCheckIn", "Daily check in")
             try {
                 console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
 
-                const authInfo = await authenticate({account: account});
+                const authInfo = await authenticate({ account: account });
 
                 try {
                     const checkInResponse: AxiosResponse<DailyCehckInResponsePayload> = await axios.post(
@@ -162,7 +162,7 @@ task("intractStatistics", "Show account statistics")
             try {
                 console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
 
-                const authInfo = await authenticate({account: account});
+                const authInfo = await authenticate({ account: account });
 
                 try {
                     const superUserResponse: SuperUserResponsePayload = await getSuperUserInfo(
@@ -212,7 +212,7 @@ task("intractLineaDailyQuiz", "Daily quiz")
             try {
                 console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
 
-                const authInfo = await authenticate({account: account});
+                const authInfo = await authenticate({ account: account });
                 const lineaUserInfo = await getLineaCampaingUserInfo(authInfo.token);
                 try {
                     const quizResponse: AxiosResponse = await axios.post(
@@ -239,6 +239,8 @@ task("intractLineaDailyQuiz", "Daily quiz")
             }
         }
     });
+
+// WAVE 1 - METAMASK
 
 task("intractVerifyWave1MetamaskBridge", "Verify Wave 1 Metamask Bridge")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
@@ -369,14 +371,14 @@ task("intractClaimWave1MetamaskBridge", "Claim Wave 1 Metamask Bridge")
 
         const accounts = await getAccounts(taskArgs, hre.ethers.provider);
 
-        const campaignId = LineaCampaignIdentifiers.Wave2.CampaignId;
-        const taskId = LineaCampaignIdentifiers.Wave2.tasksIds.BridgeOnMetamask;
+        const campaignId = LineaCampaignIdentifiers.Wave1.CampaignId;
+        const taskId = LineaCampaignIdentifiers.Wave1.tasksIds.BridgeOnMetamask;
 
         for (const account of accounts) {
             try {
                 console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
                 try {
-                    const authInfo = await authenticate({account: account});
+                    const authInfo = await authenticate({ account: account });
                     await claimTask(authInfo.token, campaignId, taskId);
                     if (taskArgs.delay != undefined) {
                         await delay(taskArgs.delay);
@@ -412,7 +414,7 @@ task("intractVerifyWave1MetamaskSwap", "Verify Wave 1 Metamask Swap")
             try {
                 console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
 
-                const authInfo = await authenticate({account: account});
+                const authInfo = await authenticate({ account: account });
 
                 const verifyPayload = {
                     campaignId: "654a0e8d95c012164b1f1620",
@@ -480,7 +482,7 @@ task("intractVerifyWave1MetamaskSwap", "Verify Wave 1 Metamask Swap")
                 };
 
                 try {
-                    const preconditionTasks = [LineaCampaignIdentifiers.Wave2.tasksIds.BridgeOnMetamask];
+                    const preconditionTasks = [LineaCampaignIdentifiers.Wave1.tasksIds.BridgeOnMetamask];
                     await verifyTask(authInfo.token, verifyPayload, preconditionTasks);
                     console.log(
                         `Verification started for Wave 1 Swap on MetaMask.\nWait ${
@@ -521,15 +523,885 @@ task("intractClaimWave1MetamaskSwap", "Claim Wave 1 Metamask Swap")
 
         const accounts = await getAccounts(taskArgs, hre.ethers.provider);
 
-        const campaignId = LineaCampaignIdentifiers.Wave2.CampaignId;
-        const taskId = LineaCampaignIdentifiers.Wave2.tasksIds.SwapOnMetamask;
+        const campaignId = LineaCampaignIdentifiers.Wave1.CampaignId;
+        const taskId = LineaCampaignIdentifiers.Wave1.tasksIds.SwapOnMetamask;
 
         for (const account of accounts) {
             try {
                 console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
                 try {
-                    const authInfo = await authenticate({account: account});
+                    const authInfo = await authenticate({ account: account });
                     await claimTask(authInfo.token, campaignId, taskId);
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    console.log(e.message);
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+// WAVE 2 - BRIDGE AND ON RAMP
+
+task("intractVerifyWave2BridgeCore", "Verify Wave 2 Bridge")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addFlag("orbiter", "Verify Orbiter Bridge")
+    .addFlag("stargate", "Verify Stargate Bridge")
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        var bridgeProjectId: string | undefined = undefined;
+        if (taskArgs.orbiter) {
+            bridgeProjectId = LineaCampaignIdentifiers.Wave2.tasksIds.OrbiterProjectId;
+        } else if (taskArgs.stargate) {
+            bridgeProjectId = LineaCampaignIdentifiers.Wave2.tasksIds.StargateProjectId;
+        }
+
+        if (!bridgeProjectId) {
+            console.log("Need to define bridge parameter: --orbiter or --stargate");
+        }
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                const authInfo = await authenticate({ account: account });
+
+                const verifyPayload = {
+                    campaignId: "65535ae63cd33ebafe9d68f8",
+                    userInputs: { lineaProjectId: bridgeProjectId, TRANSACTION_HASH: "0x" },
+                    task: {
+                        userInputs: {
+                            initiateButton: { isExist: false },
+                            verifyButton: {
+                                label: "Verify",
+                                callbackFunction: true,
+                                callbackParameters: [
+                                    { source: "ADMIN_INPUT_FIELD", key: "LINEA_BRIDGE_AMOUNT" },
+                                    { source: "CLIENT_VERIFICATION_OBJECT", key: "questerWalletAddress" },
+                                    { source: "CLIENT_VERIFICATION_OBJECT", key: "lineaProjectId" },
+                                ],
+                            },
+                            dynamicInputs: [],
+                        },
+                        asyncVerifyConfig: {
+                            isAsyncVerify: true,
+                            verifyTimeInSeconds: 2700,
+                            maxRetryCount: 3,
+                            retryTimeInSeconds: 1500,
+                            isScatterEnabled: false,
+                            maxScatterInSeconds: 0,
+                        },
+                        powVerifyConfig: { isPOWVerify: false },
+                        recurrenceConfig: { isRecurring: false, frequencyInDays: 1, maxRecurrenceCount: 1 },
+                        flashTaskConfig: { isFlashTask: false },
+                        name: "Linea Bridge ETH Amount",
+                        description:
+                            "Select any listed bridge partner dapp and bridge at least $25 worth of ETH from another network to Linea.",
+                        templateType: "LineaBridgeEthAmount",
+                        xp: 100,
+                        adminInputs: [
+                            {
+                                key: "LINEA_BRIDGE_AMOUNT",
+                                inputType: "INPUT_NUMBER",
+                                label: "Bridge Amount",
+                                placeholder: "",
+                                value: 20,
+                                _id: "65535ae63cd33ebafe9d68fa",
+                            },
+                        ],
+                        isAttributionTask: true,
+                        templateFamily: "LINEA/WEEK1",
+                        totalUsersCompleted: 0,
+                        totalRecurringUsersCompleted: [],
+                        requiredLogins: ["EVMWallet"],
+                        isIntractTask: false,
+                        isRequiredTask: true,
+                        showOnChainHelper: false,
+                        hasMaxRetryCheck: false,
+                        hasRateLimitCheck: false,
+                        isAddedLater: false,
+                        isVisible: true,
+                        isDeleted: false,
+                        _id: "65535ae63cd33ebafe9d68f9",
+                    },
+                    verificationObject: {
+                        lineaProjectId: bridgeProjectId,
+                        questerWalletAddress: account.address,
+                    },
+                };
+
+                try {
+                    await verifyTask(authInfo.token, verifyPayload, []);
+                    console.log(
+                        `Verification started for Wave 2 Bridge Core Task.\nWait 120 minutes and claim with task "npx hardhat intractClaimWave2BridgeCore --network lineaMainnet"`
+                    );
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    if (e instanceof AxiosError) {
+                        console.log(e.response?.data.message);
+                    } else {
+                        console.log(e.message);
+                    }
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractClaimWave2BridgeCore", "Claim Wave 2 Bridge Core")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        const campaignId = LineaCampaignIdentifiers.Wave2.CampaignId;
+        const taskId = LineaCampaignIdentifiers.Wave2.tasksIds.BridgeCore;
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+                try {
+                    const authInfo = await authenticate({ account: account });
+                    await claimTask(authInfo.token, campaignId, taskId);
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    console.log(e.message);
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractVerifyWave2BridgeBonus25", "Verify Wave 2 Bridge Bonus 25")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addFlag("orbiter", "Verify Orbiter Bridge")
+    .addFlag("stargate", "Verify Stargate Bridge")
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        var bridgeTaskId: string | undefined = undefined;
+        var bridgeProjectId: string | undefined = undefined;
+        var bridgeProjectName: string | undefined = undefined;
+        if (taskArgs.orbiter) {
+            bridgeTaskId = LineaCampaignIdentifiers.Wave2.tasksIds.BridgeBonus25.OrbiterTaskId;
+            bridgeProjectId = LineaCampaignIdentifiers.Wave2.tasksIds.OrbiterProjectId;
+            bridgeProjectName = "Bridge $25 on ORBITER to Linea";
+        } else if (taskArgs.stargate) {
+            bridgeTaskId = LineaCampaignIdentifiers.Wave2.tasksIds.BridgeBonus25.StargateTaskId;
+            bridgeProjectId = LineaCampaignIdentifiers.Wave2.tasksIds.StargateProjectId;
+            bridgeProjectName = "Bridge $25 on STARGATE to Linea";
+        }
+
+        if (!bridgeProjectId) {
+            console.log("Need to define bridge flag: --orbiter or --stargate");
+        }
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                const authInfo = await authenticate({ account: account });
+
+                const verifyPayload = {
+                    campaignId: "65535ae63cd33ebafe9d68f8",
+                    userInputs: { lineaProjectId: bridgeProjectId, TRANSACTION_HASH: "0x" },
+                    task: {
+                        userInputs: {
+                            initiateButton: { isExist: false },
+                            verifyButton: {
+                                label: "Verify",
+                                callbackFunction: true,
+                                callbackParameters: [
+                                    { source: "ADMIN_INPUT_FIELD", key: "LINEA_BRIDGE_AMOUNT" },
+                                    { source: "CLIENT_VERIFICATION_OBJECT", key: "questerWalletAddress" },
+                                    { source: "ADMIN_INPUT_FIELD", key: "LINEA_PROJECT_ID" },
+                                ],
+                            },
+                            dynamicInputs: [],
+                        },
+                        asyncVerifyConfig: {
+                            isAsyncVerify: true,
+                            verifyTimeInSeconds: 1800,
+                            maxRetryCount: 3,
+                            retryTimeInSeconds: 600,
+                            isScatterEnabled: false,
+                            maxScatterInSeconds: 0,
+                        },
+                        powVerifyConfig: { isPOWVerify: false },
+                        recurrenceConfig: { isRecurring: false, frequencyInDays: 1, maxRecurrenceCount: 1 },
+                        flashTaskConfig: { isFlashTask: false },
+                        name: bridgeProjectName,
+                        description: bridgeProjectName,
+                        templateType: "LineaBridgeMultipleProject",
+                        xp: 5,
+                        adminInputs: [
+                            {
+                                key: "LINEA_BRIDGE_AMOUNT",
+                                inputType: "INPUT_NUMBER",
+                                label: "Bridge Amount for multiple",
+                                placeholder: "",
+                                value: 20,
+                                _id: "65535ae63cd33ebafe9d690a",
+                            },
+                            {
+                                key: "LINEA_PROJECT_ID",
+                                inputType: "INPUT_STRING",
+                                label: "Linea Project Id",
+                                placeholder: "",
+                                value: bridgeProjectId,
+                                _id: "65535ae63cd33ebafe9d690b",
+                            },
+                        ],
+                        isAttributionTask: true,
+                        templateFamily: "LINEA/WEEK1",
+                        totalUsersCompleted: 184,
+                        totalRecurringUsersCompleted: [],
+                        requiredLogins: ["EVMWallet"],
+                        isIntractTask: false,
+                        isRequiredTask: false,
+                        showOnChainHelper: false,
+                        hasMaxRetryCheck: false,
+                        hasRateLimitCheck: false,
+                        isAddedLater: false,
+                        isVisible: true,
+                        isDeleted: false,
+                        _id: LineaCampaignIdentifiers.Wave2.tasksIds.BridgeBonus25.StargateTaskId,
+                    },
+                    verificationObject: {
+                        lineaProjectId: bridgeProjectId,
+                        questerWalletAddress: account.address,
+                    },
+                };
+
+                try {
+                    await verifyTask(authInfo.token, verifyPayload, [
+                        LineaCampaignIdentifiers.Wave2.tasksIds.BridgeCore,
+                    ]);
+                    console.log(
+                        `Verification started for Wave 2 Bridge Bunus 25$ Task.\nWait 120 minutes and claim with task "npx hardhat intractClaimWave2BridgeBonus25 --network lineaMainnet"`
+                    );
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    if (e instanceof AxiosError) {
+                        console.log(e.response?.data.message);
+                    } else {
+                        console.log(e.message);
+                    }
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractClaimWave2BridgeBonus25", "Claim Wave 2 Bridge Bonus 25")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addFlag("orbiter", "Verify Orbiter Bridge")
+    .addFlag("stargate", "Verify Stargate Bridge")
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        const campaignId = LineaCampaignIdentifiers.Wave2.CampaignId;
+        var taskId: string | undefined = undefined;
+
+        if (taskArgs.orbiter) {
+            taskId = LineaCampaignIdentifiers.Wave2.tasksIds.BridgeBonus25.OrbiterTaskId;
+        } else if (taskArgs.stargate) {
+            taskId = LineaCampaignIdentifiers.Wave2.tasksIds.BridgeBonus25.StargateTaskId;
+        }
+
+        if (!taskId) {
+            console.log("Need to define bridge parameter: --orbiter or --stargate");
+        }
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+                try {
+                    const authInfo = await authenticate({ account: account });
+                    await claimTask(authInfo.token, campaignId, taskId!);
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    console.log(e.message);
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractVerifyWave2BridgeBonus500", "Verify Wave 2 Bridge Bonus 500")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addFlag("orbiter", "Verify Orbiter Bridge")
+    .addFlag("stargate", "Verify Stargate Bridge")
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        var bridgeProjectId: string | undefined = undefined;
+        if (taskArgs.orbiter) {
+            bridgeProjectId = LineaCampaignIdentifiers.Wave2.tasksIds.OrbiterProjectId;
+        } else if (taskArgs.stargate) {
+            bridgeProjectId = LineaCampaignIdentifiers.Wave2.tasksIds.StargateProjectId;
+        }
+
+        if (!bridgeProjectId) {
+            console.log("Need to define bridge flag: --orbiter or --stargate");
+        }
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                const authInfo = await authenticate({ account: account });
+
+                const verifyPayload = {
+                    campaignId: "65535ae63cd33ebafe9d68f8",
+                    userInputs: { lineaProjectId: bridgeProjectId, TRANSACTION_HASH: "0x" },
+                    task: {
+                        userInputs: {
+                            initiateButton: { isExist: false },
+                            verifyButton: {
+                                label: "Verify",
+                                callbackFunction: true,
+                                callbackParameters: [
+                                    { source: "ADMIN_INPUT_FIELD", key: "LINEA_BRIDGE_AMOUNT" },
+                                    { source: "CLIENT_VERIFICATION_OBJECT", key: "questerWalletAddress" },
+                                    { source: "CLIENT_VERIFICATION_OBJECT", key: "lineaProjectId" },
+                                ],
+                            },
+                            dynamicInputs: [],
+                        },
+                        asyncVerifyConfig: {
+                            isAsyncVerify: true,
+                            verifyTimeInSeconds: 1800,
+                            maxRetryCount: 3,
+                            retryTimeInSeconds: 600,
+                            isScatterEnabled: false,
+                            maxScatterInSeconds: 0,
+                        },
+                        powVerifyConfig: { isPOWVerify: false },
+                        recurrenceConfig: { isRecurring: false, frequencyInDays: 1, maxRecurrenceCount: 1 },
+                        flashTaskConfig: { isFlashTask: false },
+                        name: "Linea Bridge Eth Amount",
+                        description: "Bridge more than $500 worth of ETH in a single transaction to Linea.",
+                        templateType: "LineaBridgeEthAmount",
+                        xp: 50,
+                        adminInputs: [
+                            {
+                                key: "LINEA_BRIDGE_AMOUNT",
+                                inputType: "INPUT_NUMBER",
+                                label: "Bridge Amount",
+                                placeholder: "",
+                                value: 450,
+                                _id: "65535ae63cd33ebafe9d68fc",
+                            },
+                        ],
+                        isAttributionTask: true,
+                        templateFamily: "LINEA/WEEK1",
+                        totalUsersCompleted: 738,
+                        totalRecurringUsersCompleted: [],
+                        requiredLogins: ["EVMWallet"],
+                        isIntractTask: false,
+                        isRequiredTask: false,
+                        showOnChainHelper: false,
+                        hasMaxRetryCheck: false,
+                        hasRateLimitCheck: false,
+                        isAddedLater: false,
+                        isVisible: true,
+                        isDeleted: false,
+                        _id: "65535ae63cd33ebafe9d68fb",
+                    },
+                    verificationObject: {
+                        lineaProjectId: bridgeProjectId,
+                        questerWalletAddress: account.address,
+                    },
+                };
+
+                try {
+                    await verifyTask(authInfo.token, verifyPayload, [
+                        LineaCampaignIdentifiers.Wave2.tasksIds.BridgeCore,
+                    ]);
+                    console.log(
+                        `Verification started for Wave 2 Bridge Bunus 500$ Task.\nWait 120 minutes and claim with task "npx hardhat intractClaimWave2BridgeBonus500 --network lineaMainnet"`
+                    );
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    if (e instanceof AxiosError) {
+                        console.log(e.response?.data.message);
+                    } else {
+                        console.log(e.message);
+                    }
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractClaimWave2BridgeBonus500", "Claim Wave 2 Bridge Bonus 500")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addFlag("orbiter", "Verify Orbiter Bridge")
+    .addFlag("stargate", "Verify Stargate Bridge")
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        const campaignId = LineaCampaignIdentifiers.Wave2.CampaignId;
+        var taskId = LineaCampaignIdentifiers.Wave2.tasksIds.BridgeBonus500;
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+                try {
+                    const authInfo = await authenticate({ account: account });
+                    await claimTask(authInfo.token, campaignId, taskId!);
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    console.log(e.message);
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractVerifyWave2BridgeBonus1000", "Verify Wave 2 Bridge Bonus 1000")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addFlag("orbiter", "Verify Orbiter Bridge")
+    .addFlag("stargate", "Verify Stargate Bridge")
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        var bridgeProjectId: string | undefined = undefined;
+        if (taskArgs.orbiter) {
+            bridgeProjectId = LineaCampaignIdentifiers.Wave2.tasksIds.OrbiterProjectId;
+        } else if (taskArgs.stargate) {
+            bridgeProjectId = LineaCampaignIdentifiers.Wave2.tasksIds.StargateProjectId;
+        }
+
+        if (!bridgeProjectId) {
+            console.log("Need to define bridge flag: --orbiter or --stargate");
+        }
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                const authInfo = await authenticate({ account: account });
+
+                const verifyPayload = {
+                    campaignId: "65535ae63cd33ebafe9d68f8",
+                    userInputs: {
+                        lineaProjectId: bridgeProjectId,
+                        lineaProjectIds: [],
+                        TRANSACTION_HASH: "0x",
+                    },
+                    task: {
+                        userInputs: {
+                            initiateButton: { isExist: false },
+                            verifyButton: {
+                                label: "Verify",
+                                callbackFunction: true,
+                                callbackParameters: [
+                                    { source: "ADMIN_INPUT_FIELD", key: "LINEA_BRIDGE_AMOUNT" },
+                                    { source: "CLIENT_VERIFICATION_OBJECT", key: "questerWalletAddress" },
+                                    { source: "CLIENT_VERIFICATION_OBJECT", key: "lineaProjectIds" },
+                                ],
+                            },
+                            dynamicInputs: [],
+                        },
+                        asyncVerifyConfig: {
+                            isAsyncVerify: true,
+                            verifyTimeInSeconds: 1800,
+                            maxRetryCount: 3,
+                            retryTimeInSeconds: 600,
+                            isScatterEnabled: false,
+                            maxScatterInSeconds: 0,
+                        },
+                        powVerifyConfig: { isPOWVerify: false },
+                        recurrenceConfig: { isRecurring: false, frequencyInDays: 1, maxRecurrenceCount: 1 },
+                        flashTaskConfig: { isFlashTask: false },
+                        name: "Linea Bridge Eth Amount",
+                        description:
+                            "Bridge more than $1000 in ETH (in total across the listed bridges) to Linea.",
+                        templateType: "LineaBridgeVolume",
+                        xp: 75,
+                        adminInputs: [
+                            {
+                                key: "LINEA_BRIDGE_AMOUNT",
+                                inputType: "INPUT_NUMBER",
+                                label: "Total Bridge Amount",
+                                placeholder: "",
+                                value: 900,
+                                _id: "65535ae63cd33ebafe9d68fe",
+                            },
+                        ],
+                        isAttributionTask: true,
+                        templateFamily: "LINEA/WEEK1",
+                        totalUsersCompleted: 695,
+                        totalRecurringUsersCompleted: [],
+                        requiredLogins: ["EVMWallet"],
+                        isIntractTask: false,
+                        isRequiredTask: false,
+                        showOnChainHelper: false,
+                        hasMaxRetryCheck: false,
+                        hasRateLimitCheck: false,
+                        isAddedLater: false,
+                        isVisible: true,
+                        isDeleted: false,
+                        _id: "65535ae63cd33ebafe9d68fd",
+                    },
+                    verificationObject: {
+                        lineaProjectId: bridgeProjectId,
+                        lineaProjectIds: [],
+                        questerWalletAddress: account.address,
+                    },
+                };
+
+                try {
+                    await verifyTask(authInfo.token, verifyPayload, [
+                        LineaCampaignIdentifiers.Wave2.tasksIds.BridgeCore,
+                    ]);
+                    console.log(
+                        `Verification started for Wave 2 Bridge Bunus 1000$ Task.\nWait 120 minutes and claim with task "npx hardhat intractClaimWave2BridgeBonus1000 --network lineaMainnet"`
+                    );
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    if (e instanceof AxiosError) {
+                        console.log(e.response?.data.message);
+                    } else {
+                        console.log(e.message);
+                    }
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractClaimWave2BridgeBonus1000", "Claim Wave 2 Bridge Bonus 1000")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addFlag("orbiter", "Verify Orbiter Bridge")
+    .addFlag("stargate", "Verify Stargate Bridge")
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        const campaignId = LineaCampaignIdentifiers.Wave2.CampaignId;
+        var taskId = LineaCampaignIdentifiers.Wave2.tasksIds.BridgeBonus1000;
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+                try {
+                    const authInfo = await authenticate({ account: account });
+                    await claimTask(authInfo.token, campaignId, taskId!);
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    console.log(e.message);
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractDappSheriffReview", "Review dapp on DappSheriff")
+    .addParam("appId", "Application ID for review", 156, types.int, true)
+    .addParam("reviewText", "Review text", "Great protocol", types.string, true)
+    .addParam("rate", "rate", 5, types.float, true)
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        const campaignId = LineaCampaignIdentifiers.Wave2.CampaignId;
+        var taskId = LineaCampaignIdentifiers.Wave2.tasksIds.Review;
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+                try {
+                    const result = await axios.post("https://dappsheriff.com/api/app/127/reviews", {
+                        app_id: taskArgs.appId,
+                        reviewer: account.address,
+                        review: taskArgs.reviewText,
+                        rate: taskArgs.rate,
+                    });
+                    console.log(`Review has been submitted`);
+
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    console.log(e.message);
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractVerifyWave2BridgeReview", "Verify Wave 2 Review")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                const authInfo = await authenticate({ account: account });
+
+                const verifyPayload = {
+                    campaignId: "65535ae63cd33ebafe9d68f8",
+                    userInputs: { TRANSACTION_HASH: "0x" },
+                    task: {
+                        userInputs: {
+                            initiateButton: {
+                                label: "Write a review!",
+                                baseLink: "https://dappsheriff.com/",
+                                isExist: true,
+                            },
+                            verifyButton: { label: "Verify", callbackFunction: true, callbackParameters: [] },
+                            dynamicInputs: [],
+                        },
+                        asyncVerifyConfig: {
+                            isAsyncVerify: true,
+                            verifyTimeInSeconds: 120,
+                            maxRetryCount: 3,
+                            retryTimeInSeconds: 60,
+                            isScatterEnabled: false,
+                            maxScatterInSeconds: 0,
+                        },
+                        powVerifyConfig: { isPOWVerify: false },
+                        recurrenceConfig: { isRecurring: false, frequencyInDays: 1, maxRecurrenceCount: 1 },
+                        flashTaskConfig: { isFlashTask: false },
+                        name: "Review your favorite dapp of the Bridge wave on DappSheriff (for 20XP)",
+                        description: "Verify that you added review on Dapsheriff",
+                        templateType: "DappSheriffReview",
+                        xp: 20,
+                        adminInputs: [],
+                        isAttributionTask: true,
+                        templateFamily: "LINEA/WEEK1",
+                        totalUsersCompleted: 2007,
+                        totalRecurringUsersCompleted: [],
+                        requiredLogins: ["EVMWallet"],
+                        isIntractTask: false,
+                        isRequiredTask: false,
+                        showOnChainHelper: false,
+                        hasMaxRetryCheck: false,
+                        hasRateLimitCheck: false,
+                        isAddedLater: false,
+                        isVisible: true,
+                        isDeleted: false,
+                        _id: LineaCampaignIdentifiers.Wave2.tasksIds.Review,
+                    },
+                    verificationObject: {
+                        questerWalletAddress: account.address,
+                    },
+                };
+
+                try {
+                    await verifyTask(authInfo.token, verifyPayload, [
+                        LineaCampaignIdentifiers.Wave2.tasksIds.BridgeCore,
+                    ]);
+                    console.log(
+                        `Verification started for Wave 2 Review bridge on DappSheriff Task.\nWait 5 minutes and claim with task "npx hardhat intractClaimWave2Review --network lineaMainnet"`
+                    );
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    if (e instanceof AxiosError) {
+                        console.log(e.response?.data.message);
+                    } else {
+                        console.log(e.message);
+                    }
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractClaimWave2BridgeReview", "Claim Wave 2 Bridge Review")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addFlag("orbiter", "Verify Orbiter Bridge")
+    .addFlag("stargate", "Verify Stargate Bridge")
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        const campaignId = LineaCampaignIdentifiers.Wave2.CampaignId;
+        var taskId = LineaCampaignIdentifiers.Wave2.tasksIds.Review;
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+                try {
+                    const authInfo = await authenticate({ account: account });
+                    await claimTask(authInfo.token, campaignId, taskId!);
                     if (taskArgs.delay != undefined) {
                         await delay(taskArgs.delay);
                     }

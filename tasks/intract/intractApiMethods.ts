@@ -19,11 +19,28 @@ export const REFERRAL_INFO = {
 };
 export const LineaCampaignIdentifiers = {
     MainCampaignId: "6549ed0333cc8772783b858b",
-    Wave2: {
+    Wave1: {
+        Name: "Metamask",
         CampaignId: "654a0e8d95c012164b1f1620",
         tasksIds: {
             BridgeOnMetamask: "654a0e8d95c012164b1f1621",
             SwapOnMetamask: "654a0e8d95c012164b1f1623",
+        },
+    },
+    Wave2: {
+        Name: "Bridging and Onramps",
+        CampaignId: "65535ae63cd33ebafe9d68f8",
+        tasksIds: {
+            BridgeCore: "65535ae63cd33ebafe9d68f9",
+            StargateProjectId: "653f74996e3c9704874cdd5a",
+            OrbiterProjectId: "653aa0a76e3c9704874cdd31",
+            BridgeBonus25: {
+                StargateTaskId: "65535ae63cd33ebafe9d6909",
+                OrbiterTaskId: "65535ae63cd33ebafe9d6900",
+            },
+            BridgeBonus500: "65535ae63cd33ebafe9d68fb",
+            BridgeBonus1000: "65535ae63cd33ebafe9d68fd",
+            Review: "65535ae63cd33ebafe9d68ff",
         },
     },
 };
