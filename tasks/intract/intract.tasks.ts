@@ -573,6 +573,7 @@ task("intractVerifyWave2BridgeCore", "Verify Wave 2 Bridge")
 
         if (!bridgeProjectId) {
             console.log("Need to define bridge parameter: --orbiter or --stargate");
+            return;
         }
 
         const accounts = await getAccounts(taskArgs, hre.ethers.provider);
@@ -740,6 +741,7 @@ task("intractVerifyWave2BridgeBonus25", "Verify Wave 2 Bridge Bonus 25")
 
         if (!bridgeProjectId) {
             console.log("Need to define bridge flag: --orbiter or --stargate");
+            return;
         }
 
         const accounts = await getAccounts(taskArgs, hre.ethers.provider);
@@ -922,6 +924,7 @@ task("intractVerifyWave2BridgeBonus500", "Verify Wave 2 Bridge Bonus 500")
 
         if (!bridgeProjectId) {
             console.log("Need to define bridge flag: --orbiter or --stargate");
+            return;
         }
 
         const accounts = await getAccounts(taskArgs, hre.ethers.provider);
@@ -1086,6 +1089,7 @@ task("intractVerifyWave2BridgeBonus1000", "Verify Wave 2 Bridge Bonus 1000")
 
         if (!bridgeProjectId) {
             console.log("Need to define bridge flag: --orbiter or --stargate");
+            return;
         }
 
         const accounts = await getAccounts(taskArgs, hre.ethers.provider);
