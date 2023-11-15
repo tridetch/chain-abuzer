@@ -3,7 +3,7 @@ import { task, types } from "hardhat/config";
 import * as zksyncLite from "zksync";
 import * as zksyncEra from "zksync-web3";
 import { ChainId, getChainInfo } from "../../utils/ChainInfoUtils";
-import { addDust, delay, getAccounts, waitForGasPrice } from "../../utils/Utils";
+import { addDust, delay, getAccounts, populateTxnParams, waitForGasPrice } from "../../utils/Utils";
 import { MAKER_ADDRESS, OrbiterBridgeInfo, OrbiterBridges } from "./orbiterMakerInfo";
 
 function getBridgeInfo(chainId: number): OrbiterBridgeInfo | undefined {
@@ -137,9 +137,11 @@ task("orbiterBridge", "Bridge funds across networks")
                     });
                     console.log(`Bridge to ${bridgeInfo.name} amount ${utils.formatEther(amountWithCode)}`);
                 } else if (fromZksyncEra) {
+                    const txParams = populateTxnParams({signer: zksyncEraWallet, chain: chainInfo})
                     bridgeTx = await zksyncEraWallet.sendTransaction({
                         to: MAKER_ADDRESS,
                         value: amountWithCode,
+                        ...txParams
                     });
                     console.log(
                         `Bridge to ${bridgeInfo.name} amount ${utils.formatEther(amountWithCode)}\nTx ${
@@ -147,9 +149,11 @@ task("orbiterBridge", "Bridge funds across networks")
                         }${bridgeTx.hash}`
                     );
                 } else {
+                    const txParams = populateTxnParams({signer: account, chain: chainInfo})
                     bridgeTx = await account.sendTransaction({
                         to: MAKER_ADDRESS,
                         value: amountWithCode,
+                        ...txParams
                     });
                     console.log(
                         `Bridge to ${bridgeInfo.name} amount ${utils.formatEther(amountWithCode)}\nTx ${
