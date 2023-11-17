@@ -523,7 +523,7 @@ task("holographMintDreamTravelNft", "Mint Dream Travel NFT")
         }
     });
 
-    task("holographMintMercyRougeNft", "Mint Mercy ROugE NFT")
+task("holographMintMercyRougeNft", "Mint Mercy ROugE NFT")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
