@@ -1,7 +1,7 @@
 import { task, types } from "hardhat/config";
 import { getChainInfo } from "../../utils/ChainInfoUtils";
 import "../../utils/Util.tasks";
-import { delay, getAccounts } from "../../utils/Utils";
+import { MOCK_USER_AGENT, delay, getAccounts } from "../../utils/Utils";
 
 import axios, { AxiosError, AxiosResponse } from "axios";
 import {
@@ -51,7 +51,8 @@ task("intractRegisterAndSetAddress", "Register account and set primary address")
                     InteractApiUrls.GetLineaUserCampaing,
                     {
                         headers: {
-                            authorization: `Bearer ${authInfo.token}`,
+                            "User-Agent": MOCK_USER_AGENT,
+                            Authorization: `Bearer ${authInfo.token}`,
                         },
                     }
                 );
@@ -73,7 +74,8 @@ task("intractRegisterAndSetAddress", "Register account and set primary address")
                     },
                     {
                         headers: {
-                            authorization: `Bearer ${authInfo.token}`,
+                            "User-Agent": MOCK_USER_AGENT,
+                            Authorization: `Bearer ${authInfo.token}`,
                             Questuserid: lineaCampaingUserId,
                         },
                     }
@@ -120,11 +122,13 @@ task("intractDailyCheckIn", "Daily check in")
                         undefined,
                         {
                             headers: {
-                                authorization: `Bearer ${authInfo.token}`,
+                                "User-Agent": MOCK_USER_AGENT,
+                                Authorization: `Bearer ${authInfo.token}`,
                             },
                         }
                     );
 
+                    console.log(`Check-in completed!`);
                     console.log(
                         `Streak count: ${checkInResponse.data.streakCount}; Longest streak count: ${checkInResponse.data.longestStreakCount}`
                     );
@@ -220,7 +224,8 @@ task("intractLineaDailyQuiz", "Daily quiz")
                         undefined,
                         {
                             headers: {
-                                authorization: `Bearer ${authInfo.token}`,
+                                "User-Agent": MOCK_USER_AGENT,
+                                Authorization: `Bearer ${authInfo.token}`,
                                 Questuserid: lineaUserInfo._id,
                             },
                         }
@@ -551,6 +556,7 @@ task("intractVerifyWave2BridgeCore", "Verify Wave 2 Bridge")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addFlag("orbiter", "Verify Orbiter Bridge")
     .addFlag("stargate", "Verify Stargate Bridge")
+    .addFlag("rhinofi", "Verify Rhino Fi Bridge")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
@@ -569,6 +575,8 @@ task("intractVerifyWave2BridgeCore", "Verify Wave 2 Bridge")
             bridgeProjectId = LineaCampaignIdentifiers.Wave2.tasksIds.OrbiterProjectId;
         } else if (taskArgs.stargate) {
             bridgeProjectId = LineaCampaignIdentifiers.Wave2.tasksIds.StargateProjectId;
+        } else if (taskArgs.rhinofi) {
+            bridgeProjectId = LineaCampaignIdentifiers.Wave2.tasksIds.RhinoFiProjectId;
         }
 
         if (!bridgeProjectId) {
@@ -713,6 +721,7 @@ task("intractVerifyWave2BridgeBonus25", "Verify Wave 2 Bridge Bonus 25")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addFlag("orbiter", "Verify Orbiter Bridge")
     .addFlag("stargate", "Verify Stargate Bridge")
+    .addFlag("rhinofi", "Verify Rhino Fi Bridge")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
@@ -737,6 +746,10 @@ task("intractVerifyWave2BridgeBonus25", "Verify Wave 2 Bridge Bonus 25")
             bridgeTaskId = LineaCampaignIdentifiers.Wave2.tasksIds.BridgeBonus25.StargateTaskId;
             bridgeProjectId = LineaCampaignIdentifiers.Wave2.tasksIds.StargateProjectId;
             bridgeProjectName = "Bridge $25 on STARGATE to Linea";
+        } else if (taskArgs.rhinofi) {
+            bridgeTaskId = LineaCampaignIdentifiers.Wave2.tasksIds.BridgeBonus25.RhinoFiTaskId;
+            bridgeProjectId = LineaCampaignIdentifiers.Wave2.tasksIds.RhinoFiProjectId;
+            bridgeProjectName = "Bridge $25 on RHINO FI to Linea";
         }
 
         if (!bridgeProjectId) {
@@ -815,7 +828,7 @@ task("intractVerifyWave2BridgeBonus25", "Verify Wave 2 Bridge Bonus 25")
                         isAddedLater: false,
                         isVisible: true,
                         isDeleted: false,
-                        _id: LineaCampaignIdentifiers.Wave2.tasksIds.BridgeBonus25.StargateTaskId,
+                        _id: bridgeTaskId,
                     },
                     verificationObject: {
                         lineaProjectId: bridgeProjectId,
@@ -851,6 +864,7 @@ task("intractClaimWave2BridgeBonus25", "Claim Wave 2 Bridge Bonus 25")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addFlag("orbiter", "Verify Orbiter Bridge")
     .addFlag("stargate", "Verify Stargate Bridge")
+    .addFlag("rhinofi", "Verify Rhino Fi Bridge")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
@@ -873,6 +887,8 @@ task("intractClaimWave2BridgeBonus25", "Claim Wave 2 Bridge Bonus 25")
             taskId = LineaCampaignIdentifiers.Wave2.tasksIds.BridgeBonus25.OrbiterTaskId;
         } else if (taskArgs.stargate) {
             taskId = LineaCampaignIdentifiers.Wave2.tasksIds.BridgeBonus25.StargateTaskId;
+        } else if (taskArgs.rhinofi) {
+            taskId = LineaCampaignIdentifiers.Wave2.tasksIds.BridgeBonus25.RhinoFiTaskId;
         }
 
         if (!taskId) {
@@ -902,6 +918,7 @@ task("intractVerifyWave2BridgeBonus500", "Verify Wave 2 Bridge Bonus 500")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addFlag("orbiter", "Verify Orbiter Bridge")
     .addFlag("stargate", "Verify Stargate Bridge")
+    .addFlag("rhinofi", "Verify Rhino Fi Bridge")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
@@ -920,6 +937,8 @@ task("intractVerifyWave2BridgeBonus500", "Verify Wave 2 Bridge Bonus 500")
             bridgeProjectId = LineaCampaignIdentifiers.Wave2.tasksIds.OrbiterProjectId;
         } else if (taskArgs.stargate) {
             bridgeProjectId = LineaCampaignIdentifiers.Wave2.tasksIds.StargateProjectId;
+        } else if (taskArgs.rhinofi) {
+            bridgeProjectId = LineaCampaignIdentifiers.Wave2.tasksIds.RhinoFiProjectId;
         }
 
         if (!bridgeProjectId) {
@@ -1067,6 +1086,7 @@ task("intractVerifyWave2BridgeBonus1000", "Verify Wave 2 Bridge Bonus 1000")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addFlag("orbiter", "Verify Orbiter Bridge")
     .addFlag("stargate", "Verify Stargate Bridge")
+    .addFlag("rhinofi", "Verify Rhino Fi Bridge")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
@@ -1085,6 +1105,8 @@ task("intractVerifyWave2BridgeBonus1000", "Verify Wave 2 Bridge Bonus 1000")
             bridgeProjectId = LineaCampaignIdentifiers.Wave2.tasksIds.OrbiterProjectId;
         } else if (taskArgs.stargate) {
             bridgeProjectId = LineaCampaignIdentifiers.Wave2.tasksIds.StargateProjectId;
+        } else if (taskArgs.rhinofi) {
+            bridgeProjectId = LineaCampaignIdentifiers.Wave2.tasksIds.RhinoFiProjectId;
         }
 
         if (!bridgeProjectId) {

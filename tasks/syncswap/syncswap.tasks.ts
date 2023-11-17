@@ -4,7 +4,7 @@ import { task, types } from "hardhat/config";
 import { ERC20, ERC20__factory } from "../../typechain-types";
 import { ChainId, getChainInfo } from "../../utils/ChainInfoUtils";
 import "../../utils/Util.tasks";
-import { addDust, delay, getAccounts, populateTxnParams } from "../../utils/Utils";
+import { addDust, delay, getAccounts, populateTxnParams, waitForGasPrice } from "../../utils/Utils";
 import { SyncSwapClassicPoolAbi, SyncSwapStablePoolAbi } from "./SyncsSwapContractsAbi";
 import { getSyncSwapContracts } from "./SyncsSwapHeplers";
 
@@ -121,6 +121,8 @@ task("syncSwapTrade", "Swap tokens on Syncswap")
                     console.log(`Skip address with zero balance ${account.address}`);
                     continue;
                 }
+                
+                await waitForGasPrice({ maxPriceInGwei: taskArgs.gasPrice, provider: hre.ethers.provider });
 
                 console.log(`Swap ${utils.formatUnits(amount, sellTokenDecimals)} ${fromNativeEth ? "ETH" : await sellTokenContract.symbol()} to ${toNativeEth ? "ETH" : await buyTokenContract.symbol()}`);
                 

@@ -137,7 +137,7 @@ task("orbiterBridge", "Bridge funds across networks")
                     });
                     console.log(`Bridge to ${bridgeInfo.name} amount ${utils.formatEther(amountWithCode)}`);
                 } else if (fromZksyncEra) {
-                    const txParams = populateTxnParams({signer: zksyncEraWallet, chain: chainInfo})
+                    const txParams = await populateTxnParams({signer: zksyncEraWallet, chain: chainInfo})
                     bridgeTx = await zksyncEraWallet.sendTransaction({
                         to: MAKER_ADDRESS,
                         value: amountWithCode,
@@ -149,7 +149,7 @@ task("orbiterBridge", "Bridge funds across networks")
                         }${bridgeTx.hash}`
                     );
                 } else {
-                    const txParams = populateTxnParams({signer: account, chain: chainInfo})
+                    const txParams = await populateTxnParams({signer: account, chain: chainInfo})
                     bridgeTx = await account.sendTransaction({
                         to: MAKER_ADDRESS,
                         value: amountWithCode,

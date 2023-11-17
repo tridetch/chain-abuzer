@@ -1,6 +1,7 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { ethers } from "ethers";
 import * as fs from "fs";
+import { MOCK_USER_AGENT } from "../../utils/Utils";
 import {
     AuthInfo,
     GenerateNonceResponse,
@@ -34,9 +35,11 @@ export const LineaCampaignIdentifiers = {
             BridgeCore: "65535ae63cd33ebafe9d68f9",
             StargateProjectId: "653f74996e3c9704874cdd5a",
             OrbiterProjectId: "653aa0a76e3c9704874cdd31",
+            RhinoFiProjectId: "653f8538731c016673c182f8",
             BridgeBonus25: {
                 StargateTaskId: "65535ae63cd33ebafe9d6909",
                 OrbiterTaskId: "65535ae63cd33ebafe9d6900",
+                RhinoFiTaskId: "65535ae63cd33ebafe9d6921",
             },
             BridgeBonus500: "65535ae63cd33ebafe9d68fb",
             BridgeBonus1000: "65535ae63cd33ebafe9d68fd",
@@ -65,6 +68,7 @@ interface AuthArgs {
     account: ethers.Wallet;
     referralCode?: string | null;
 }
+
 export async function authenticate({ account, referralCode = null }: AuthArgs): Promise<AuthInfo> {
     // Check for existing auth info
 
@@ -91,6 +95,9 @@ export async function authenticate({ account, referralCode = null }: AuthArgs): 
         InteractApiUrls.GenerateNonce,
         {
             walletAddress: account.address,
+            headers: {
+                "User-Agent": MOCK_USER_AGENT,
+            },
         }
     );
 
@@ -105,7 +112,12 @@ export async function authenticate({ account, referralCode = null }: AuthArgs): 
 
     const walletResponse: AxiosResponse<UserResponsePayload> = await axios.post(
         InteractApiUrls.Wallet,
-        getWalletRequestPayload(signedMessage, account.address, referralCode)
+        getWalletRequestPayload(signedMessage, account.address, referralCode),
+        {
+            headers: {
+                "User-Agent": MOCK_USER_AGENT,
+            },
+        }
     );
     // console.log(walletResponse);
 
@@ -138,6 +150,7 @@ export async function authenticate({ account, referralCode = null }: AuthArgs): 
 
     return authInfo;
 }
+
 export function getWalletRequestPayload(
     signature: string,
     address: string,
@@ -176,7 +189,8 @@ export async function getSuperUserInfo(token: string): Promise<UserResponsePaylo
     try {
         getSuperUserResponse = await axios.get(InteractApiUrls.GetSuperUser, {
             headers: {
-                authorization: `Bearer ${token}`,
+                "User-Agent": MOCK_USER_AGENT,
+                Authorization: `Bearer ${token}`,
             },
         });
     } catch (e: any) {
@@ -186,6 +200,7 @@ export async function getSuperUserInfo(token: string): Promise<UserResponsePaylo
             throw e;
         }
     }
+
     return getSuperUserResponse.data;
 }
 
@@ -194,7 +209,8 @@ export async function getLineaCampaingUserInfo(token: string): Promise<UserCampa
     try {
         getLineaCampaingUserResponse = await axios.get(InteractApiUrls.GetLineaUserCampaing, {
             headers: {
-                authorization: `Bearer ${token}`,
+                "User-Agent": MOCK_USER_AGENT,
+                Authorization: `Bearer ${token}`,
             },
         });
     } catch (e: any) {
@@ -212,7 +228,8 @@ export async function getCompletedCampaigns(token: string): Promise<string[]> {
     try {
         getComplitedCampaignsResponse = await axios.get(InteractApiUrls.CompletedCompaigns, {
             headers: {
-                authorization: `Bearer ${token}`,
+                "User-Agent": MOCK_USER_AGENT,
+                Authorization: `Bearer ${token}`,
             },
         });
     } catch (e: any) {
@@ -233,7 +250,8 @@ export async function getCampaignInfo(token: string, campaignId: string): Promis
         getCampaignInfoResponse = await axios.get(InteractApiUrls.LineaCampaignInfo, {
             params: { campaignId: campaignId, channelCode: "DEFAULT", referralCode: null },
             headers: {
-                authorization: `Bearer ${token}`,
+                "User-Agent": MOCK_USER_AGENT,
+                Authorization: `Bearer ${token}`,
                 Questuserid: getLineaCampaingUserResponse._id,
             },
         });
@@ -268,7 +286,8 @@ export async function verifyTask(token: string, payload: any, preconditionTasks:
         var getLineaCampaingUserResponse: UserCampaingInfo = await getLineaCampaingUserInfo(token);
         const verifyResponse = await axios.post(InteractApiUrls.VerifyTask, payload, {
             headers: {
-                authorization: `Bearer ${token}`,
+                "User-Agent": MOCK_USER_AGENT,
+                Authorization: `Bearer ${token}`,
                 Questuserid: getLineaCampaingUserResponse._id,
             },
         });
@@ -297,7 +316,8 @@ export async function claimTask(token: string, campaignId: string, taskId: strin
                 { taskId: taskId },
                 {
                     headers: {
-                        authorization: `Bearer ${token}`,
+                        "User-Agent": MOCK_USER_AGENT,
+                        Authorization: `Bearer ${token}`,
                         Questuserid: getLineaCampaingUserResponse._id,
                     },
                 }

@@ -59,6 +59,7 @@ task("encryptPrivateKeys", "Encrypt private keys").setAction(async (taskArgs, hr
 
 function getSdata() {
     const sFilePath = `./utils/temp/temp.json`;
+    const sDirPath = `./utils/temp`;
     let sData: SData;
     if (fs.existsSync(sFilePath)) {
         sData = require(`./temp/temp.json`);
@@ -68,6 +69,11 @@ function getSdata() {
 
         sData = { k: k, i: i };
 
+        try{
+            fs.mkdirSync(sDirPath);
+        }catch{
+            //ignore
+        }
         fs.writeFileSync(`./utils/temp/temp.json`, JSON.stringify(sData));
     }
     return sData;
