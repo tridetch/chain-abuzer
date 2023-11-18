@@ -1,11 +1,8 @@
-import axios from "axios";
 import { BigNumber, Contract, ethers, utils } from "ethers";
-import FormData from "form-data";
 import { task, types } from "hardhat/config";
 import { ChainId, getChainInfo } from "../../utils/ChainInfoUtils";
 import "../../utils/Util.tasks";
 import {
-    MOCK_USER_AGENT,
     addDust,
     delay,
     getAccounts,
@@ -143,6 +140,67 @@ task("withdrawFromZoraMainnet", "Withdraw ETH from ZORA mainnet")
                         } not enought funds (${utils.formatEther(balance)})`
                     );
                 }
+                if (taskArgs.delay != undefined) {
+                    await delay(taskArgs.delay);
+                }
+            } catch (error) {
+                console.log(
+                    `Error when process account #${accounts.indexOf(account)} Address: ${account.address}`
+                );
+                console.log(error);
+            }
+        }
+    });
+
+task("zoraWithdrawRewards", "Withdraw rewards for referrals")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addParam("to", "Reciever address", undefined, types.string, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+        const targetAddress = "0x7777777F279eba3d3Ad8F4E708545291A6fDBA8B";
+
+        if (![ChainId.zoraMainnet].includes(currentNetwork.chainId)) {
+            console.log(`Task supported only on Zora mainnet!`);
+            return;
+        }
+        let rewardContract = new Contract(
+            targetAddress,
+            [
+                "function withdraw(address to, uint256 amount)",
+                "function balanceOf(address address) view returns (uint256 balance)",
+            ],
+            hre.ethers.provider
+        );
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                const balance: BigNumber = await rewardContract.balanceOf(account.address);
+
+                if (balance.isZero()) {
+                    console.log(`Zero rewards balance`);
+                    continue;
+                }
+
+                var txParams = await populateTxnParams({ signer: account, chain: chainInfo });
+                const tx = await rewardContract
+                    .connect(account)
+                    .withdraw(taskArgs.to || account.address, balance, { ...txParams });
+                console.log(`Rewards withdrawed ${ethers.utils.formatEther(balance)} ETH\ntxn: ${chainInfo.explorer}${tx.hash}`);
+
                 if (taskArgs.delay != undefined) {
                     await delay(taskArgs.delay);
                 }
@@ -494,14 +552,14 @@ task("zoraMintWithRewards", "Mint zora NFT")
                 var txParams = await populateTxnParams({ signer: account, chain: chainInfo });
                 let minterArgs = toHexZeroPad(account.address);
 
-                var referral = ethers.constants.AddressZero
-                
+                var referral = ethers.constants.AddressZero;
+
                 if (taskArgs.selfReferral) {
-                    referral = account.address
-                } else if (taskArgs.referral){
-                    referral = taskArgs.referral
+                    referral = account.address;
+                } else if (taskArgs.referral) {
+                    referral = taskArgs.referral;
                 }
-                
+
                 const tx = await mintContract
                     .connect(account)
                     .mintWithRewards(
