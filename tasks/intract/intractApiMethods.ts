@@ -84,10 +84,10 @@ export async function authenticate({ account, referralCode = null }: AuthArgs): 
 
     var authInfo = AuthCache.find((info) => info.address == account.address);
 
-    var tommorow = new Date();
-    tommorow.setDate(tommorow.getDate() + 1);
+    var expiresDay = new Date();
+    expiresDay.setDate(expiresDay.getDate() + 5);
 
-    if (authInfo && new Date(authInfo.expires) > tommorow) {
+    if (authInfo && new Date(authInfo.expires) > expiresDay) {
         return authInfo;
     }
 

@@ -580,7 +580,7 @@ task("intractVerifyWave2BridgeCore", "Verify Wave 2 Bridge")
         }
 
         if (!bridgeProjectId) {
-            console.log("Need to define bridge parameter: --orbiter or --stargate");
+            console.log("Need to define bridge parameter: --orbiter | --stargate | --rhinofi");
             return;
         }
 
@@ -892,7 +892,7 @@ task("intractClaimWave2BridgeBonus25", "Claim Wave 2 Bridge Bonus 25")
         }
 
         if (!taskId) {
-            console.log("Need to define bridge parameter: --orbiter or --stargate");
+            console.log("Need to define bridge parameter: --orbiter | --stargate | --rhinofi");
         }
 
         for (const account of accounts) {
@@ -1110,7 +1110,7 @@ task("intractVerifyWave2BridgeBonus1000", "Verify Wave 2 Bridge Bonus 1000")
         }
 
         if (!bridgeProjectId) {
-            console.log("Need to define bridge flag: --orbiter or --stargate");
+            console.log("Need to define bridge flag: --orbiter | --stargate | --rhinofi");
             return;
         }
 
@@ -1126,7 +1126,18 @@ task("intractVerifyWave2BridgeBonus1000", "Verify Wave 2 Bridge Bonus 1000")
                     campaignId: "65535ae63cd33ebafe9d68f8",
                     userInputs: {
                         lineaProjectId: bridgeProjectId,
-                        lineaProjectIds: [],
+                        lineaProjectIds: [
+                            "654cc69f9322e02fb37cdd89",
+                            "654e17cd9322e02fb37cdd95",
+                            "6548fdf68b0181c6dc90186d",
+                            "6548f86947e9f49f91c1ea92",
+                            "654903b57d85943bcc3b6ed4",
+                            "654905f6c8430e1e7e2f1793",
+                            "653aa0a76e3c9704874cdd31",
+                            "65490245130775c66fa2d42c",
+                            "6548ec802f2fda5a061a6587",
+                            "6548ec802f2fda5a061a6586",
+                        ],
                         TRANSACTION_HASH: "0x",
                     },
                     task: {
@@ -1186,7 +1197,18 @@ task("intractVerifyWave2BridgeBonus1000", "Verify Wave 2 Bridge Bonus 1000")
                     },
                     verificationObject: {
                         lineaProjectId: bridgeProjectId,
-                        lineaProjectIds: [],
+                        lineaProjectIds: [
+                            "654cc69f9322e02fb37cdd89",
+                            "654e17cd9322e02fb37cdd95",
+                            "6548fdf68b0181c6dc90186d",
+                            "6548f86947e9f49f91c1ea92",
+                            "654903b57d85943bcc3b6ed4",
+                            "654905f6c8430e1e7e2f1793",
+                            "653aa0a76e3c9704874cdd31",
+                            "65490245130775c66fa2d42c",
+                            "6548ec802f2fda5a061a6587",
+                            "6548ec802f2fda5a061a6586",
+                        ],
                         questerWalletAddress: account.address,
                     },
                 };
