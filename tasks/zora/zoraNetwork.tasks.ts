@@ -513,7 +513,7 @@ task("zoraMintFarcasterElephantNft", "Mint Farcaster Elephant NFT")
 
 task("zoraMintWithRewards", "Mint zora NFT")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
-    .addParam("referral", "Referral address", ethers.constants.AddressZero, types.string, true)
+    .addParam("referral", "Referral address", undefined, types.string, true)
     .addFlag("selfReferral", "User same account address as referral")
     .addParam("contractAddress", "Address of NFT contract")
     // .addParam("message", "Message to post in tokenchat after mint", undefined, types.string, true)
