@@ -26,7 +26,7 @@ function addBridgeIdentifierCodeToAmount(
     return result;
 }
 
-const MINIMUM_BRIDGE_AMOUNT = utils.parseEther("0.0054");
+const MINIMUM_BRIDGE_AMOUNT = utils.parseEther("0.001");
 const ZKSYNC_MAINNET_RPC = "https://zksync2-mainnet.zksync.io/";
 
 task("orbiterBridge", "Bridge funds across networks")

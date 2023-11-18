@@ -23,4 +23,5 @@ export const OrbiterBridges: OrbiterBridgeInfo[] = [
     { name: "Scroll", chainId: 534352, identificationCode: 9019 },
     { name: "Base", chainId: 8453, identificationCode: 9021 },
     { name: "Linea", chainId: 59144, identificationCode: 9023 },
+    { name: "Zora", chainId: 7777777, identificationCode: 9030 },
 ];

@@ -1,8 +1,18 @@
-import { BigNumber, Contract, utils } from "ethers";
+import axios from "axios";
+import { BigNumber, Contract, ethers, utils } from "ethers";
+import FormData from "form-data";
 import { task, types } from "hardhat/config";
 import { ChainId, getChainInfo } from "../../utils/ChainInfoUtils";
 import "../../utils/Util.tasks";
-import { addDust, delay, getAccounts, populateTxnParams, toHexZeroPad, waitForGasPrice } from "../../utils/Utils";
+import {
+    MOCK_USER_AGENT,
+    addDust,
+    delay,
+    getAccounts,
+    populateTxnParams,
+    toHexZeroPad,
+    waitForGasPrice,
+} from "../../utils/Utils";
 
 task("bridgeToZoraMainnet", "Bridge ETH to ZORA mainnet")
     .addParam("amount", "Amount to send", undefined, types.float)
@@ -445,7 +455,10 @@ task("zoraMintFarcasterElephantNft", "Mint Farcaster Elephant NFT")
 
 task("zoraMintWithRewards", "Mint zora NFT")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addParam("referral", "Referral address", ethers.constants.AddressZero, types.string, true)
+    .addFlag("selfReferral", "User same account address as referral")
     .addParam("contractAddress", "Address of NFT contract")
+    // .addParam("message", "Message to post in tokenchat after mint", undefined, types.string, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
@@ -458,7 +471,7 @@ task("zoraMintWithRewards", "Mint zora NFT")
     .setAction(async (taskArgs, hre) => {
         const currentNetwork = await hre.ethers.provider.getNetwork();
         const chainInfo = getChainInfo(currentNetwork.chainId);
-        const targetAddress = taskArgs.contractAddress
+        const targetAddress = taskArgs.contractAddress;
 
         if (![ChainId.zoraMainnet].includes(currentNetwork.chainId)) {
             console.log(`Task supported only on Zora mainnet!`);
@@ -473,12 +486,22 @@ task("zoraMintWithRewards", "Mint zora NFT")
         );
 
         const accounts = await getAccounts(taskArgs, hre.ethers.provider);
-        
-        const referral = accounts[0].address;
+
         for (const account of accounts) {
             try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
                 var txParams = await populateTxnParams({ signer: account, chain: chainInfo });
                 let minterArgs = toHexZeroPad(account.address);
+
+                var referral = ethers.constants.AddressZero
+                
+                if (taskArgs.selfReferral) {
+                    referral = account.address
+                } else if (taskArgs.referral){
+                    referral = taskArgs.referral
+                }
+                
                 const tx = await mintContract
                     .connect(account)
                     .mintWithRewards(
@@ -492,12 +515,39 @@ task("zoraMintWithRewards", "Mint zora NFT")
                             ...txParams,
                         }
                     );
+                console.log(`Mint txn: ${chainInfo.explorer}${tx.hash}`);
 
-                console.log(
-                    `\nTask result:\n#${accounts.indexOf(account)} Address: ${account.address}\ntxn: ${
-                        chainInfo.explorer
-                    }${tx.hash}`
-                );
+                /* if (taskArgs.message) {
+                    try {
+                        const sessionResponse = await axios.post("https://tokenchat.co/api/session-update");
+                        console.log(sessionResponse);
+                        var token: string | undefined = sessionResponse.headers["set-cookie"]?.[0];
+                        console.log(token);
+                        if (token) {
+                            var endIndex = token.search(";");
+                            token = token.substring(0, endIndex);
+                        }
+                        console.log(token);
+
+                        const formData = new FormData();
+                        formData.append("comment", taskArgs.message);
+                        const messageResponse = await axios.post(
+                            `https://tokenchat.co/api/new-comment/zora:${tx.hash}`,
+                            formData,
+                            {
+                                headers: {
+                                    "User-Agent": MOCK_USER_AGENT,
+                                    Cookie: token,
+                                },
+                            }
+                        );
+                        console.log(messageResponse);
+
+                        console.log(`Message ${taskArgs.message} posted`);
+                    } catch (error) {
+                        console.log(error);
+                    }
+                } */
 
                 if (taskArgs.delay != undefined) {
                     await delay(taskArgs.delay);
@@ -509,4 +559,4 @@ task("zoraMintWithRewards", "Mint zora NFT")
                 console.log(error);
             }
         }
-    })
+    });
