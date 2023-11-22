@@ -159,6 +159,11 @@ task("kyberSwap", "Swap tokens on KyberSwap")
                     console.log(`Cannot construct swap data`);
                 }
 
+                await waitForGasPrice({
+                    maxPriceInGwei: taskArgs.gasPrice,
+                    provider: hre.ethers.provider,
+                });
+
                 if (!isNativeEth) {
                     const allowance: BigNumber = await sellToken.allowance(
                         account.address,
@@ -166,10 +171,6 @@ task("kyberSwap", "Swap tokens on KyberSwap")
                     );
 
                     if (allowance.lt(amount)) {
-                        await waitForGasPrice({
-                            maxPriceInGwei: taskArgs.gasPrice,
-                            provider: hre.ethers.provider,
-                        });
                         console.log(
                             `Swap amount - ${utils.formatUnits(
                                 amount,
