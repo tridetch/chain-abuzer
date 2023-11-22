@@ -1279,7 +1279,7 @@ task("intractClaimWave2BridgeBonus1000", "Claim Wave 2 Bridge Bonus 1000")
     });
 
 task("intractDappSheriffReview", "Review dapp on DappSheriff")
-    .addParam("appId", "Application ID for review", 156, types.int, true)
+    .addParam("appId", "Application ID for review", 39, types.int, true)
     .addParam("reviewText", "Review text", "Great protocol", types.string, true)
     .addParam("rate", "rate", 5, types.float, true)
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
@@ -1450,6 +1450,938 @@ task("intractClaimWave2BridgeReview", "Claim Wave 2 Bridge Review")
                 try {
                     const authInfo = await authenticate({ account: account });
                     await claimTask(authInfo.token, campaignId, taskId!);
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    console.log(e.message);
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+// WAVE 3 - SWAP
+
+task("intractVerifyWave3SwapCore", "Verify Wave 3 Swap")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addFlag("kyberSwap", "Verify KyberSwap")
+    .addFlag("syncSwap", "Verify SyncSwap")
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        var bridgeProjectId: string | undefined = undefined;
+        if (taskArgs.kyberSwap) {
+            bridgeProjectId = LineaCampaignIdentifiers.Wave3.KyberSwapProjectId;
+        } else if (taskArgs.syncSwap) {
+            bridgeProjectId = LineaCampaignIdentifiers.Wave3.SyncSwapProjectId;
+        }
+
+        if (!bridgeProjectId) {
+            console.log("Need to define bridge parameter: --kyber-swap | --sync-swap ");
+            return;
+        }
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                const authInfo = await authenticate({ account: account });
+
+                const verifyPayload = {
+                    campaignId: "655b48ec2e9188e21c94e93e",
+                    userInputs: { lineaProjectId: bridgeProjectId, TRANSACTION_HASH: "0x" },
+                    task: {
+                        userInputs: {
+                            initiateButton: { isExist: false },
+                            verifyButton: {
+                                label: "Verify",
+                                callbackFunction: true,
+                                callbackParameters: [
+                                    { source: "ADMIN_INPUT_FIELD", key: "LINEA_SWAP_AMOUNT" },
+                                    { source: "CLIENT_VERIFICATION_OBJECT", key: "questerWalletAddress" },
+                                    { source: "CLIENT_VERIFICATION_OBJECT", key: "lineaProjectId" },
+                                ],
+                            },
+                            dynamicInputs: [],
+                        },
+                        asyncVerifyConfig: {
+                            isAsyncVerify: true,
+                            verifyTimeInSeconds: 1200,
+                            maxRetryCount: 3,
+                            retryTimeInSeconds: 600,
+                            isScatterEnabled: false,
+                            maxScatterInSeconds: 0,
+                        },
+                        powVerifyConfig: { isPOWVerify: false },
+                        recurrenceConfig: { isRecurring: false, frequencyInDays: 1, maxRecurrenceCount: 1 },
+                        flashTaskConfig: { isFlashTask: false },
+                        name: "Swap at least $25 worth of ETH to any of the supported tokens on any supported DEX.",
+                        description: "Verify that you have completed a valid swap",
+                        templateType: "LineaSwapEthAmount",
+                        xp: 150,
+                        adminInputs: [
+                            {
+                                key: "LINEA_SWAP_AMOUNT",
+                                inputType: "INPUT_NUMBER",
+                                label: "Swap Amount",
+                                placeholder: "amt",
+                                value: "22.5",
+                                _id: "655b48ec2e9188e21c94e940",
+                            },
+                        ],
+                        isAttributionTask: true,
+                        templateFamily: "LINEA/WEEK3",
+                        totalUsersCompleted: 37602,
+                        totalRecurringUsersCompleted: [],
+                        requiredLogins: ["EVMWallet"],
+                        isIntractTask: false,
+                        isRequiredTask: true,
+                        showOnChainHelper: false,
+                        hasMaxRetryCheck: false,
+                        hasRateLimitCheck: false,
+                        isAddedLater: false,
+                        isVisible: true,
+                        isDeleted: false,
+                        _id: "655b48ec2e9188e21c94e93f",
+                    },
+                    verificationObject: {
+                        lineaProjectId: bridgeProjectId,
+                        questerWalletAddress: account.address,
+                    },
+                };
+
+                try {
+                    await verifyTask(authInfo.token, verifyPayload, []);
+                    console.log(
+                        `Verification started for Wave 3 Swap Core Task.\nWait 50 minutes and claim with task "npx hardhat intractClaimWave3SwapCore --network lineaMainnet"`
+                    );
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    if (e instanceof AxiosError) {
+                        console.log(e.response?.data.message);
+                    } else {
+                        console.log(e.message);
+                    }
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractClaimWave3SwapCore", "Claim Wave 3 Swap Core")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        const campaignId = LineaCampaignIdentifiers.Wave3.CampaignId;
+        const taskId = LineaCampaignIdentifiers.Wave3.tasksIds.SwapCore;
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+                try {
+                    const authInfo = await authenticate({ account: account });
+                    await claimTask(authInfo.token, campaignId, taskId);
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    console.log(e.message);
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractVerifyWave3SwapAggregator", "Verify Wave 3 Swap aggregator")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        var bridgeProjectId: string | undefined = LineaCampaignIdentifiers.Wave3.KyberSwapProjectId;
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                const authInfo = await authenticate({ account: account });
+
+                const verifyPayload = {
+                    campaignId: "655b48ec2e9188e21c94e93e",
+                    userInputs: { lineaProjectId: bridgeProjectId, TRANSACTION_HASH: "0x" },
+                    task: {
+                        userInputs: {
+                            initiateButton: { isExist: false },
+                            verifyButton: {
+                                label: "Verify",
+                                callbackFunction: true,
+                                callbackParameters: [
+                                    { source: "ADMIN_INPUT_FIELD", key: "LINEA_SWAP_AMOUNT" },
+                                    { source: "CLIENT_VERIFICATION_OBJECT", key: "questerWalletAddress" },
+                                    { source: "CLIENT_VERIFICATION_OBJECT", key: "lineaProjectId" },
+                                ],
+                            },
+                            dynamicInputs: [],
+                        },
+                        asyncVerifyConfig: {
+                            isAsyncVerify: true,
+                            verifyTimeInSeconds: 1200,
+                            maxRetryCount: 3,
+                            retryTimeInSeconds: 600,
+                            isScatterEnabled: false,
+                            maxScatterInSeconds: 0,
+                        },
+                        powVerifyConfig: { isPOWVerify: false },
+                        recurrenceConfig: { isRecurring: false, frequencyInDays: 1, maxRecurrenceCount: 1 },
+                        flashTaskConfig: { isFlashTask: false },
+                        name: "Use an aggregator to swap at least $25 of volume from any supported token to any supported token of your choice.",
+                        description: "Use an aggregator to complete a valid swap",
+                        templateType: "LineaAggregatorSwapEthAmount",
+                        xp: 40,
+                        adminInputs: [
+                            {
+                                key: "LINEA_SWAP_AMOUNT",
+                                inputType: "INPUT_NUMBER",
+                                label: "Swap Amount",
+                                placeholder: "amt",
+                                value: "22.5",
+                                _id: "655b48ed2e9188e21c94e942",
+                            },
+                        ],
+                        isAttributionTask: true,
+                        templateFamily: "LINEA/WEEK3",
+                        totalUsersCompleted: 20099,
+                        totalRecurringUsersCompleted: [],
+                        requiredLogins: ["EVMWallet"],
+                        isIntractTask: false,
+                        isRequiredTask: false,
+                        showOnChainHelper: false,
+                        hasMaxRetryCheck: false,
+                        hasRateLimitCheck: false,
+                        isAddedLater: false,
+                        isVisible: true,
+                        isDeleted: false,
+                        _id: "655b48ec2e9188e21c94e941",
+                    },
+                    verificationObject: {
+                        lineaProjectId: bridgeProjectId,
+                        questerWalletAddress: account.address,
+                    },
+                };
+
+                try {
+                    await verifyTask(authInfo.token, verifyPayload, [
+                        LineaCampaignIdentifiers.Wave3.tasksIds.SwapCore,
+                    ]);
+                    console.log(
+                        `Verification started for Wave 3 Swap Aggregator Task.\nWait 50 minutes and claim with task "npx hardhat intractClaimWave3SwapAggregator --network lineaMainnet"`
+                    );
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    if (e instanceof AxiosError) {
+                        console.log(e.response?.data.message);
+                    } else {
+                        console.log(e.message);
+                    }
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractClaimWave3SwapAggregator", "Claim Wave 3 Swap Aggregator")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        const campaignId = LineaCampaignIdentifiers.Wave3.CampaignId;
+        const taskId = LineaCampaignIdentifiers.Wave3.tasksIds.SwapAggregator;
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+                try {
+                    const authInfo = await authenticate({ account: account });
+                    await claimTask(authInfo.token, campaignId, taskId);
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    console.log(e.message);
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractVerifyWave3Swap20Times", "Verify Wave 3 Swap 20 times")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        var bridgeProjectId: string | undefined = LineaCampaignIdentifiers.Wave3.KyberSwapProjectId;
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                const authInfo = await authenticate({ account: account });
+
+                const verifyPayload = {
+                    campaignId: "655b48ec2e9188e21c94e93e",
+                    userInputs: {
+                        lineaProjectIds: ["655659a386b270fa5f703361", "65565bd586b270fa5f703375"],
+                        TRANSACTION_HASH: "0x",
+                    },
+                    task: {
+                        userInputs: {
+                            initiateButton: { isExist: false },
+                            verifyButton: {
+                                label: "Verify",
+                                callbackFunction: true,
+                                callbackParameters: [
+                                    { source: "ADMIN_INPUT_FIELD", key: "LINEA_SWAP_VOLUME" },
+                                    { source: "ADMIN_INPUT_FIELD", key: "LINEA_SWAP_AMOUNT" },
+                                    { source: "CLIENT_VERIFICATION_OBJECT", key: "questerWalletAddress" },
+                                    { source: "CLIENT_VERIFICATION_OBJECT", key: "lineaProjectIds" },
+                                ],
+                            },
+                            dynamicInputs: [],
+                        },
+                        asyncVerifyConfig: {
+                            isAsyncVerify: true,
+                            verifyTimeInSeconds: 1200,
+                            maxRetryCount: 3,
+                            retryTimeInSeconds: 600,
+                            isScatterEnabled: false,
+                            maxScatterInSeconds: 0,
+                        },
+                        powVerifyConfig: { isPOWVerify: false },
+                        recurrenceConfig: { isRecurring: false, frequencyInDays: 1, maxRecurrenceCount: 1 },
+                        flashTaskConfig: { isFlashTask: false },
+                        name: "Execute more than 20 swaps in total, each with a minimum value of $5, within the duration of the token swaps wave. ",
+                        description: "Execute more than 20 valid swaps",
+                        templateType: "LineaSwapEthTxnVolume",
+                        xp: 60,
+                        adminInputs: [
+                            {
+                                key: "LINEA_SWAP_AMOUNT",
+                                inputType: "INPUT_NUMBER",
+                                label: "Individual Min Swap Amount",
+                                placeholder: "amt",
+                                value: "20",
+                                _id: "655b48ed2e9188e21c94e944",
+                            },
+                            {
+                                key: "LINEA_SWAP_VOLUME",
+                                inputType: "INPUT_NUMBER",
+                                label: "Swap Volume",
+                                placeholder: "amt",
+                                value: "4.5",
+                                _id: "655b48ed2e9188e21c94e945",
+                            },
+                        ],
+                        isAttributionTask: true,
+                        templateFamily: "LINEA/WEEK3",
+                        totalUsersCompleted: 1859,
+                        totalRecurringUsersCompleted: [],
+                        requiredLogins: ["EVMWallet"],
+                        isIntractTask: false,
+                        isRequiredTask: false,
+                        showOnChainHelper: false,
+                        hasMaxRetryCheck: false,
+                        hasRateLimitCheck: false,
+                        isAddedLater: false,
+                        isVisible: true,
+                        isDeleted: false,
+                        _id: "655b48ed2e9188e21c94e943",
+                    },
+                    verificationObject: {
+                        lineaProjectIds: ["655659a386b270fa5f703361", "65565bd586b270fa5f703375"],
+                        questerWalletAddress: account.address,
+                    },
+                };
+
+                try {
+                    await verifyTask(authInfo.token, verifyPayload, [
+                        LineaCampaignIdentifiers.Wave3.tasksIds.SwapCore,
+                    ]);
+                    console.log(
+                        `Verification started for Wave 3 Swap 20 times Task.\nWait 50 minutes and claim with task "npx hardhat intractClaimWave3Swap20Times --network lineaMainnet"`
+                    );
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    if (e instanceof AxiosError) {
+                        console.log(e.response?.data.message);
+                    } else {
+                        console.log(e.message);
+                    }
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractClaimWave3Swap20Times", "Claim Wave 3 Swap 20 times")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        const campaignId = LineaCampaignIdentifiers.Wave3.CampaignId;
+        const taskId = LineaCampaignIdentifiers.Wave3.tasksIds.Swap20Times;
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+                try {
+                    const authInfo = await authenticate({ account: account });
+                    await claimTask(authInfo.token, campaignId, taskId);
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    console.log(e.message);
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractVerifyWave3Swap1000", "Verify Wave 3 Swap 1000")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        var bridgeProjectId: string | undefined = LineaCampaignIdentifiers.Wave3.KyberSwapProjectId;
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                const authInfo = await authenticate({ account: account });
+
+                const verifyPayload = {
+                    campaignId: "655b48ec2e9188e21c94e93e",
+                    userInputs: {
+                        lineaProjectIds: ["65565bd586b270fa5f703375", "655659a386b270fa5f703361"],
+                        TRANSACTION_HASH: "0x",
+                    },
+                    task: {
+                        userInputs: {
+                            initiateButton: { isExist: false },
+                            verifyButton: {
+                                label: "Verify",
+                                callbackFunction: true,
+                                callbackParameters: [
+                                    { source: "ADMIN_INPUT_FIELD", key: "LINEA_SWAP_AMOUNT" },
+                                    { source: "CLIENT_VERIFICATION_OBJECT", key: "questerWalletAddress" },
+                                    { source: "CLIENT_VERIFICATION_OBJECT", key: "lineaProjectIds" },
+                                ],
+                            },
+                            dynamicInputs: [],
+                        },
+                        asyncVerifyConfig: {
+                            isAsyncVerify: true,
+                            verifyTimeInSeconds: 1200,
+                            maxRetryCount: 3,
+                            retryTimeInSeconds: 600,
+                            isScatterEnabled: false,
+                            maxScatterInSeconds: 0,
+                        },
+                        powVerifyConfig: { isPOWVerify: false },
+                        recurrenceConfig: { isRecurring: false, frequencyInDays: 1, maxRecurrenceCount: 1 },
+                        flashTaskConfig: { isFlashTask: false },
+                        name: "Swap more than $1000 in total volume across multiple DEXs.",
+                        description: "Swap more than $1000 in total volume across multiple DEXs.",
+                        templateType: "LineaSwapEthAmountVolume",
+                        xp: 60,
+                        adminInputs: [
+                            {
+                                key: "LINEA_SWAP_AMOUNT",
+                                inputType: "INPUT_NUMBER",
+                                label: "Swap Amount",
+                                placeholder: "amt",
+                                value: "900",
+                                _id: "655b48ed2e9188e21c94e947",
+                            },
+                        ],
+                        isAttributionTask: true,
+                        templateFamily: "LINEA/WEEK3",
+                        totalUsersCompleted: 7969,
+                        totalRecurringUsersCompleted: [],
+                        requiredLogins: ["EVMWallet"],
+                        isIntractTask: false,
+                        isRequiredTask: false,
+                        showOnChainHelper: false,
+                        hasMaxRetryCheck: false,
+                        hasRateLimitCheck: false,
+                        isAddedLater: false,
+                        isVisible: true,
+                        isDeleted: false,
+                        _id: "655b48ed2e9188e21c94e946",
+                    },
+                    verificationObject: {
+                        lineaProjectIds: ["65565bd586b270fa5f703375", "655659a386b270fa5f703361"],
+                        questerWalletAddress: account.address,
+                    },
+                };
+
+                try {
+                    await verifyTask(authInfo.token, verifyPayload, [
+                        LineaCampaignIdentifiers.Wave3.tasksIds.SwapCore,
+                    ]);
+                    console.log(
+                        `Verification started for Wave 3 Swap 1000 Task.\nWait 50 minutes and claim with task "npx hardhat intractClaimWave3Swap1000 --network lineaMainnet"`
+                    );
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    if (e instanceof AxiosError) {
+                        console.log(e.response?.data.message);
+                    } else {
+                        console.log(e.message);
+                    }
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractClaimWave3Swap1000", "Claim Wave 3 Swap 1000")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        const campaignId = LineaCampaignIdentifiers.Wave3.CampaignId;
+        const taskId = LineaCampaignIdentifiers.Wave3.tasksIds.Swap1000;
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+                try {
+                    const authInfo = await authenticate({ account: account });
+                    await claimTask(authInfo.token, campaignId, taskId);
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    console.log(e.message);
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractVerifyWave3SwapLsd", "Verify Wave 3 Swap Lsd")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        var bridgeProjectId: string | undefined = LineaCampaignIdentifiers.Wave3.KyberSwapProjectId;
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                const authInfo = await authenticate({ account: account });
+
+                const verifyPayload = {
+                    campaignId: "655b48ec2e9188e21c94e93e",
+                    userInputs: { lineaProjectId: "65565bd586b270fa5f703375", TRANSACTION_HASH: "0x" },
+                    task: {
+                        userInputs: {
+                            initiateButton: { isExist: false },
+                            verifyButton: {
+                                label: "Verify",
+                                callbackFunction: true,
+                                callbackParameters: [
+                                    { source: "ADMIN_INPUT_FIELD", key: "LINEA_SWAP_AMOUNT" },
+                                    { source: "CLIENT_VERIFICATION_OBJECT", key: "questerWalletAddress" },
+                                    { source: "CLIENT_VERIFICATION_OBJECT", key: "lineaProjectId" },
+                                ],
+                            },
+                            dynamicInputs: [],
+                        },
+                        asyncVerifyConfig: {
+                            isAsyncVerify: true,
+                            verifyTimeInSeconds: 1200,
+                            maxRetryCount: 3,
+                            retryTimeInSeconds: 600,
+                            isScatterEnabled: false,
+                            maxScatterInSeconds: 0,
+                        },
+                        powVerifyConfig: { isPOWVerify: false },
+                        recurrenceConfig: { isRecurring: false, frequencyInDays: 1, maxRecurrenceCount: 1 },
+                        flashTaskConfig: { isFlashTask: false },
+                        name: "Swap at least $25 of ETH into a RWA OR an LST.",
+                        description: "Swap at least $25 of ETH into a RWA OR an LST.",
+                        templateType: "LineaSwapLstOrRwa",
+                        xp: 40,
+                        adminInputs: [
+                            {
+                                key: "LINEA_SWAP_AMOUNT",
+                                inputType: "INPUT_NUMBER",
+                                label: "Swap Amount",
+                                placeholder: "amt",
+                                value: "22.5",
+                                _id: "655b48ed2e9188e21c94e949",
+                            },
+                        ],
+                        isAttributionTask: true,
+                        templateFamily: "LINEA/WEEK3",
+                        totalUsersCompleted: 11927,
+                        totalRecurringUsersCompleted: [],
+                        requiredLogins: ["EVMWallet"],
+                        isIntractTask: false,
+                        isRequiredTask: false,
+                        showOnChainHelper: false,
+                        hasMaxRetryCheck: false,
+                        hasRateLimitCheck: false,
+                        isAddedLater: false,
+                        isVisible: true,
+                        isDeleted: false,
+                        _id: "655b48ed2e9188e21c94e948",
+                    },
+                    verificationObject: {
+                        lineaProjectId: "65565bd586b270fa5f703375",
+                        questerWalletAddress: account.address,
+                    },
+                };
+
+                try {
+                    await verifyTask(authInfo.token, verifyPayload, [
+                        LineaCampaignIdentifiers.Wave3.tasksIds.SwapCore,
+                    ]);
+                    console.log(
+                        `Verification started for Wave 3 Swap LSD Task.\nWait 50 minutes and claim with task "npx hardhat intractClaimWave3SwapLsd --network lineaMainnet"`
+                    );
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    if (e instanceof AxiosError) {
+                        console.log(e.response?.data.message);
+                    } else {
+                        console.log(e.message);
+                    }
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractClaimWave3SwapLsd", "Claim Wave 3 Swap 1000")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        const campaignId = LineaCampaignIdentifiers.Wave3.CampaignId;
+        const taskId = LineaCampaignIdentifiers.Wave3.tasksIds.SwapLSD;
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+                try {
+                    const authInfo = await authenticate({ account: account });
+                    await claimTask(authInfo.token, campaignId, taskId);
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    console.log(e.message);
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractVerify3SwapReview", "Verify Wave 3 Swap Review")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                const authInfo = await authenticate({ account: account });
+
+                const verifyPayload = {
+                    campaignId: "655b48ec2e9188e21c94e93e",
+                    userInputs: { TRANSACTION_HASH: "0x" },
+                    task: {
+                        userInputs: {
+                            initiateButton: {
+                                label: "Write a review!",
+                                baseLink: "https://dappsheriff.com/",
+                                isExist: true,
+                            },
+                            verifyButton: {
+                                label: "Verify",
+                                callbackFunction: true,
+                                callbackParameters: [
+                                    { source: "ADMIN_INPUT_FIELD", key: "DAPPSHERIFF_SLUG" },
+                                ],
+                            },
+                            dynamicInputs: [],
+                        },
+                        asyncVerifyConfig: {
+                            isAsyncVerify: true,
+                            verifyTimeInSeconds: 1200,
+                            maxRetryCount: 3,
+                            retryTimeInSeconds: 600,
+                            isScatterEnabled: false,
+                            maxScatterInSeconds: 0,
+                        },
+                        powVerifyConfig: { isPOWVerify: false },
+                        recurrenceConfig: { isRecurring: false, frequencyInDays: 1, maxRecurrenceCount: 1 },
+                        flashTaskConfig: { isFlashTask: false },
+                        name: "Review your favorite dapp of the Token Swap wave on DappSheriff (for 20XP)",
+                        description: "Verify that you added review on Dapsheriff",
+                        templateType: "DappsheriffReview",
+                        xp: 20,
+                        adminInputs: [
+                            {
+                                key: "DAPPSHERIFF_SLUG",
+                                inputType: "INPUT_STRING",
+                                label: "URI SLUG",
+                                placeholder: "",
+                                value: "waves/2",
+                                _id: "655b48ed2e9188e21c94e94b",
+                            },
+                        ],
+                        isAttributionTask: true,
+                        templateFamily: "LINEA/WEEK1",
+                        totalUsersCompleted: 18647,
+                        totalRecurringUsersCompleted: [],
+                        requiredLogins: ["EVMWallet"],
+                        isIntractTask: false,
+                        isRequiredTask: false,
+                        showOnChainHelper: false,
+                        hasMaxRetryCheck: false,
+                        hasRateLimitCheck: false,
+                        isAddedLater: false,
+                        isVisible: true,
+                        isDeleted: false,
+                        _id: "655b48ed2e9188e21c94e94a",
+                    },
+                    verificationObject: {
+                        questerWalletAddress: account.address,
+                    },
+                };
+
+                try {
+                    await verifyTask(authInfo.token, verifyPayload, [
+                        LineaCampaignIdentifiers.Wave3.tasksIds.SwapCore,
+                    ]);
+                    console.log(
+                        `Verification started for Wave 3 Review swap on DappSheriff Task.\nWait 5 minutes and claim with task "npx hardhat intractClaimWave3SwapReview --network lineaMainnet"`
+                    );
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    if (e instanceof AxiosError) {
+                        console.log(e.response?.data.message);
+                    } else {
+                        console.log(e.message);
+                    }
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractClaimWave3SwapReview", "Claim Wave 3 Swap Review")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        const campaignId = LineaCampaignIdentifiers.Wave3.CampaignId;
+        const taskId = LineaCampaignIdentifiers.Wave3.tasksIds.SwapReview;
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+                try {
+                    const authInfo = await authenticate({ account: account });
+                    await claimTask(authInfo.token, campaignId, taskId);
                     if (taskArgs.delay != undefined) {
                         await delay(taskArgs.delay);
                     }

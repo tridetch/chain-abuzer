@@ -46,6 +46,20 @@ export const LineaCampaignIdentifiers = {
             Review: "65535ae63cd33ebafe9d68ff",
         },
     },
+    Wave3: {
+        Name: "Swaps",
+        CampaignId: "655b48ec2e9188e21c94e93e",
+        KyberSwapProjectId: "65565bd586b270fa5f703375",
+        SyncSwapProjectId: "655659a386b270fa5f703361",
+        tasksIds: {
+            SwapCore: "655b48ec2e9188e21c94e93f",
+            SwapAggregator: "655b48ec2e9188e21c94e941",
+            Swap20Times: "655b48ed2e9188e21c94e943",
+            Swap1000: "655b48ed2e9188e21c94e946",
+            SwapLSD: "655b48ed2e9188e21c94e948",
+            SwapReview: "655b48ed2e9188e21c94e94a",
+        },
+    },
 };
 
 export const InteractApiUrls = {
@@ -85,7 +99,7 @@ export async function authenticate({ account, referralCode = null }: AuthArgs): 
     var authInfo = AuthCache.find((info) => info.address == account.address);
 
     var expiresDay = new Date();
-    expiresDay.setDate(expiresDay.getDate() + 5);
+    expiresDay.setDate(expiresDay.getDate() + 6);
 
     if (authInfo && new Date(authInfo.expires) > expiresDay) {
         return authInfo;
