@@ -1469,6 +1469,7 @@ task("intractVerifyWave3SwapCore", "Verify Wave 3 Swap")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addFlag("kyberSwap", "Verify KyberSwap")
     .addFlag("syncSwap", "Verify SyncSwap")
+    .addFlag("izumi", "Verify SyncSwap")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
@@ -1487,6 +1488,8 @@ task("intractVerifyWave3SwapCore", "Verify Wave 3 Swap")
             bridgeProjectId = LineaCampaignIdentifiers.Wave3.KyberSwapProjectId;
         } else if (taskArgs.syncSwap) {
             bridgeProjectId = LineaCampaignIdentifiers.Wave3.SyncSwapProjectId;
+        } else if (taskArgs.izumi) {
+            bridgeProjectId = LineaCampaignIdentifiers.Wave3.IzumiProjectId;
         }
 
         if (!bridgeProjectId) {

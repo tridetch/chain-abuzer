@@ -51,6 +51,7 @@ export const LineaCampaignIdentifiers = {
         CampaignId: "655b48ec2e9188e21c94e93e",
         KyberSwapProjectId: "65565bd586b270fa5f703375",
         SyncSwapProjectId: "655659a386b270fa5f703361",
+        IzumiProjectId: "65565a2f86b270fa5f703366",
         tasksIds: {
             SwapCore: "655b48ec2e9188e21c94e93f",
             SwapAggregator: "655b48ec2e9188e21c94e941",
