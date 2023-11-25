@@ -924,7 +924,7 @@ task("zksyncCheckZkPepeAirdrop", "Check zkpepe airdrop amount")
                 console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
 
                 const response = await axios.get(
-                    "https://www.zksyncpepe.com/resources/amounts/0x73609a361844c53ea82a717b9c3dfeff96d22a93.json",
+                    `https://www.zksyncpepe.com/resources/amounts/${account.address.toLowerCase()}.json`,
                     {
                         headers: {
                             "sec-ch-ua": '"Chromium";v="119", "Not?A_Brand";v="24"',
