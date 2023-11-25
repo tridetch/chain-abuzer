@@ -6,8 +6,15 @@ import { task, types } from "hardhat/config";
 import * as zksync from "zksync-web3";
 import { ERC20__factory } from "../../typechain-types";
 import { ChainId, getChainInfo } from "../../utils/ChainInfoUtils";
-import { addDust, dateInSeconds, delay, getAccounts, shuffle, waitForGasPrice } from "../../utils/Utils";
-
+import {
+    MOCK_USER_AGENT,
+    addDust,
+    dateInSeconds,
+    delay,
+    getAccounts,
+    shuffle,
+    waitForGasPrice,
+} from "../../utils/Utils";
 dotenv.config();
 
 export const ZkSyncV2Tasks = {
@@ -152,9 +159,9 @@ task("zksyncEraWithdraw", "Withdraw ETH from zksyncV2 network")
                 });
 
                 console.log(
-                    `${ethers.utils.formatEther(amount)} bridget\nTxn ${
-                        chainInfo.explorer
-                    }${withdrawHandle.hash}`
+                    `${ethers.utils.formatEther(amount)} bridget\nTxn ${chainInfo.explorer}${
+                        withdrawHandle.hash
+                    }`
                 );
 
                 if (taskArgs.delay != undefined) {
@@ -577,7 +584,7 @@ task("zksyncEraContractInteractions", "Interact with erc-20 contracts")
                 var erc20Shuffled = shuffle(erc20Contracts);
 
                 if (taskArgs.interactions <= erc20Shuffled.length) {
-                    erc20Shuffled = erc20Shuffled.slice(undefined, taskArgs.interactions)
+                    erc20Shuffled = erc20Shuffled.slice(undefined, taskArgs.interactions);
                 }
 
                 for (const erc20 of erc20Contracts) {
@@ -885,6 +892,66 @@ task("zksyncTevaeraMintOnftBundleNft", "Mint Tevaera ONFT bundle")
                 }
             } catch (error) {
                 console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("zksyncCheckZkPepeAirdrop", "Check zkpepe airdrop amount")
+    .addParam("delay", "Add random delay", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const network = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(network.chainId);
+
+        if (network.chainId != ChainId.zkSyncEra) {
+            throw new Error("Task allowed only on ethereum chain");
+        }
+
+        const zkProvider = new zksync.Provider(ZKSYNC_MAINNET_RPC);
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                const response = await axios.get(
+                    "https://www.zksyncpepe.com/resources/amounts/0x73609a361844c53ea82a717b9c3dfeff96d22a93.json",
+                    {
+                        headers: {
+                            "sec-ch-ua": '"Chromium";v="119", "Not?A_Brand";v="24"',
+                            Accept: "application/json, text/plain, */*",
+                            Referer: "https://www.zksyncpepe.com/airdrop",
+                            DNT: "1",
+                            "sec-ch-ua-mobile": "?0",
+                            "User-Agent": MOCK_USER_AGENT,
+                            "sec-ch-ua-platform": '"macOS"',
+                        },
+                    }
+                );
+
+                if (typeof response.data[0] === "number") {
+                    const amount = response.data;
+                    console.log(`Congrats! ${amount} $zkPepe awailable for claim.`);
+                } else {
+                    console.log(`What a pity! You are not eligible for this airdrop round.`);
+                }
+
+                if (taskArgs.delay != undefined) {
+                    await delay(taskArgs.delay);
+                }
+            } catch (error) {
+                console.log(
+                    `Error when process account #${accounts.indexOf(account)} Address: ${account.address}`
+                );
                 console.log(error);
             }
         }
