@@ -61,6 +61,21 @@ export const LineaCampaignIdentifiers = {
             SwapReview: "655b48ed2e9188e21c94e94a",
         },
     },
+    Wave4: {
+        Name: "Lending",
+        CampaignId: "65647f06731b793354cb239c",
+        ZkMoneyProjectId: "656194d9fcb39c430a90b585",
+        GranaryFinanceProjectId: "655fa1d24e89ee27a3df3afd",
+        MendiFinanceProjectId: "655c98119dd9d3a008aaf957",
+        LayerBankProjectId: "655c98009dd9d3a008aaf956",
+        tasksIds: {
+            LendingCore: "65647f06731b793354cb239d",
+            StableAsCollateral: "65647f06731b793354cb23a1",
+            LsdAsCollateral: "65647f06731b793354cb23a5",
+            Repay: "65647f06731b793354cb23a9",
+            Review: "65647f06731b793354cb23b0",
+        },
+    },
 };
 
 export const InteractApiUrls = {

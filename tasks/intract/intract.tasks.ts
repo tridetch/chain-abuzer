@@ -2397,3 +2397,899 @@ task("intractClaimWave3SwapReview", "Claim Wave 3 Swap Review")
             }
         }
     });
+
+// WAVE 4
+
+task("intractVerifyWave4LendingCore", "Verify Wave 4 Lending")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addFlag("granary", "Verify Granary")
+    .addFlag("mendi", "Verify Mendi")
+    .addFlag("layerbank", "Verify LayerBank")
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        var projectId: string | undefined = undefined;
+        if (taskArgs.granary) {
+            projectId = LineaCampaignIdentifiers.Wave4.GranaryFinanceProjectId;
+        } else if (taskArgs.mendi) {
+            projectId = LineaCampaignIdentifiers.Wave4.MendiFinanceProjectId;
+        } else if (taskArgs.layerbank) {
+            projectId = LineaCampaignIdentifiers.Wave4.LayerBankProjectId;
+        }
+
+        if (!projectId) {
+            console.log("Need to define parameter: --granary | --mendy | --layerbank ");
+            return;
+        }
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                const authInfo = await authenticate({ account: account });
+
+                const verifyPayload = {
+                    campaignId: "65647f06731b793354cb239c",
+                    userInputs: { lineaProjectId: projectId, TRANSACTION_HASH: "0x" },
+                    task: {
+                        userInputs: {
+                            initiateButton: {
+                                label: "Bridge on MetaMask",
+                                baseLink: "https://portfolio.metamask.io/bridge",
+                                isExist: true,
+                            },
+                            verifyButton: {
+                                label: "Verify",
+                                callbackFunction: true,
+                                callbackParameters: [
+                                    { source: "ADMIN_INPUT_FIELD", key: "LINEA_LEND_AMOUNT" },
+                                    { source: "ADMIN_INPUT_FIELD", key: "ALLOWED_TOKEN_ADDRESSES" },
+                                    { source: "CLIENT_VERIFICATION_OBJECT", key: "questerWalletAddress" },
+                                    { source: "CLIENT_VERIFICATION_OBJECT", key: "lineaProjectId" },
+                                ],
+                            },
+                            dynamicInputs: [],
+                        },
+                        asyncVerifyConfig: {
+                            isAsyncVerify: true,
+                            verifyTimeInSeconds: 900,
+                            maxRetryCount: 3,
+                            retryTimeInSeconds: 900,
+                            isScatterEnabled: false,
+                            maxScatterInSeconds: 0,
+                        },
+                        powVerifyConfig: { isPOWVerify: false },
+                        recurrenceConfig: { isRecurring: false, frequencyInDays: 1, maxRecurrenceCount: 1 },
+                        flashTaskConfig: { isFlashTask: false },
+                        name: "Borrow at least $25 worth of ETH/WETH on any of the money markets available on Linea.",
+                        description:
+                            "Carry out a loan on any of the money markets available on Linea. (ETH/WETH only)",
+                        templateType: "LineaBorrowEth",
+                        xp: 150,
+                        adminInputs: [
+                            {
+                                key: "LINEA_LEND_AMOUNT",
+                                inputType: "INPUT_NUMBER",
+                                label: "Min Lending volume",
+                                placeholder: "amt",
+                                value: 18,
+                                _id: "65647f06731b793354cb239e",
+                            },
+                            {
+                                key: "ALLOWED_TOKEN_ADDRESSES",
+                                inputType: "INPUT_STRING_ARRAY",
+                                label: "List of allowed token addresses which user has to borrow",
+                                placeholder: "0x...",
+                                value: [
+                                    "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+                                    "0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f",
+                                ],
+                                _id: "65647f06731b793354cb239f",
+                            },
+                            {
+                                key: "IS_COMPLEX_LENDING",
+                                inputType: "INPUT_STRING_ARRAY",
+                                label: "List of allowed token addresses which user has to borrow",
+                                placeholder: "0x...",
+                                value: false,
+                                _id: "65647f06731b793354cb23a0",
+                            },
+                        ],
+                        isAttributionTask: true,
+                        templateFamily: "LINEA/WEEK4",
+                        totalUsersCompleted: 308,
+                        totalRecurringUsersCompleted: [],
+                        requiredLogins: ["EVMWallet"],
+                        isIntractTask: false,
+                        isRequiredTask: true,
+                        showOnChainHelper: false,
+                        hasMaxRetryCheck: false,
+                        hasRateLimitCheck: false,
+                        isAddedLater: false,
+                        isVisible: true,
+                        isDeleted: false,
+                        _id: "65647f06731b793354cb239d",
+                    },
+                    verificationObject: {
+                        lineaProjectId: projectId,
+                        questerWalletAddress: account.address,
+                    },
+                };
+
+                try {
+                    await verifyTask(authInfo.token, verifyPayload, []);
+                    console.log(
+                        `Verification started for Wave 4 Lending Core Task.\nWait 50 minutes and claim with task "npx hardhat intractClaimWave4LendingCore --network lineaMainnet"`
+                    );
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    if (e instanceof AxiosError) {
+                        console.log(e.response?.data.message);
+                    } else {
+                        console.log(e.message);
+                    }
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractClaimWave4LendingCore", "Claim Wave 4 Lending Core")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        const campaignId = LineaCampaignIdentifiers.Wave4.CampaignId;
+        const taskId = LineaCampaignIdentifiers.Wave4.tasksIds.LendingCore;
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+                try {
+                    const authInfo = await authenticate({ account: account });
+                    await claimTask(authInfo.token, campaignId, taskId);
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    console.log(e.message);
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractVerifyWave4LendingStableCollateral", "Verify Wave 4 Lending Stable Collateral")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addFlag("granary", "Verify Granary")
+    .addFlag("mendi", "Verify Medi")
+    .addFlag("layerbank", "Verify LayerBank")
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        var projectId: string | undefined = undefined;
+        if (taskArgs.granary) {
+            projectId = LineaCampaignIdentifiers.Wave4.GranaryFinanceProjectId;
+        } else if (taskArgs.mendi) {
+            projectId = LineaCampaignIdentifiers.Wave4.MendiFinanceProjectId;
+        } else if (taskArgs.layerbank) {
+            projectId = LineaCampaignIdentifiers.Wave4.LayerBankProjectId;
+        }
+
+        if (!projectId) {
+            console.log("Need to define parameter: --granary | --mendy | --layerbank ");
+            return;
+        }
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                const authInfo = await authenticate({ account: account });
+
+                const verifyPayload = {
+                    campaignId: "65647f06731b793354cb239c",
+                    userInputs: { lineaProjectId: projectId, TRANSACTION_HASH: "0x" },
+                    task: {
+                        userInputs: {
+                            initiateButton: {
+                                label: "Bridge on MetaMask",
+                                baseLink: "https://portfolio.metamask.io/bridge",
+                                isExist: true,
+                            },
+                            verifyButton: {
+                                label: "Verify",
+                                callbackFunction: true,
+                                callbackParameters: [
+                                    { source: "ADMIN_INPUT_FIELD", key: "LINEA_LEND_AMOUNT" },
+                                    { source: "ADMIN_INPUT_FIELD", key: "LINEA_BORROW_AMOUNT" },
+                                    { source: "ADMIN_INPUT_FIELD", key: "ALLOWED_TOKEN_ADDRESSES" },
+                                    { source: "CLIENT_VERIFICATION_OBJECT", key: "questerWalletAddress" },
+                                    { source: "CLIENT_VERIFICATION_OBJECT", key: "lineaProjectId" },
+                                ],
+                            },
+                            dynamicInputs: [],
+                        },
+                        asyncVerifyConfig: {
+                            isAsyncVerify: true,
+                            verifyTimeInSeconds: 900,
+                            maxRetryCount: 3,
+                            retryTimeInSeconds: 900,
+                            isScatterEnabled: false,
+                            maxScatterInSeconds: 0,
+                        },
+                        powVerifyConfig: { isPOWVerify: false },
+                        recurrenceConfig: { isRecurring: false, frequencyInDays: 1, maxRecurrenceCount: 1 },
+                        flashTaskConfig: { isFlashTask: false },
+                        name: "Use a specific token as collateral for a loan",
+                        description: "Use a specific token as collateral for a loan",
+                        templateType: "LineaLoanFromSpecificTokenCollateral",
+                        xp: 20,
+                        adminInputs: [
+                            {
+                                key: "LINEA_LEND_AMOUNT",
+                                inputType: "INPUT_NUMBER",
+                                label: "Min lending amount for collateralised token",
+                                placeholder: "amt",
+                                value: 1,
+                                _id: "65647f06731b793354cb23a2",
+                            },
+                            {
+                                key: "LINEA_BORROW_AMOUNT",
+                                inputType: "INPUT_NUMBER",
+                                label: "Min borrow amount",
+                                placeholder: "amt",
+                                value: 18,
+                                _id: "65647f06731b793354cb23a3",
+                            },
+                            {
+                                key: "ALLOWED_TOKEN_ADDRESSES",
+                                inputType: "INPUT_STRING_ARRAY",
+                                label: "List of allowed token addresses which user has to put in as collateral",
+                                placeholder: "0x...",
+                                value: [
+                                    "0x176211869ca2b568f2a7d4ee941e073a821ee1ff",
+                                    "0xa219439258ca9da29e9cc4ce5596924745e12b93",
+                                    "0x4af15ec2a0bd43db75dd04e62faa3b8ef36b00d5",
+                                ],
+                                _id: "65647f06731b793354cb23a4",
+                            },
+                        ],
+                        isAttributionTask: true,
+                        templateFamily: "LINEA/WEEK4",
+                        totalUsersCompleted: 94,
+                        totalRecurringUsersCompleted: [],
+                        requiredLogins: ["EVMWallet"],
+                        isIntractTask: false,
+                        isRequiredTask: false,
+                        showOnChainHelper: false,
+                        hasMaxRetryCheck: false,
+                        hasRateLimitCheck: false,
+                        isAddedLater: false,
+                        isVisible: true,
+                        isDeleted: false,
+                        _id: "65647f06731b793354cb23a1",
+                    },
+                    verificationObject: {
+                        lineaProjectId: projectId,
+                        questerWalletAddress: account.address,
+                    },
+                };
+
+                try {
+                    await verifyTask(authInfo.token, verifyPayload, []);
+                    console.log(
+                        `Verification started for Wave 4 Lending Stable Collateral Task.\nWait 50 minutes and claim with task "npx hardhat intractClaimWave4StableCollateral --network lineaMainnet"`
+                    );
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    if (e instanceof AxiosError) {
+                        console.log(e.response?.data.message);
+                    } else {
+                        console.log(e.message);
+                    }
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractClaimWave4LendingStableCollateral", "Claim Wave 4 Lending Stable Collateral")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        const campaignId = LineaCampaignIdentifiers.Wave4.CampaignId;
+        const taskId = LineaCampaignIdentifiers.Wave4.tasksIds.StableAsCollateral;
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+                try {
+                    const authInfo = await authenticate({ account: account });
+                    await claimTask(authInfo.token, campaignId, taskId);
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    console.log(e.message);
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractVerifyWave4LendingLsdCollateral", "Verify Wave 4 Lending Lsd Collateral")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addFlag("granary", "Verify Granary")
+    .addFlag("layerbank", "Verify LayerBank")
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        var projectId: string | undefined = undefined;
+        if (taskArgs.granary) {
+            projectId = LineaCampaignIdentifiers.Wave4.GranaryFinanceProjectId;
+        } else if (taskArgs.layerbank) {
+            projectId = LineaCampaignIdentifiers.Wave4.LayerBankProjectId;
+        }
+
+        if (!projectId) {
+            console.log("Need to define parameter: --granary | --layerbank ");
+            return;
+        }
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                const authInfo = await authenticate({ account: account });
+
+                const verifyPayload = {
+                    campaignId: "65647f06731b793354cb239c",
+                    userInputs: { lineaProjectId: projectId, TRANSACTION_HASH: "0x" },
+                    task: {
+                        userInputs: {
+                            initiateButton: {
+                                label: "Bridge on MetaMask",
+                                baseLink: "https://portfolio.metamask.io/bridge",
+                                isExist: true,
+                            },
+                            verifyButton: {
+                                label: "Verify",
+                                callbackFunction: true,
+                                callbackParameters: [
+                                    { source: "ADMIN_INPUT_FIELD", key: "LINEA_LEND_AMOUNT" },
+                                    { source: "ADMIN_INPUT_FIELD", key: "LINEA_BORROW_AMOUNT" },
+                                    { source: "ADMIN_INPUT_FIELD", key: "ALLOWED_TOKEN_ADDRESSES" },
+                                    { source: "CLIENT_VERIFICATION_OBJECT", key: "questerWalletAddress" },
+                                    { source: "CLIENT_VERIFICATION_OBJECT", key: "lineaProjectId" },
+                                ],
+                            },
+                            dynamicInputs: [],
+                        },
+                        asyncVerifyConfig: {
+                            isAsyncVerify: true,
+                            verifyTimeInSeconds: 900,
+                            maxRetryCount: 3,
+                            retryTimeInSeconds: 900,
+                            isScatterEnabled: false,
+                            maxScatterInSeconds: 0,
+                        },
+                        powVerifyConfig: { isPOWVerify: false },
+                        recurrenceConfig: { isRecurring: false, frequencyInDays: 1, maxRecurrenceCount: 1 },
+                        flashTaskConfig: { isFlashTask: false },
+                        name: "Use a specific token as collateral for a loan",
+                        description: "Use a specific token as collateral for a loan",
+                        templateType: "LineaLoanFromSpecificTokenCollateral",
+                        xp: 40,
+                        adminInputs: [
+                            {
+                                key: "LINEA_LEND_AMOUNT",
+                                inputType: "INPUT_NUMBER",
+                                label: "Min lending amount for collateralised token",
+                                placeholder: "amt",
+                                value: 1,
+                                _id: "65647f06731b793354cb23a6",
+                            },
+                            {
+                                key: "LINEA_BORROW_AMOUNT",
+                                inputType: "INPUT_NUMBER",
+                                label: "Min borrow amount",
+                                placeholder: "amt",
+                                value: 18,
+                                _id: "65647f06731b793354cb23a7",
+                            },
+                            {
+                                key: "ALLOWED_TOKEN_ADDRESSES",
+                                inputType: "INPUT_STRING_ARRAY",
+                                label: "List of allowed token addresses which user has to put in as collateral",
+                                placeholder: "0x...",
+                                value: [
+                                    "0xb79dd08ea68a908a97220c76d19a6aa9cbde4376",
+                                    "0x1e1f509963a6d33e169d9497b11c7dbfe73b7f13",
+                                    "0xb5bedd42000b71fdde22d3ee8a79bd49a568fc8f",
+                                ],
+                                _id: "65647f06731b793354cb23a8",
+                            },
+                        ],
+                        isAttributionTask: true,
+                        templateFamily: "LINEA/WEEK4",
+                        totalUsersCompleted: 66,
+                        totalRecurringUsersCompleted: [],
+                        requiredLogins: ["EVMWallet"],
+                        isIntractTask: false,
+                        isRequiredTask: false,
+                        showOnChainHelper: false,
+                        hasMaxRetryCheck: false,
+                        hasRateLimitCheck: false,
+                        isAddedLater: false,
+                        isVisible: true,
+                        isDeleted: false,
+                        _id: "65647f06731b793354cb23a5",
+                    },
+                    verificationObject: {
+                        lineaProjectId: projectId,
+                        questerWalletAddress: account.address,
+                    },
+                };
+
+                try {
+                    await verifyTask(authInfo.token, verifyPayload, []);
+                    console.log(
+                        `Verification started for Wave 4 Lending Lsd Collateral Task.\nWait 50 minutes and claim with task "npx hardhat intractClaimWave4LsdCollateral --network lineaMainnet"`
+                    );
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    if (e instanceof AxiosError) {
+                        console.log(e.response?.data.message);
+                    } else {
+                        console.log(e.message);
+                    }
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractClaimWave4LendingLsdCollateral", "Claim Wave 4 Lending Lsd Collateral")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        const campaignId = LineaCampaignIdentifiers.Wave4.CampaignId;
+        const taskId = LineaCampaignIdentifiers.Wave4.tasksIds.LsdAsCollateral;
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+                try {
+                    const authInfo = await authenticate({ account: account });
+                    await claimTask(authInfo.token, campaignId, taskId);
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    console.log(e.message);
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractVerifyWave4LendingRepay", "Verify Wave 4 Lending Repay")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addFlag("granary", "Verify KyberSwap")
+    .addFlag("mendi", "Verify SyncSwap")
+    .addFlag("layerbank", "Verify SyncSwap")
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        var projectId: string | undefined = undefined;
+        if (taskArgs.granary) {
+            projectId = LineaCampaignIdentifiers.Wave4.GranaryFinanceProjectId;
+        } else if (taskArgs.mendi) {
+            projectId = LineaCampaignIdentifiers.Wave4.MendiFinanceProjectId;
+        } else if (taskArgs.layerbank) {
+            projectId = LineaCampaignIdentifiers.Wave4.LayerBankProjectId;
+        }
+
+        if (!projectId) {
+            console.log("Need to define parameter: --granary | --mendy | --layerbank ");
+            return;
+        }
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                const authInfo = await authenticate({ account: account });
+
+                const verifyPayload = {
+                    campaignId: "65647f06731b793354cb239c",
+                    userInputs: { lineaProjectId: projectId, TRANSACTION_HASH: "0x" },
+                    task: {
+                        userInputs: {
+                            initiateButton: {
+                                label: "Bridge on MetaMask",
+                                baseLink: "https://portfolio.metamask.io/bridge",
+                                isExist: true,
+                            },
+                            verifyButton: {
+                                label: "Verify",
+                                callbackFunction: true,
+                                callbackParameters: [
+                                    { source: "ADMIN_INPUT_FIELD", key: "LINEA_REPAY_AMOUNT" },
+                                    { source: "ADMIN_INPUT_FIELD", key: "ALLOWED_TOKEN_ADDRESSES" },
+                                    { source: "CLIENT_VERIFICATION_OBJECT", key: "questerWalletAddress" },
+                                    { source: "CLIENT_VERIFICATION_OBJECT", key: "lineaProjectId" },
+                                ],
+                            },
+                            dynamicInputs: [],
+                        },
+                        asyncVerifyConfig: {
+                            isAsyncVerify: true,
+                            verifyTimeInSeconds: 900,
+                            maxRetryCount: 3,
+                            retryTimeInSeconds: 900,
+                            isScatterEnabled: false,
+                            maxScatterInSeconds: 0,
+                        },
+                        powVerifyConfig: { isPOWVerify: false },
+                        recurrenceConfig: { isRecurring: false, frequencyInDays: 1, maxRecurrenceCount: 1 },
+                        flashTaskConfig: { isFlashTask: false },
+                        name: "Repay your loan.",
+                        description: "Close the position of your loan",
+                        templateType: "LineaRepayLoan",
+                        xp: 30,
+                        adminInputs: [
+                            {
+                                key: "LINEA_REPAY_AMOUNT",
+                                inputType: "INPUT_NUMBER",
+                                label: "Min debt to be paid back",
+                                placeholder: "amt",
+                                value: 5,
+                                _id: "65647f06731b793354cb23aa",
+                            },
+                            {
+                                key: "ALLOWED_TOKEN_ADDRESSES",
+                                inputType: "INPUT_STRING_ARRAY",
+                                label: "List of allowed token addresses which user has to borrow",
+                                placeholder: "0x...",
+                                value: [
+                                    "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+                                    "0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f",
+                                ],
+                                _id: "65647f06731b793354cb23ab",
+                            },
+                        ],
+                        isAttributionTask: true,
+                        templateFamily: "LINEA/WEEK4",
+                        totalUsersCompleted: 101,
+                        totalRecurringUsersCompleted: [],
+                        requiredLogins: ["EVMWallet"],
+                        isIntractTask: false,
+                        isRequiredTask: false,
+                        showOnChainHelper: false,
+                        hasMaxRetryCheck: false,
+                        hasRateLimitCheck: false,
+                        isAddedLater: false,
+                        isVisible: true,
+                        isDeleted: false,
+                        _id: "65647f06731b793354cb23a9",
+                    },
+                    verificationObject: {
+                        lineaProjectId: projectId,
+                        questerWalletAddress: account.address,
+                    },
+                };
+
+                try {
+                    await verifyTask(authInfo.token, verifyPayload, []);
+                    console.log(
+                        `Verification started for Wave 4 Lending Repay Task.\nWait 50 minutes and claim with task "npx hardhat intractClaimWave4LendingRepay --network lineaMainnet"`
+                    );
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    if (e instanceof AxiosError) {
+                        console.log(e.response?.data.message);
+                    } else {
+                        console.log(e.message);
+                    }
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractClaimWave4LendingRepay", "Claim Wave 4 Lending Repay")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        const campaignId = LineaCampaignIdentifiers.Wave4.CampaignId;
+        const taskId = LineaCampaignIdentifiers.Wave4.tasksIds.Repay;
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+                try {
+                    const authInfo = await authenticate({ account: account });
+                    await claimTask(authInfo.token, campaignId, taskId);
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    console.log(e.message);
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractVerify4LandingReview", "Verify Wave 4 Landing Review")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                const authInfo = await authenticate({ account: account });
+
+                const verifyPayload = {
+                    campaignId: "65647f06731b793354cb239c",
+                    userInputs: { TRANSACTION_HASH: "0x" },
+                    task: {
+                        userInputs: {
+                            initiateButton: {
+                                label: "Write a review!",
+                                baseLink: "https://dappsheriff.com/",
+                                isExist: true,
+                            },
+                            verifyButton: {
+                                label: "Verify",
+                                callbackFunction: true,
+                                callbackParameters: [
+                                    { source: "ADMIN_INPUT_FIELD", key: "DAPPSHERIFF_SLUG" },
+                                ],
+                            },
+                            dynamicInputs: [],
+                        },
+                        asyncVerifyConfig: {
+                            isAsyncVerify: true,
+                            verifyTimeInSeconds: 900,
+                            maxRetryCount: 3,
+                            retryTimeInSeconds: 900,
+                            isScatterEnabled: false,
+                            maxScatterInSeconds: 0,
+                        },
+                        powVerifyConfig: { isPOWVerify: false },
+                        recurrenceConfig: { isRecurring: false, frequencyInDays: 1, maxRecurrenceCount: 1 },
+                        flashTaskConfig: { isFlashTask: false },
+                        name: "Verify that you added review on Dappsheriff",
+                        description: "Verify that you added review on Dappsheriff",
+                        templateType: "DappsheriffReview",
+                        xp: 20,
+                        adminInputs: [
+                            {
+                                key: "DAPPSHERIFF_SLUG",
+                                inputType: "INPUT_STRING",
+                                label: "URI SLUG",
+                                placeholder: "",
+                                value: "waves/3",
+                                _id: "65647f06731b793354cb23b1",
+                            },
+                        ],
+                        isAttributionTask: true,
+                        templateFamily: "LINEA/WEEK1",
+                        totalUsersCompleted: 1503,
+                        totalRecurringUsersCompleted: [],
+                        requiredLogins: ["EVMWallet"],
+                        isIntractTask: false,
+                        isRequiredTask: false,
+                        showOnChainHelper: false,
+                        hasMaxRetryCheck: false,
+                        hasRateLimitCheck: false,
+                        isAddedLater: false,
+                        isVisible: true,
+                        isDeleted: false,
+                        _id: "65647f06731b793354cb23b0",
+                    },
+                    verificationObject: {
+                        questerWalletAddress: account.address,
+                    },
+                };
+
+                try {
+                    await verifyTask(authInfo.token, verifyPayload, []);
+                    console.log(
+                        `Verification started for Wave 4 Review landing on DappSheriff Task.\nWait 5 minutes and claim with task "npx hardhat intractClaimWave3LandingReview --network lineaMainnet"`
+                    );
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    if (e instanceof AxiosError) {
+                        console.log(e.response?.data.message);
+                    } else {
+                        console.log(e.message);
+                    }
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractClaimWave4LendingReview", "Claim Wave 4 Lending Review")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        const campaignId = LineaCampaignIdentifiers.Wave4.CampaignId;
+        const taskId = LineaCampaignIdentifiers.Wave4.tasksIds.Review;
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+                try {
+                    const authInfo = await authenticate({ account: account });
+                    await claimTask(authInfo.token, campaignId, taskId);
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    console.log(e.message);
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
