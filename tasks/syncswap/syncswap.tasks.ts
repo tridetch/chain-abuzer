@@ -13,6 +13,7 @@ task("syncSwapTrade", "Swap tokens on Syncswap")
     .addFlag("all", "Use all balance of tokens")
     .addParam("minBalance", "Minimum balance after using all funds", undefined, types.float, true)
     .addParam("dust", "Dust percentage", undefined, types.int, true)
+    .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
     .addParam("delay", "Add delay", undefined, types.float, true)
     .addParam("fromToken", "Token to sell", "0x0000000000000000000000000000000000000000", types.string)
     .addParam("toToken", "Token to buy", "0x0000000000000000000000000000000000000000", types.string) // ETH 0x0000000000000000000000000000000000000000

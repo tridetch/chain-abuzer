@@ -245,6 +245,54 @@ task("intractLineaDailyQuiz", "Daily quiz")
         }
     });
 
+task("intractDappSheriffReview", "Review dapp on DappSheriff")
+    .addParam("appId", "Application ID for review", undefined, types.int, false)
+    .addParam("reviewText", "Review text", "Great protocol", types.string, true)
+    .addParam("rate", "rate", 5, types.float, true)
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        const campaignId = LineaCampaignIdentifiers.Wave2.CampaignId;
+        var taskId = LineaCampaignIdentifiers.Wave2.tasksIds.Review;
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+                try {
+                    const result = await axios.post("https://dappsheriff.com/api/app/127/reviews", {
+                        app_id: taskArgs.appId,
+                        reviewer: account.address,
+                        review: taskArgs.reviewText,
+                        rate: taskArgs.rate,
+                    });
+                    console.log(`Review has been submitted`);
+
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    console.log(e.message);
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
 // WAVE 1 - METAMASK
 
 task("intractVerifyWave1MetamaskBridge", "Verify Wave 1 Metamask Bridge")
@@ -1265,54 +1313,6 @@ task("intractClaimWave2BridgeBonus1000", "Claim Wave 2 Bridge Bonus 1000")
                 try {
                     const authInfo = await authenticate({ account: account });
                     await claimTask(authInfo.token, campaignId, taskId!);
-                    if (taskArgs.delay != undefined) {
-                        await delay(taskArgs.delay);
-                    }
-                } catch (e: any) {
-                    console.log(e.message);
-                }
-            } catch (error) {
-                console.log(`Error when process account`);
-                console.log(error);
-            }
-        }
-    });
-
-task("intractDappSheriffReview", "Review dapp on DappSheriff")
-    .addParam("appId", "Application ID for review", 39, types.int, true)
-    .addParam("reviewText", "Review text", "Great protocol", types.string, true)
-    .addParam("rate", "rate", 5, types.float, true)
-    .addParam("delay", "Add delay between operations", undefined, types.float, true)
-    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
-    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
-    .addOptionalParam(
-        "accountIndex",
-        "Index of the account for which it will be executed",
-        undefined,
-        types.string
-    )
-    .setAction(async (taskArgs, hre) => {
-        const currentNetwork = await hre.ethers.provider.getNetwork();
-        const chainInfo = getChainInfo(currentNetwork.chainId);
-
-        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
-
-        const campaignId = LineaCampaignIdentifiers.Wave2.CampaignId;
-        var taskId = LineaCampaignIdentifiers.Wave2.tasksIds.Review;
-
-        for (const account of accounts) {
-            try {
-                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
-                try {
-                    const result = await axios.post("https://dappsheriff.com/api/app/127/reviews", {
-                        app_id: taskArgs.appId,
-                        reviewer: account.address,
-                        review: taskArgs.reviewText,
-                        rate: taskArgs.rate,
-                    });
-                    console.log(`Review has been submitted`);
-
                     if (taskArgs.delay != undefined) {
                         await delay(taskArgs.delay);
                     }
@@ -3146,7 +3146,7 @@ task("intractClaimWave4LendingRepay", "Claim Wave 4 Lending Repay")
         }
     });
 
-task("intractVerify4LandingReview", "Verify Wave 4 Landing Review")
+task("intractVerifyWave4LendingReview", "Verify Wave 4 Landing Review")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)

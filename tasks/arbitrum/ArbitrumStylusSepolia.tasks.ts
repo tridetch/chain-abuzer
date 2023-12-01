@@ -56,7 +56,7 @@ task("arbitrumSepoliaBridge", "Bridge ETH Sepolia to arbitrum sepolia network")
                 console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
                 console.log(`Sending ${utils.formatEther(amount)} ETH from ${account.address} ...`);
 
-                const txParams = populateTxnParams({ signer: account, chain: chainInfo });
+                const txParams = await populateTxnParams({ signer: account, chain: chainInfo });
                 const ethDepositTxResponse = await bridgeContract.connect(account).depositEth({
                     value: amount,
                     ...txParams,

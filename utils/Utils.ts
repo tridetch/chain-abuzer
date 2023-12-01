@@ -129,6 +129,11 @@ export async function populateTxnParams({
             txRequest.maxFeePerGas = ethers.utils.parseUnits("0.001", "gwei");
             txRequest.gasPrice = undefined; // eip-1559 transaction do not support gasPrice
             break;
+        case ChainId.lineaMainnet:
+            txRequest.gasPrice = (await signer.getGasPrice())
+                .div(BigNumber.from(100))
+                .mul(BigNumber.from(100 + 3));
+            break;
     }
 
     return txRequest;

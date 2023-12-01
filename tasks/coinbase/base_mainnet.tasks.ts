@@ -161,7 +161,7 @@ task("baseMintLayerZeroExpedition", "Mint MintDAO LayerZero EXPEDITION NFT")
 
                 const calldata = `0xe912512000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000`;
 
-                const txParams = populateTxnParams({ signer: account, chain: chainInfo });
+                const txParams = await populateTxnParams({ signer: account, chain: chainInfo });
 
                 const mintTx = await account.sendTransaction({
                     to: contractAddress,
