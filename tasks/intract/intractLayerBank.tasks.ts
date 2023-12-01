@@ -1,4 +1,4 @@
-import { BigNumber, ethers } from "ethers";
+import { ethers } from "ethers";
 import { task, types } from "hardhat/config";
 import { ERC20__factory } from "../../typechain-types";
 import { ChainId, getChainInfo } from "../../utils/ChainInfoUtils";
@@ -8,8 +8,8 @@ export const ACCOUNT_DELAY = 2;
 export const TASK_DELAY = 0.5;
 
 task("routeIntractWave4Lending", "Make some developer tasks")
-    .addParam("supplyAmount", "Amount of tokens to swap", 0.0178, types.float, true)
-    .addParam("borrowAmount", "Amount of tokens to swap", 0.0126, types.float, true)
+    .addParam("supplyAmount", "Amount of tokens to swap", 0.0176, types.float, true)
+    .addParam("borrowAmount", "Amount of tokens to swap", 0.0121, types.float, true)
     .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
@@ -32,7 +32,8 @@ task("routeIntractWave4Lending", "Make some developer tasks")
         // const usdcTokenContract = ERC20__factory.connect(USDC_TOKEN_ADDRESS, hre.ethers.provider);
         // const usdcDecimals = await usdcTokenContract.decimals();
 
-        const ETH_BORROW_AMOUNT = ethers.utils.parseEther(taskArgs.borrowAmount);
+        const ETH_SUPPLY_AMOUNT = ethers.utils.parseEther(taskArgs.supplyAmount.toString());
+        const ETH_BORROW_AMOUNT = ethers.utils.parseEther(taskArgs.borrowAmount.toString());
 
         const layerBankEthAddress = "0xc7D8489DaE3D2EbEF075b1dB2257E2c231C9D231";
         const layerBankEthContract = ERC20__factory.connect(layerBankEthAddress, hre.ethers.provider);
@@ -71,7 +72,7 @@ task("routeIntractWave4Lending", "Make some developer tasks")
 
                 const balance = await account.getBalance();
 
-                if (balance < BigNumber.from(0.02)) {
+                if (balance < ethers.utils.parseEther("0.02")) {
                     console.log(
                         `Skip account with low balance. Min - 0.02 ETH Actual balance - ${ethers.utils.formatEther(
                             balance
@@ -80,15 +81,17 @@ task("routeIntractWave4Lending", "Make some developer tasks")
                     return;
                 }
 
-                const amount = ethers.utils.parseEther(taskArgs.supplyAmount.toString());
-
                 await waitForGasPrice({ maxPriceInGwei: taskArgs.gasPrice, provider: hre.ethers.provider });
 
                 var txparams = await populateTxnParams({ signer: account, chain: chainInfo });
                 console.log(`Supply ETH`);
                 const supplyTx = await layerBankLendingContract
                     .connect(account)
-                    .supply(layerBankEthAddress, amount, { value: amount, gasLimit: GAS_LIMIT, ...txparams });
+                    .supply(layerBankEthAddress, ETH_SUPPLY_AMOUNT, {
+                        value: ETH_SUPPLY_AMOUNT,
+                        gasLimit: GAS_LIMIT,
+                        ...txparams,
+                    });
                 console.log(`tx - ${chainInfo.explorer}${supplyTx.hash}`);
 
                 await supplyTx.wait(2);
@@ -98,7 +101,7 @@ task("routeIntractWave4Lending", "Make some developer tasks")
                 const enableCollateralTx = await layerBankLendingContract
                     .connect(account)
                     .enterMarkets([layerBankEthAddress], { gasLimit: GAS_LIMIT, ...txparams });
-                console.log(`tx - ${enableCollateralTx.hash}`);
+                console.log(`tx - ${chainInfo.explorer}${enableCollateralTx.hash}`);
                 await enableCollateralTx.wait(2);
 
                 var txparams = await populateTxnParams({ signer: account, chain: chainInfo });
@@ -111,16 +114,6 @@ task("routeIntractWave4Lending", "Make some developer tasks")
                     });
                 console.log(`tx - ${chainInfo.explorer}${borrowTx.hash}`);
                 await borrowTx.wait(2);
-
-                // console.log(`Approve USDC`);
-                // await hre.run("approve", {
-                //     gasLimit: GAS_LIMIT,
-                //     ...taskArgs,
-                //     tokenAddress: USDC_TOKEN_ADDRESS,
-                //     spenderAddress: layerBankUsdcAddress,
-                //     amount: 25,
-                // });
-                // await delay(0.02);
 
                 var txparams = await populateTxnParams({ signer: account, chain: chainInfo });
                 console.log(`Repay ETH`);
@@ -140,8 +133,11 @@ task("routeIntractWave4Lending", "Make some developer tasks")
                     .connect(account)
                     .redeemUnderlying(
                         layerBankEthAddress,
-                        await layerBankEthContract.balanceOf(account.address),
-                        { gasLimit: GAS_LIMIT, ...txparams }
+                        ETH_SUPPLY_AMOUNT.sub(ETH_SUPPLY_AMOUNT.div(1000).mul(3)),
+                        {
+                            gasLimit: GAS_LIMIT,
+                            ...txparams,
+                        }
                     );
                 console.log(`tx - ${chainInfo.explorer}${redeemTokenTx.hash}`);
 
