@@ -561,6 +561,77 @@ task("sendEth", "Send ETH to address")
         }
     });
 
+task("sendToken", "Send tokens to address")
+    .addParam("amount", "Amount to send", undefined, types.float)
+    .addFlag("all", "Use all balance of tokens")
+    .addParam("dust", "Dust percentage", undefined, types.int, true)
+    .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
+    .addParam("delay", "Add delay", undefined, types.float, true)
+    .addParam("token", "Token address", undefined, types.string, false)
+    .addParam("to", "Destination address", undefined, types.string)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.int)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize account execution order")
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const chainInfo = getChainInfo((await hre.ethers.provider.getNetwork()).chainId);
+
+        let token = ERC20__factory.connect(taskArgs.token, hre.ethers.provider);
+        let tokenDecimals: number = await token.decimals();
+        const tokenName = await token.name();
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                let amount: BigNumber;
+                if (taskArgs.all) {
+                    amount = await token.balanceOf(account.address);
+                } else if (taskArgs.dust) {
+                    amount = utils.parseUnits(
+                        addDust({ amount: taskArgs.amount, upToPercent: taskArgs.addDust }).toString(),
+                        tokenDecimals
+                    );
+                } else {
+                    amount = utils.parseUnits(taskArgs.amount.toString(), tokenDecimals);
+                }
+
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+                await waitForGasPrice({ maxPriceInGwei: taskArgs.gasPrice, provider: hre.ethers.provider });
+
+                const balance = await token.balanceOf(account.address);
+
+                if (amount.lte(balance)) {
+                    const txParams = await populateTxnParams({ signer: account, chain: chainInfo });
+                    const txn = await token.connect(account).transfer(taskArgs.to, amount, {
+                        ...txParams,
+                    });
+
+                    console.log(
+                        `Send ${utils.formatUnits(amount, tokenDecimals)} ${tokenName} to ${
+                            taskArgs.to
+                        } \ntxn: ${chainInfo.explorer}${txn.hash}`
+                    );
+                } else {
+                    console.log(`Not enought funds ${utils.formatEther(balance)}`);
+                }
+                if (taskArgs.delay != undefined) {
+                    await delay(taskArgs.delay);
+                }
+            } catch (error) {
+                console.log(
+                    `Error when process account #${accounts.indexOf(account)} Address: ${account.address}`
+                );
+                console.log(error);
+            }
+        }
+    });
+
 task("txCount", "Show account transaction count")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
@@ -638,7 +709,7 @@ task("approve", "Approve token to spender")
                 .connect(account)
                 .approve(taskArgs.spenderAddress, amount, { ...txParams });
             await tx.wait();
-            
+
             console.log(
                 `Approved ${utils.formatUnits(amount, decimals)} ${symbol} tx ${chainInfo.explorer}${tx.hash}`
             );

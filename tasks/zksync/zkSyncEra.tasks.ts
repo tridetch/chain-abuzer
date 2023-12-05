@@ -897,7 +897,7 @@ task("zksyncTevaeraMintOnftBundleNft", "Mint Tevaera ONFT bundle")
         }
     });
 
-task("zksyncCheckZkPepeAirdrop", "Check zkpepe airdrop amount")
+task("zksyncClaimZkPepeAirdrop", "Check zkpepe airdrop amount")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
@@ -919,6 +919,23 @@ task("zksyncCheckZkPepeAirdrop", "Check zkpepe airdrop amount")
         const zkProvider = new zksync.Provider(ZKSYNC_MAINNET_RPC);
         const accounts = await getAccounts(taskArgs, hre.ethers.provider);
 
+        const zkPepe = ERC20__factory.connect("0x7D54a311D56957fa3c9a3e397CA9dC6061113ab3", zkProvider);
+        const zkPepeDecimals = await zkPepe.decimals();
+
+        const claimContract = new ethers.Contract("0x95702a335e3349d197036Acb04BECA1b4997A91a", [
+            "function claim(bytes32[] proof, uint256 amount)",
+        ]);
+
+        const headers = {
+            "sec-ch-ua": '"Chromium";v="119", "Not?A_Brand";v="24"',
+            Accept: "application/json, text/plain, */*",
+            Referer: "https://www.zksyncpepe.com/airdrop",
+            DNT: "1",
+            "sec-ch-ua-mobile": "?0",
+            "User-Agent": MOCK_USER_AGENT,
+            "sec-ch-ua-platform": '"macOS"',
+        };
+
         for (const account of accounts) {
             try {
                 console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
@@ -926,21 +943,29 @@ task("zksyncCheckZkPepeAirdrop", "Check zkpepe airdrop amount")
                 const response = await axios.get(
                     `https://www.zksyncpepe.com/resources/amounts/${account.address.toLowerCase()}.json`,
                     {
-                        headers: {
-                            "sec-ch-ua": '"Chromium";v="119", "Not?A_Brand";v="24"',
-                            Accept: "application/json, text/plain, */*",
-                            Referer: "https://www.zksyncpepe.com/airdrop",
-                            DNT: "1",
-                            "sec-ch-ua-mobile": "?0",
-                            "User-Agent": MOCK_USER_AGENT,
-                            "sec-ch-ua-platform": '"macOS"',
-                        },
+                        headers: headers,
                     }
                 );
 
                 if (typeof response.data[0] === "number") {
-                    const amount = response.data;
-                    console.log(`Congrats! ${amount} $zkPepe awailable for claim.`);
+                    const amount = ethers.utils.parseUnits(response.data[0].toString(), zkPepeDecimals);
+                    console.log(
+                        `Congrats! ${ethers.utils.formatUnits(
+                            amount,
+                            zkPepeDecimals
+                        )} $zkPepe awailable. Claiming...`
+                    );
+
+                    const proof = await axios.get(
+                        `https://www.zksyncpepe.com/resources/proofs/${account.address.toLowerCase()}.json`,
+                        {
+                            headers: headers,
+                        }
+                    );
+
+                    const claimTx = await claimContract.connect(account).claim(proof.data, amount);
+
+                    console.log(`Claim Tx - ${chainInfo.explorer}${claimTx.hash}`);
                 } else {
                     console.log(`What a pity! You are not eligible for this airdrop round.`);
                 }
