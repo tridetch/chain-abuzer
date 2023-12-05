@@ -125,9 +125,7 @@ task("orbiterBridge", "Bridge funds across networks")
 
                 let bridgeTx;
 
-                if (chainInfo.chainId == 1 || bridgeInfo.chainId == 1) {
-                    await waitForGasPrice({ maxPriceInGwei: taskArgs.gasPrice, provider: ethProvider });
-                }
+                await waitForGasPrice({ maxPriceInGwei: taskArgs.gasPrice, provider: hre.ethers.provider });
 
                 if (taskArgs.fromZksyncLite) {
                     bridgeTx = await zksyncLiteWallet.syncTransfer({
@@ -137,11 +135,11 @@ task("orbiterBridge", "Bridge funds across networks")
                     });
                     console.log(`Bridge to ${bridgeInfo.name} amount ${utils.formatEther(amountWithCode)}`);
                 } else if (fromZksyncEra) {
-                    const txParams = await populateTxnParams({signer: zksyncEraWallet, chain: chainInfo})
+                    const txParams = await populateTxnParams({ signer: zksyncEraWallet, chain: chainInfo });
                     bridgeTx = await zksyncEraWallet.sendTransaction({
                         to: MAKER_ADDRESS,
                         value: amountWithCode,
-                        ...txParams
+                        ...txParams,
                     });
                     console.log(
                         `Bridge to ${bridgeInfo.name} amount ${utils.formatEther(amountWithCode)}\nTx ${
@@ -149,11 +147,11 @@ task("orbiterBridge", "Bridge funds across networks")
                         }${bridgeTx.hash}`
                     );
                 } else {
-                    const txParams = await populateTxnParams({signer: account, chain: chainInfo})
+                    const txParams = await populateTxnParams({ signer: account, chain: chainInfo });
                     bridgeTx = await account.sendTransaction({
                         to: MAKER_ADDRESS,
                         value: amountWithCode,
-                        ...txParams
+                        ...txParams,
                     });
                     console.log(
                         `Bridge to ${bridgeInfo.name} amount ${utils.formatEther(amountWithCode)}\nTx ${
