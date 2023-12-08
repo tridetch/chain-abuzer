@@ -40,7 +40,7 @@ task("routeIntractWave5Liquidity", "Wave 5 onchain activity and task verificatio
 
         async function performRoute(account: ethers.Wallet) {
             try {
-                console.log(`### ${accounts.indexOf(account)} Address ${account.address} ###`);
+                console.log(`\n### ${accounts.indexOf(account)} Address ${account.address} ###`);
 
                 const delayTime = taskArgs.delay;
                 taskArgs.delay = undefined;
