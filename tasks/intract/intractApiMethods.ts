@@ -76,6 +76,19 @@ export const LineaCampaignIdentifiers = {
             Review: "65647f06731b793354cb23b0",
         },
     },
+    Wave5: {
+        Name: "Liquidity",
+        CampaignId: "656db678132add9470b7595c",
+        Velocore: "65647a184b53507f1de4ea8c",
+        XYFinance: "65659f81646593f64862d08c",
+        tasksIds: {
+            LiquidityCore: "656db678132add9470b7595d",
+            LiquidityLst: "656db678132add9470b75961",
+            LiquidityVe: "656db678132add9470b75965",
+            LiquiditySingle: "656db678132add9470b75969",
+            LiquidityReview: "656db678132add9470b7596d",
+        },
+    },
 };
 
 export const InteractApiUrls = {
