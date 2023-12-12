@@ -8,7 +8,7 @@ task("routeIntractWave5Liquidity", "Wave 5 onchain activity and task verificatio
     .addParam("delay", "Wait for gas price", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -121,7 +121,7 @@ task("routeIntractWave5ClaimAll", "Wave 5 and task claim")
     .addParam("delay", "Wait for gas price", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -189,7 +189,7 @@ task("intractWave5LiquidityWithdraw", "WithdrawLiquidity")
     .addParam("delay", "Wait for gas price", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -253,7 +253,7 @@ task("intractWave5LiquidityVerify", "")
     .addParam("delay", "Wait for gas price", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",

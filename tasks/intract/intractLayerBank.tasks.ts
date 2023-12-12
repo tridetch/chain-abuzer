@@ -13,7 +13,7 @@ task("routeIntractWave4Lending", "Make some developer tasks")
     .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -72,7 +72,7 @@ task("routeIntractWave4Lending", "Make some developer tasks")
 
                 const balance = await account.getBalance();
 
-                if (balance < ethers.utils.parseEther("0.02")) {
+                if (balance < ethers.utils.parseEther("0.0207")) {
                     console.log(
                         `Skip account with low balance. Min - 0.02 ETH Actual balance - ${ethers.utils.formatEther(
                             balance

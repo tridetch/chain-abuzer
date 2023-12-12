@@ -89,6 +89,19 @@ export const LineaCampaignIdentifiers = {
             LiquidityReview: "656db678132add9470b7596d",
         },
     },
+    Wave6:{
+        Name: "PoH verification",
+        CampaignId: "65705a282a20cd7291eb8e4b"
+    },
+    Wave7:{
+        Name: "Trading",
+        CampaignId: "6572fc0bef415b56fd67608f",
+        tasksIds: {
+            Trade: "656db678132add9470b7595d",
+            Review: "6572fc0bef415b56fd67609a"
+        },
+
+    }
 };
 
 export const InteractApiUrls = {

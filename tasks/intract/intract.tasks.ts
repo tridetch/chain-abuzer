@@ -9,6 +9,7 @@ import {
     LineaCampaignIdentifiers,
     authenticate,
     claimTask,
+    getCompletedCampaigns,
     getLineaCampaingUserInfo,
     getSuperUserInfo,
     verifyTask,
@@ -25,7 +26,7 @@ task("intractRegisterAndSetAddress", "Register account and set primary address")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -97,7 +98,7 @@ task("intractDailyCheckIn", "Daily check in")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -149,7 +150,7 @@ task("intractStatistics", "Show account statistics")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -199,7 +200,7 @@ task("intractLineaDailyQuiz", "Daily quiz")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -252,7 +253,7 @@ task("intractDappSheriffReview", "Review dapp on DappSheriff")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -293,13 +294,59 @@ task("intractDappSheriffReview", "Review dapp on DappSheriff")
         }
     });
 
+task("intractLineaCheckVerification", "Check PoH verification for linea")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                const authInfo = await authenticate({ account: account });
+
+                try {
+                    const completedCampaigns: string[] = await getCompletedCampaigns(authInfo.token);
+                    const isVerificationCOmpleted = completedCampaigns.includes(
+                        LineaCampaignIdentifiers.Wave6.CampaignId
+                    );
+                    if (isVerificationCOmpleted) {
+                        console.log(`Verification Completed`);
+                    } else {
+                        console.log(`Warning verification NOT completed`);
+                    }
+                } catch (e: any) {
+                    console.log(e.message);
+                }
+                if (taskArgs.delay != undefined) {
+                    await delay(taskArgs.delay);
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
 // WAVE 1 - METAMASK
 
 task("intractVerifyWave1MetamaskBridge", "Verify Wave 1 Metamask Bridge")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -411,7 +458,7 @@ task("intractClaimWave1MetamaskBridge", "Claim Wave 1 Metamask Bridge")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -450,7 +497,7 @@ task("intractVerifyWave1MetamaskSwap", "Verify Wave 1 Metamask Swap")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -563,7 +610,7 @@ task("intractClaimWave1MetamaskSwap", "Claim Wave 1 Metamask Swap")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -607,7 +654,7 @@ task("intractVerifyWave2BridgeCore", "Verify Wave 2 Bridge")
     .addFlag("rhinofi", "Verify Rhino Fi Bridge")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -730,7 +777,7 @@ task("intractClaimWave2BridgeCore", "Claim Wave 2 Bridge Core")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -772,7 +819,7 @@ task("intractVerifyWave2BridgeBonus25", "Verify Wave 2 Bridge Bonus 25")
     .addFlag("rhinofi", "Verify Rhino Fi Bridge")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -915,7 +962,7 @@ task("intractClaimWave2BridgeBonus25", "Claim Wave 2 Bridge Bonus 25")
     .addFlag("rhinofi", "Verify Rhino Fi Bridge")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -969,7 +1016,7 @@ task("intractVerifyWave2BridgeBonus500", "Verify Wave 2 Bridge Bonus 500")
     .addFlag("rhinofi", "Verify Rhino Fi Bridge")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -1095,7 +1142,7 @@ task("intractClaimWave2BridgeBonus500", "Claim Wave 2 Bridge Bonus 500")
     .addFlag("stargate", "Verify Stargate Bridge")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -1137,7 +1184,7 @@ task("intractVerifyWave2BridgeBonus1000", "Verify Wave 2 Bridge Bonus 1000")
     .addFlag("rhinofi", "Verify Rhino Fi Bridge")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -1291,7 +1338,7 @@ task("intractClaimWave2BridgeBonus1000", "Claim Wave 2 Bridge Bonus 1000")
     .addFlag("stargate", "Verify Stargate Bridge")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -1330,7 +1377,7 @@ task("intractVerifyWave2BridgeReview", "Verify Wave 2 Review")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -1428,7 +1475,7 @@ task("intractClaimWave2BridgeReview", "Claim Wave 2 Bridge Review")
     .addFlag("stargate", "Verify Stargate Bridge")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -1472,7 +1519,7 @@ task("intractVerifyWave3SwapCore", "Verify Wave 3 Swap")
     .addFlag("izumi", "Verify SyncSwap")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -1594,7 +1641,7 @@ task("intractClaimWave3SwapCore", "Claim Wave 3 Swap Core")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -1633,7 +1680,7 @@ task("intractVerifyWave3SwapAggregator", "Verify Wave 3 Swap aggregator")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -1745,7 +1792,7 @@ task("intractClaimWave3SwapAggregator", "Claim Wave 3 Swap Aggregator")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -1784,7 +1831,7 @@ task("intractVerifyWave3Swap20Times", "Verify Wave 3 Swap 20 times")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -1908,7 +1955,7 @@ task("intractClaimWave3Swap20Times", "Claim Wave 3 Swap 20 times")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -1947,7 +1994,7 @@ task("intractVerifyWave3Swap1000", "Verify Wave 3 Swap 1000")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -2062,7 +2109,7 @@ task("intractClaimWave3Swap1000", "Claim Wave 3 Swap 1000")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -2101,7 +2148,7 @@ task("intractVerifyWave3SwapLsd", "Verify Wave 3 Swap Lsd")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -2213,7 +2260,7 @@ task("intractClaimWave3SwapLsd", "Claim Wave 3 Swap 1000")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -2252,7 +2299,7 @@ task("intractVerify3SwapReview", "Verify Wave 3 Swap Review")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -2363,7 +2410,7 @@ task("intractClaimWave3SwapReview", "Claim Wave 3 Swap Review")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -2407,7 +2454,7 @@ task("intractVerifyWave4LendingCore", "Verify Wave 4 Lending")
     .addFlag("layerbank", "Verify LayerBank")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -2554,7 +2601,7 @@ task("intractClaimWave4LendingCore", "Claim Wave 4 Lending Core")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -2596,7 +2643,7 @@ task("intractVerifyWave4LendingStableCollateral", "Verify Wave 4 Lending Stable 
     .addFlag("layerbank", "Verify LayerBank")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -2744,7 +2791,7 @@ task("intractClaimWave4LendingStableCollateral", "Claim Wave 4 Lending Stable Co
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -2785,7 +2832,7 @@ task("intractVerifyWave4LendingLsdCollateral", "Verify Wave 4 Lending Lsd Collat
     .addFlag("layerbank", "Verify LayerBank")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -2931,7 +2978,7 @@ task("intractClaimWave4LendingLsdCollateral", "Claim Wave 4 Lending Lsd Collater
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -2973,7 +3020,7 @@ task("intractVerifyWave4LendingRepay", "Verify Wave 4 Lending Repay")
     .addFlag("layerbank", "Verify SyncSwap")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -3111,7 +3158,7 @@ task("intractClaimWave4LendingRepay", "Claim Wave 4 Lending Repay")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -3150,7 +3197,7 @@ task("intractVerifyWave4LendingReview", "Verify Wave 4 Landing Review")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -3259,7 +3306,7 @@ task("intractClaimWave4LendingReview", "Claim Wave 4 Lending Review")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -3300,7 +3347,7 @@ task("intractVerifyWave5LiquidityCore", "Verify Wave 5 Liquidity Core")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -3502,7 +3549,7 @@ task("intractClaimWave5LiquidityCore", "Claim Wave 5 Liquidity Core")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -3541,7 +3588,7 @@ task("intractVerifyWave5LiquidityLst", "Verify Wave 5 Liquidity Lst")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -3710,7 +3757,7 @@ task("intractClaimWave5LiquidityLst", "Claim Wave 5 Liquidity Lst")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -3749,7 +3796,7 @@ task("intractVerifyWave5LiquidityVe", "Verify Wave 5 Liquidity Ve")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -3950,7 +3997,7 @@ task("intractClaimWave5LiquidityVe", "Claim Wave 5 Liquidity Ve")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -3989,7 +4036,7 @@ task("intractVerifyWave5LiquiditySingle", "Verify Wave 5 Liquidity Single")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -4191,7 +4238,7 @@ task("intractClaimWave5LiquiditySingle", "Claim Wave 5 Liquidity Single")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -4230,7 +4277,7 @@ task("intractVerifyWave5LiquidityReview", "Verify Wave 5 Liquidity Review")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -4352,7 +4399,7 @@ task("intractClaimWave5LiquidityReview", "Claim Wave 5 Liquidity Review")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -4367,6 +4414,650 @@ task("intractClaimWave5LiquidityReview", "Claim Wave 5 Liquidity Review")
 
         const campaignId = LineaCampaignIdentifiers.Wave5.CampaignId;
         const taskId = LineaCampaignIdentifiers.Wave5.tasksIds.LiquidityReview;
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+                try {
+                    const authInfo = await authenticate({ account: account });
+                    await claimTask(authInfo.token, campaignId, taskId);
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    console.log(e.message);
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+// WAVE 6
+
+task("intractVerifyWave6PoH", "Verify Wave 5 Liquidity Review")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                const authInfo = await authenticate({ account: account });
+
+                const verifyPayload = {
+                    campaignId: "65705a282a20cd7291eb8e4b",
+                    userInputs: {
+                        TRANSACTION_HASH: "0x",
+                    },
+                    task: {
+                        userInputs: {
+                            initiateButton: {
+                                label: "Bridge on MetaMask",
+                                baseLink: "https://portfolio.metamask.io/bridge",
+                                isExist: true,
+                            },
+                            verifyButton: {
+                                label: "Verify",
+                                callbackFunction: true,
+                                callbackParameters: [],
+                            },
+                            dynamicInputs: [],
+                        },
+                        asyncVerifyConfig: {
+                            isAsyncVerify: true,
+                            verifyTimeInSeconds: 600,
+                            maxRetryCount: 1,
+                            retryTimeInSeconds: 600,
+                            isScatterEnabled: false,
+                            maxScatterInSeconds: 0,
+                        },
+                        powVerifyConfig: {
+                            isPOWVerify: false,
+                        },
+                        recurrenceConfig: {
+                            isRecurring: false,
+                            frequencyInDays: 1,
+                            maxRecurrenceCount: 1,
+                        },
+                        flashTaskConfig: {
+                            isFlashTask: false,
+                        },
+                        name: "Verax Verification",
+                        description: "Verax Verification",
+                        templateType: "VeraxVerification",
+                        xp: 0,
+                        adminInputs: [],
+                        isAttributionTask: true,
+                        templateFamily: "LINEA/WEEK4",
+                        totalUsersCompleted: 123028,
+                        totalRecurringUsersCompleted: [],
+                        requiredLogins: ["EVMWallet"],
+                        isIntractTask: false,
+                        isRequiredTask: true,
+                        showOnChainHelper: false,
+                        hasMaxRetryCheck: false,
+                        hasRateLimitCheck: false,
+                        isAddedLater: false,
+                        isVisible: true,
+                        isDeleted: false,
+                        _id: "65705a282a20cd7291eb8e4c",
+                    },
+                    verificationObject: {
+                        questerWalletAddress: account.address,
+                    },
+                };
+
+                try {
+                    await verifyTask(authInfo.token, verifyPayload, []);
+                    console.log(`Verification started for Wave 6 PoH`);
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    if (e instanceof AxiosError) {
+                        console.log(e.response?.data.message);
+                    } else {
+                        console.log(e.message);
+                    }
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractTrustaCheckAttestaionPoh", "")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                const sign = await account.signMessage(
+                    "Please sign this message to confirm you are the owner of this address and Sign in to TrustGo App"
+                );
+                // console.log(`Signsture ${sign}`);
+
+                const signInResponse = await axios.post(
+                    "https://mp.trustalabs.ai/accounts/check_signed_message",
+                    {
+                        mode: "evm",
+                        address: account.address,
+                        message:
+                            "Please sign this message to confirm you are the owner of this address and Sign in to TrustGo App",
+                        signature: sign,
+                    }
+                );
+
+                // console.log(signInResponse.data);
+
+                const token = signInResponse.data.data.token;
+
+                const attestResponse = await axios.get(
+                    "https://mp.trustalabs.ai/accounts/attest_calldata?attest_type=humanity",
+                    {
+                        headers: {
+                            "User-Agent": MOCK_USER_AGENT,
+                            Authorization: `TOKEN ${token}`,
+                        },
+                    }
+                );
+
+                console.log(`Trusta PoH score: ${attestResponse.data.data.message.score}`);
+
+                if (taskArgs.delay != undefined) {
+                    await delay(taskArgs.delay);
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractTrustaCheckAttestaionMedia", "")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                const sign = await account.signMessage(
+                    "Please sign this message to confirm you are the owner of this address and Sign in to TrustGo App"
+                );
+                // console.log(`Signsture ${sign}`);
+
+                const signInResponse = await axios.post(
+                    "https://mp.trustalabs.ai/accounts/check_signed_message",
+                    {
+                        mode: "evm",
+                        address: account.address,
+                        message:
+                            "Please sign this message to confirm you are the owner of this address and Sign in to TrustGo App",
+                        signature: sign,
+                    }
+                );
+
+                // console.log(signInResponse.data);
+
+                const token = signInResponse.data.data.token;
+
+                const attestResponse = await axios.get(
+                    "https://mp.trustalabs.ai/accounts/attest_calldata?attest_type=media",
+                    {
+                        headers: {
+                            "User-Agent": MOCK_USER_AGENT,
+                            Authorization: `TOKEN ${token}`,
+                        },
+                    }
+                );
+
+                console.log(`Trusta MEDIA score: ${attestResponse.data.data.message.score}`);
+
+                if (taskArgs.delay != undefined) {
+                    await delay(taskArgs.delay);
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+// WAVE 7
+
+task("intractVerifyWave7Trading", "")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                const authInfo = await authenticate({ account: account });
+
+                const verifyPayload = {
+                    campaignId: "6572fc0bef415b56fd67608f",
+                    userInputs: {
+                        lineaProjectId: "6572e45ef45d51debfbef743",
+                        TRANSACTION_HASH: "0x",
+                    },
+                    task: {
+                        userInputs: {
+                            initiateButton: {
+                                label: "Bridge on MetaMask",
+                                baseLink: "https://portfolio.metamask.io/bridge",
+                                isExist: true,
+                            },
+                            verifyButton: {
+                                label: "Verify",
+                                callbackFunction: true,
+                                callbackParameters: [
+                                    {
+                                        key: "LINEA_TRADING_AMOUNT",
+                                        source: "ADMIN_INPUT_FIELD",
+                                    },
+                                    {
+                                        key: "LINEA_TRADE_TYPE",
+                                        source: "ADMIN_INPUT_FIELD",
+                                    },
+                                    {
+                                        key: "ALLOWED_TOKEN_ADDRESSES",
+                                        source: "ADMIN_INPUT_FIELD",
+                                    },
+                                    {
+                                        key: "LINEA_TRADING_LOGIC_KEY",
+                                        source: "ADMIN_INPUT_FIELD",
+                                    },
+                                    {
+                                        source: "CLIENT_VERIFICATION_OBJECT",
+                                        key: "questerWalletAddress",
+                                    },
+                                    {
+                                        source: "CLIENT_VERIFICATION_OBJECT",
+                                        key: "lineaProjectId",
+                                    },
+                                ],
+                            },
+                            dynamicInputs: [],
+                        },
+                        asyncVerifyConfig: {
+                            isAsyncVerify: true,
+                            verifyTimeInSeconds: 1200,
+                            maxRetryCount: 2,
+                            retryTimeInSeconds: 600,
+                            isScatterEnabled: false,
+                            maxScatterInSeconds: 0,
+                        },
+                        powVerifyConfig: {
+                            isPOWVerify: false,
+                        },
+                        recurrenceConfig: {
+                            isRecurring: false,
+                            frequencyInDays: 1,
+                            maxRecurrenceCount: 1,
+                        },
+                        flashTaskConfig: {
+                            isFlashTask: false,
+                        },
+                        name: "Deposit at least $15 into a perpetual/options platform and make any trade.",
+                        description: "Do not use >2x leverage, unless you are an experienced trader.",
+                        templateType: "LineaTrade",
+                        xp: 160,
+                        adminInputs: [
+                            {
+                                key: "LINEA_TRADING_AMOUNT",
+                                inputType: "INPUT_NUMBER",
+                                label: "Min trading amount",
+                                placeholder: "amt",
+                                value: 5,
+                                _id: "6572fc0bef415b56fd676091",
+                            },
+                            {
+                                key: "LINEA_TRADE_TYPE",
+                                inputType: "INPUT_STRING_ARRAY",
+                                label: "What kind of trades are allowed? ",
+                                placeholder: "amt",
+                                value: ["OPTIONS", "PERPETUAL"],
+                                _id: "6572fc0bef415b56fd676092",
+                            },
+                            {
+                                key: "ALLOWED_TOKEN_ADDRESSES",
+                                inputType: "INPUT_STRING_ARRAY",
+                                label: "List of Supported tokens",
+                                placeholder: "amt",
+                                value: [
+                                    "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+                                    "0xe5d7c2a44ffddf6b295a15c148167daaaf5cf34f",
+                                    "0x176211869ca2b568f2a7d4ee941e073a821ee1ff",
+                                    "0xa219439258ca9da29e9cc4ce5596924745e12b93",
+                                    "0x3aab2285ddcddad8edf438c1bab47e1a9d05a9b4",
+                                    "0x4af15ec2a0bd43db75dd04e62faa3b8ef36b00d5",
+                                    "0x7d43aabc515c356145049227cee54b608342c0ad",
+                                    "0xf5c6825015280cdfd0b56903f9f8b5a2233476f5",
+                                    "0x3b2f62d42db19b30588648bf1c184865d4c3b1d6",
+                                    "0x265b25e22bcd7f10a5bd6e6410f10537cc7567e8",
+                                    "0x0d1e753a25ebda689453309112904807625befbe",
+                                    "0x5471ea8f739dd37e9b81be9c5c77754d8aa953e4",
+                                    "0x1a584204db35460a32e7d9990ac1874cb9fb0827",
+                                    "0x6baa318cf7c51c76e17ae1ebe9bbff96ae017acb",
+                                    "0x5b16228b94b68c7ce33af2acc5663ebde4dcfa2d",
+                                    "0x0e076aafd86a71dceac65508daf975425c9d0cb6",
+                                    "0x0e5f2ee8c29e7ebc14e45da7ff90566d8c407db7",
+                                    "0x7da14988e4f390c2e34ed41df1814467d3ade0c3",
+                                    "0x8c56017b172226fe024dea197748fc1eaccc82b1",
+                                    "0x60d01ec2d5e98ac51c8b4cf84dfcce98d527c747",
+                                    "0x43e8809ea748eff3204ee01f08872f063e44065f",
+                                    "0x0b1a02a7309dfbfad1cd4adc096582c87e8a3ac1",
+                                    "0x0963a1abaf36ca88c21032b82e479353126a1c4b",
+                                    "0x9201f3b9dfab7c13cd659ac5695d12d605b5f1e6",
+                                    "0xb5bedd42000b71fdde22d3ee8a79bd49a568fc8f",
+                                    "0xb79dd08ea68a908a97220c76d19a6aa9cbde4376",
+                                    "0x1e1f509963a6d33e169d9497b11c7dbfe73b7f13",
+                                    "0x93f4d0ab6a8b4271f4a28db399b5e30612d21116",
+                                    "0x2f0b4300074afc01726262d4cc9c1d2619d7297a",
+                                    "0xcc22f6aa610d1b2a0e89ef228079cb3e1831b1d1",
+                                    "0x6ef95b6f3b0f39508e3e04054be96d5ee39ede0d",
+                                    "0x1be3735dd0c0eb229fb11094b6c277192349ebbf",
+                                    "0xb5bedd42000b71fdde22d3ee8a79bd49a568fc8f",
+                                    "0x93f4d0ab6a8b4271f4a28db399b5e30612d21116",
+                                    "0x2f0b4300074afc01726262d4cc9c1d2619d7297a",
+                                    "0xceed853798ff1c95ceb4dc48f68394eb7a86a782",
+                                    "0xb79dd08ea68a908a97220c76d19a6aa9cbde4376",
+                                    "0x1e1f509963a6d33e169d9497b11c7dbfe73b7f13",
+                                    "0x3f006b0493ff32b33be2809367f5f6722cb84a7b",
+                                    "0xb30e7a2e6f7389ca5ddc714da4c991b7a1dcc88e",
+                                    "0x1a7e4e63778b4f12a199c062f3efdd288afcbce8",
+                                ],
+                                _id: "6572fc0bef415b56fd676093",
+                            },
+                            {
+                                key: "LINEA_TRADING_LOGIC_KEY",
+                                inputType: "INPUT_STRING",
+                                label: "What is the logic? ser",
+                                placeholder: "amt",
+                                value: "ProjectWise",
+                                _id: "6572fc0bef415b56fd676094",
+                            },
+                        ],
+                        isAttributionTask: true,
+                        templateFamily: "LINEA/WEEK6",
+                        totalUsersCompleted: 161208,
+                        totalRecurringUsersCompleted: [],
+                        requiredLogins: ["EVMWallet"],
+                        isIntractTask: false,
+                        isRequiredTask: true,
+                        showOnChainHelper: false,
+                        hasMaxRetryCheck: false,
+                        hasRateLimitCheck: false,
+                        isAddedLater: false,
+                        isVisible: true,
+                        isDeleted: false,
+                        _id: "6572fc0bef415b56fd676090",
+                    },
+                    verificationObject: {
+                        lineaProjectId: "6572e45ef45d51debfbef743",
+                        questerWalletAddress: account.address,
+                    },
+                };
+
+                try {
+                    await verifyTask(authInfo.token, verifyPayload, []);
+                    console.log(`Verification started for Wave 7 Trading`);
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    if (e instanceof AxiosError) {
+                        console.log(e.response?.data.message);
+                    } else {
+                        console.log(e.message);
+                    }
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractClaimWave7Trading", "")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        const campaignId = LineaCampaignIdentifiers.Wave7.CampaignId;
+        const taskId = LineaCampaignIdentifiers.Wave7.tasksIds.Trade;
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+                try {
+                    const authInfo = await authenticate({ account: account });
+                    await claimTask(authInfo.token, campaignId, taskId);
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    console.log(e.message);
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractVerifyWave7Review", "")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                const authInfo = await authenticate({ account: account });
+
+                const verifyPayload = {
+                    campaignId: "6572fc0bef415b56fd67608f",
+                    userInputs: {
+                        TRANSACTION_HASH: "0x",
+                    },
+                    task: {
+                        userInputs: {
+                            initiateButton: {
+                                label: "Write a review!",
+                                baseLink: "https://dappsheriff.com/",
+                                isExist: true,
+                            },
+                            verifyButton: {
+                                label: "Verify",
+                                callbackFunction: true,
+                                callbackParameters: [
+                                    {
+                                        source: "ADMIN_INPUT_FIELD",
+                                        key: "DAPPSHERIFF_SLUG",
+                                    },
+                                ],
+                            },
+                            dynamicInputs: [],
+                        },
+                        asyncVerifyConfig: {
+                            isAsyncVerify: true,
+                            verifyTimeInSeconds: 1200,
+                            maxRetryCount: 2,
+                            retryTimeInSeconds: 600,
+                            isScatterEnabled: false,
+                            maxScatterInSeconds: 0,
+                        },
+                        powVerifyConfig: {
+                            isPOWVerify: false,
+                        },
+                        recurrenceConfig: {
+                            isRecurring: false,
+                            frequencyInDays: 1,
+                            maxRecurrenceCount: 1,
+                        },
+                        flashTaskConfig: {
+                            isFlashTask: false,
+                        },
+                        name: "Verify that you added review on Dappsheriff",
+                        description: "Verify that you added review on Dappsheriff",
+                        templateType: "DappsheriffReview",
+                        xp: 20,
+                        adminInputs: [
+                            {
+                                key: "DAPPSHERIFF_SLUG",
+                                inputType: "INPUT_STRING",
+                                label: "URI SLUG",
+                                placeholder: "",
+                                value: "waves/6",
+                                _id: "6572fc0bef415b56fd67609b",
+                            },
+                        ],
+                        isAttributionTask: true,
+                        templateFamily: "LINEA/WEEK1",
+                        totalUsersCompleted: 162655,
+                        totalRecurringUsersCompleted: [],
+                        requiredLogins: ["EVMWallet"],
+                        isIntractTask: false,
+                        isRequiredTask: false,
+                        showOnChainHelper: false,
+                        hasMaxRetryCheck: false,
+                        hasRateLimitCheck: false,
+                        isAddedLater: false,
+                        isVisible: true,
+                        isDeleted: false,
+                        _id: "6572fc0bef415b56fd67609a",
+                    },
+                    verificationObject: {
+                        questerWalletAddress: account.address,
+                    },
+                };
+
+                try {
+                    await verifyTask(authInfo.token, verifyPayload, []);
+                    console.log(
+                        `Verification started for Wave 7 Trading review on DappSheriff Task`
+                    );
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    if (e instanceof AxiosError) {
+                        console.log(e.response?.data.message);
+                    } else {
+                        console.log(e.message);
+                    }
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractClaimWave7Review", "")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        const campaignId = LineaCampaignIdentifiers.Wave7.CampaignId;
+        const taskId = LineaCampaignIdentifiers.Wave7.tasksIds.Review;
 
         for (const account of accounts) {
             try {
