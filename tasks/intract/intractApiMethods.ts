@@ -97,7 +97,7 @@ export const LineaCampaignIdentifiers = {
         Name: "Trading",
         CampaignId: "6572fc0bef415b56fd67608f",
         tasksIds: {
-            Trade: "656db678132add9470b7595d",
+            Trade: "6572fc0bef415b56fd676090",
             Review: "6572fc0bef415b56fd67609a"
         },
 
