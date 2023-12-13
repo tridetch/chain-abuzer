@@ -101,8 +101,8 @@ task("routeIntractWave7Trading", "")
                     ...txparams,
                 });
                 console.log(`tx - ${chainInfo.explorer}${withdrawTx.hash}`);
-                await delay(0.05)
-                
+                await withdrawTx.wait(3)
+
                 console.log(`Swap back to ETH`);
                 
                 await hre.run("syncSwapTrade", {
