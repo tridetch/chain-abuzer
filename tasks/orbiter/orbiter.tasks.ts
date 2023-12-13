@@ -5,6 +5,7 @@ import * as zksyncEra from "zksync-web3";
 import { ChainId, getChainInfo } from "../../utils/ChainInfoUtils";
 import { addDust, delay, getAccounts, populateTxnParams, waitForGasPrice } from "../../utils/Utils";
 import { MAKER_ADDRESS, OrbiterBridgeInfo, OrbiterBridges } from "./orbiterMakerInfo";
+import axios from "axios";
 
 function getBridgeInfo(chainId: number): OrbiterBridgeInfo | undefined {
     return OrbiterBridges.find((bridgeInfo) => bridgeInfo.chainId == chainId);
@@ -40,7 +41,7 @@ task("orbiterBridge", "Bridge funds across networks")
     .addParam("dust", "Dust percentage", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -167,6 +168,44 @@ task("orbiterBridge", "Bridge funds across networks")
                 console.log(
                     `Error when process account #${accounts.indexOf(account)} Address: ${account.address}`
                 );
+                console.log(error);
+            }
+        }
+    });
+
+task("orbiterCheckPoints", "")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                const response = await axios.get(
+                    `https://openapi.orbiter.finance/points_system/v2/user/points?address=${account.address}`
+                );
+
+                console.log(`Base points ${response.data.data.basePoints}; ActivityPoints ${response.data.data.activityPoints}; PlatformPoints ${response.data.data.activityPoints};`);
+                console.log(`Total O-points: ${response.data.data.total}`);
+
+                if (taskArgs.delay != undefined) {
+                    await delay(taskArgs.delay);
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
                 console.log(error);
             }
         }
