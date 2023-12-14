@@ -5019,9 +5019,7 @@ task("intractVerifyWave7Review", "")
 
                 try {
                     await verifyTask(authInfo.token, verifyPayload, []);
-                    console.log(
-                        `Verification started for Wave 7 Trading review on DappSheriff Task`
-                    );
+                    console.log(`Verification started for Wave 7 Trading review on DappSheriff Task`);
                     if (taskArgs.delay != undefined) {
                         await delay(taskArgs.delay);
                     }
@@ -5058,6 +5056,179 @@ task("intractClaimWave7Review", "")
 
         const campaignId = LineaCampaignIdentifiers.Wave7.CampaignId;
         const taskId = LineaCampaignIdentifiers.Wave7.tasksIds.Review;
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+                try {
+                    const authInfo = await authenticate({ account: account });
+                    await claimTask(authInfo.token, campaignId, taskId);
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    console.log(e.message);
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+// WAVE 8
+
+task("intractVerifyWave8SocialFi", "")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                const authInfo = await authenticate({ account: account });
+
+                const verifyPayload = {
+                    campaignId: "65798e5c7d62adc325a44d92",
+                    userInputs: {
+                        TRANSACTION_HASH: "0x",
+                    },
+                    task: {
+                        userInputs: {
+                            initiateButton: {
+                                label: "Mint NFT",
+                                baseLink: "https://www.intract.io/compass/linea/explore?showNFT=true",
+                                isExist: true,
+                            },
+                            verifyButton: {
+                                label: "Verify",
+                                callbackFunction: true,
+                                callbackParameters: [
+                                    {
+                                        source: "CLIENT_VERIFICATION_OBJECT",
+                                        key: "questerWalletAddress",
+                                    },
+                                    {
+                                        source: "ADMIN_INPUT_FIELD",
+                                        key: "NFT_CHAIN_ID",
+                                    },
+                                ],
+                            },
+                            dynamicInputs: [],
+                        },
+                        asyncVerifyConfig: {
+                            isAsyncVerify: true,
+                            verifyTimeInSeconds: 60,
+                            maxRetryCount: 0,
+                            retryTimeInSeconds: 0,
+                            isScatterEnabled: false,
+                            maxScatterInSeconds: 0,
+                        },
+                        powVerifyConfig: {
+                            isPOWVerify: false,
+                        },
+                        recurrenceConfig: {
+                            isRecurring: false,
+                            frequencyInDays: 1,
+                            maxRecurrenceCount: 1,
+                        },
+                        flashTaskConfig: {
+                            isFlashTask: false,
+                        },
+                        name: "Holds the Intract Persona NFT",
+                        description: "Verify ownership of Intract Persona NFT",
+                        templateType: "PersonaNftBalance",
+                        xp: 150,
+                        adminInputs: [
+                            {
+                                key: "NFT_CHAIN_ID",
+                                inputType: "INPUT_NUMBER",
+                                label: "ChainId",
+                                placeholder: "59144",
+                                value: 59144,
+                                _id: "65798e5c7d62adc325a44d99",
+                            },
+                            {
+                                key: "API_INITIATION_URL",
+                                inputType: "INPUT_STRING",
+                                label: "Initiation URL",
+                                placeholder: "https://intract.io/persona-nfts",
+                                value: "https://www.intract.io/compass/linea/explore?showNFT=true",
+                                _id: "65798e5c7d62adc325a44d9a",
+                            },
+                        ],
+                        isAttributionTask: true,
+                        templateFamily: "WALLET",
+                        totalUsersCompleted: 13286,
+                        totalRecurringUsersCompleted: [],
+                        requiredLogins: ["EVMWallet"],
+                        isIntractTask: false,
+                        isRequiredTask: true,
+                        showOnChainHelper: false,
+                        hasMaxRetryCheck: false,
+                        hasRateLimitCheck: false,
+                        isAddedLater: false,
+                        isVisible: true,
+                        isDeleted: false,
+                        _id: "65798e5c7d62adc325a44d98",
+                    },
+                    verificationObject: {
+                        questerWalletAddress: account.address,
+                    },
+                };
+
+                try {
+                    await verifyTask(authInfo.token, verifyPayload, []);
+                    console.log(`Verification started for Wave 8 SocialFi`);
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    if (e instanceof AxiosError) {
+                        console.log(e.response?.data.message);
+                    } else {
+                        console.log(e.message);
+                    }
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("intractClaimWave8SocialFi", "")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        const campaignId = LineaCampaignIdentifiers.Wave8.CampaignId;
+        const taskId = LineaCampaignIdentifiers.Wave8.tasksIds.Core;
 
         for (const account of accounts) {
             try {

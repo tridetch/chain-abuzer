@@ -89,19 +89,25 @@ export const LineaCampaignIdentifiers = {
             LiquidityReview: "656db678132add9470b7596d",
         },
     },
-    Wave6:{
+    Wave6: {
         Name: "PoH verification",
-        CampaignId: "65705a282a20cd7291eb8e4b"
+        CampaignId: "65705a282a20cd7291eb8e4b",
     },
-    Wave7:{
+    Wave7: {
         Name: "Trading",
         CampaignId: "6572fc0bef415b56fd67608f",
         tasksIds: {
             Trade: "6572fc0bef415b56fd676090",
-            Review: "6572fc0bef415b56fd67609a"
+            Review: "6572fc0bef415b56fd67609a",
         },
-
-    }
+    },
+    Wave8: {
+        Name: "SocialFi",
+        CampaignId: "65798e5c7d62adc325a44d92",
+        tasksIds: {
+            Core: "65798e5c7d62adc325a44d98",
+        },
+    },
 };
 
 export const InteractApiUrls = {
