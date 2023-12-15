@@ -1,5 +1,6 @@
+import axios, { AxiosResponse } from "axios";
 import * as dotenv from "dotenv";
-import { BigNumber, Contract, utils } from "ethers";
+import { BigNumber, Contract, ethers, utils } from "ethers";
 import { task, types } from "hardhat/config";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import { ERC20__factory } from "../../typechain-types";
@@ -18,7 +19,7 @@ task("scrollDeposit", "Bridge ETH to scroll")
     .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -105,7 +106,7 @@ task("scrollMintHelloScrollNft", "Mint Hello Scroll NFT from Omnisea")
     .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -158,7 +159,7 @@ task("scrollContractInteractions", "Interact with erc-20 contracts")
     .addParam("interactions", "Number of contracts to interact", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -194,7 +195,7 @@ task("scrollContractInteractions", "Interact with erc-20 contracts")
                 var erc20Shuffled = shuffle(erc20Contracts);
 
                 if (taskArgs.interactions <= erc20Shuffled.length) {
-                    erc20Shuffled = erc20Shuffled.slice(undefined, taskArgs.interactions)
+                    erc20Shuffled = erc20Shuffled.slice(undefined, taskArgs.interactions);
                 }
 
                 for (const erc20 of erc20Shuffled) {
@@ -205,6 +206,84 @@ task("scrollContractInteractions", "Interact with erc-20 contracts")
                     console.log(`Approve ${await erc20.symbol()} tx ${chainInfo.explorer}${tx.hash}`);
                     await delay(0.05);
                 }
+
+                if (taskArgs.delay != undefined) {
+                    await delay(taskArgs.delay);
+                }
+            } catch (error) {
+                console.log(
+                    `Error when process account #${accounts.indexOf(account)} Address: ${account.address}`
+                );
+                console.log(error);
+            }
+        }
+    });
+
+task("mintScrollOriginNft", "Mint Scroll Origin NFT")
+    .addParam("delay", "Add random delay", undefined, types.int, true)
+    .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        interface ScrollOriginMintDataPayload {
+            metadata: {
+                deployer: string;
+                firstDeployedContract: string;
+                bestDeployedContract: string;
+                rarityData: string;
+            };
+            proof: string[];
+        }
+
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        if (![ChainId.scrollMainnet].includes(currentNetwork.chainId)) {
+            console.log(` Task supported only on Scroll mainnet!`);
+            return;
+        }
+
+        const targetAddress = "0x74670a3998d9d6622e32d0847ff5977c37e0ec91";
+        const mintContract = new ethers.Contract(
+            targetAddress,
+            ["function mint(address, (address,address,address,uint256), bytes32[])"],
+            hre.ethers.provider
+        );
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                await waitForGasPrice({ maxPriceInGwei: taskArgs.gasPrice, provider: hre.ethers.provider });
+                const mintData: AxiosResponse<ScrollOriginMintDataPayload> = await axios.get(
+                    `https://nft.scroll.io/p/${account.address}.json?timestamp=${new Date().getTime()}`
+                );
+
+                var txParams = await populateTxnParams({ signer: account, chain: chainInfo });
+                const tx = await mintContract
+                    .connect(account)
+                    .mint(
+                        account.address,
+                        [
+                            mintData.data.metadata.deployer,
+                            mintData.data.metadata.firstDeployedContract,
+                            mintData.data.metadata.bestDeployedContract,
+                            mintData.data.metadata.rarityData,
+                        ],
+                        mintData.data.proof,
+                        { ...txParams }
+                    );
+
+                console.log(`Mint txn: ${chainInfo.explorer}${tx.hash}`);
 
                 if (taskArgs.delay != undefined) {
                     await delay(taskArgs.delay);
