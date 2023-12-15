@@ -108,6 +108,14 @@ export const LineaCampaignIdentifiers = {
             Core: "65798e5c7d62adc325a44d98",
         },
     },
+    Wave9: {
+        Name: "SuperDapps",
+        CampaignId: "657c3aa5d306cc1e607e918f",
+        tasksIds: {
+            q1: "657c3aa5d306cc1e607e91e0",
+            q2: "657c3aa5d306cc1e607e91e0",
+        },
+    },
 };
 
 export const InteractApiUrls = {

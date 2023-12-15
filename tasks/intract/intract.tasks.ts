@@ -294,52 +294,6 @@ task("intractDappSheriffReview", "Review dapp on DappSheriff")
         }
     });
 
-task("intractLineaCheckVerification", "Check PoH verification for linea")
-    .addParam("delay", "Add delay between operations", undefined, types.float, true)
-    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
-    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
-    .addOptionalParam(
-        "accountIndex",
-        "Index of the account for which it will be executed",
-        undefined,
-        types.string
-    )
-    .setAction(async (taskArgs, hre) => {
-        const currentNetwork = await hre.ethers.provider.getNetwork();
-        const chainInfo = getChainInfo(currentNetwork.chainId);
-
-        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
-
-        for (const account of accounts) {
-            try {
-                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
-
-                const authInfo = await authenticate({ account: account });
-
-                try {
-                    const completedCampaigns: string[] = await getCompletedCampaigns(authInfo.token);
-                    const isVerificationCOmpleted = completedCampaigns.includes(
-                        LineaCampaignIdentifiers.Wave6.CampaignId
-                    );
-                    if (isVerificationCOmpleted) {
-                        console.log(`Verification Completed`);
-                    } else {
-                        console.log(`Warning verification NOT completed`);
-                    }
-                } catch (e: any) {
-                    console.log(e.message);
-                }
-                if (taskArgs.delay != undefined) {
-                    await delay(taskArgs.delay);
-                }
-            } catch (error) {
-                console.log(`Error when process account`);
-                console.log(error);
-            }
-        }
-    });
-
 // WAVE 1 - METAMASK
 
 task("intractVerifyWave1MetamaskBridge", "Verify Wave 1 Metamask Bridge")
@@ -4542,6 +4496,51 @@ task("intractVerifyWave6PoH", "Verify Wave 5 Liquidity Review")
         }
     });
 
+task("intractLineaCheckVerification", "Check PoH verification for linea")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                const authInfo = await authenticate({ account: account });
+
+                try {
+                    const completedCampaigns: string[] = await getCompletedCampaigns(authInfo.token);
+                    const isVerificationCOmpleted = completedCampaigns.includes(
+                        LineaCampaignIdentifiers.Wave6.CampaignId
+                    );
+                    if (isVerificationCOmpleted) {
+                        console.log(`Verification Completed`);
+                    } else {
+                        console.log(`Warning verification NOT completed`);
+                    }
+                } catch (e: any) {
+                    console.log(e.message);
+                }
+                if (taskArgs.delay != undefined) {
+                    await delay(taskArgs.delay);
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
 // WAVE 7
 
 task("intractVerifyWave7Trading", "")
@@ -5115,6 +5114,794 @@ task("intractClaimWave8SocialFi", "")
                     }
                 } catch (e: any) {
                     console.log(e.message);
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+// Wave 9
+task("intractVerifyWave9SuperDapps", "")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                const authInfo = await authenticate({ account: account });
+
+                const verifyPayloads = [
+                    {
+                        campaignId: "657c3aa5d306cc1e607e918f",
+                        userInputs: {
+                            ANSWER: "Multi-chain support",
+                            TRANSACTION_HASH: "0x",
+                        },
+                        task: {
+                            userInputs: {
+                                initiateButton: {
+                                    label: "Answer",
+                                    isExist: false,
+                                    callbackFunction: false,
+                                },
+                                verifyButton: {
+                                    label: "Verify",
+                                    callbackFunction: true,
+                                    callbackParameters: [
+                                        {
+                                            source: "QUEST_USER_INPUT_FIELD",
+                                            key: "ANSWER",
+                                        },
+                                        {
+                                            source: "ADMIN_INPUT_FIELD",
+                                            key: "RIGHT_ANSWER",
+                                        },
+                                        {
+                                            source: "ADMIN_INPUT_FIELD",
+                                            key: "MAX_RETRIES",
+                                        },
+                                        {
+                                            source: "ADMIN_INPUT_FIELD",
+                                            key: "IS_XP_TO_BE_REDUCED",
+                                        },
+                                        {
+                                            source: "QUEST_USER_DB_FIELD",
+                                            key: "_id",
+                                        },
+                                        {
+                                            source: "CAMPAIGN_DB_FIELD",
+                                            key: "_id",
+                                        },
+                                    ],
+                                },
+                                dynamicInputs: [
+                                    {
+                                        key: "ANSWER",
+                                        label: "Answer the quiz",
+                                        placeholder: "Write your answer here",
+                                        inputType: "INPUT_STRING",
+                                        options: [],
+                                        _id: "657c3aa5d306cc1e607e91e7",
+                                    },
+                                ],
+                            },
+                            asyncVerifyConfig: {
+                                isAsyncVerify: false,
+                                verifyTimeInSeconds: 0,
+                                maxRetryCount: 0,
+                                retryTimeInSeconds: 0,
+                                isScatterEnabled: false,
+                                maxScatterInSeconds: 0,
+                            },
+                            powVerifyConfig: {
+                                isPOWVerify: false,
+                            },
+                            recurrenceConfig: {
+                                isRecurring: false,
+                                frequencyInDays: 0,
+                                maxRecurrenceCount: 0,
+                            },
+                            flashTaskConfig: {
+                                isFlashTask: false,
+                            },
+                            name: "Quiz with a right answer",
+                            description: "What is a common feature among superdapps?",
+                            templateType: "Quiz",
+                            xp: 6,
+                            adminInputs: [
+                                {
+                                    key: "QUESTION",
+                                    inputType: "INPUT_STRING",
+                                    label: "Describe your question",
+                                    placeholder: "Describe your question",
+                                    value: "What is a common feature among superdapps?",
+                                    _id: "657c3aa5d306cc1e607e91e1",
+                                },
+                                {
+                                    key: "MCQ_OPTIONS",
+                                    inputType: "INPUT_STRING_ARRAY",
+                                    label: "Add your options",
+                                    value: [
+                                        "Support for only one specific blockchain",
+                                        "No support for decentralized applications",
+                                        "Limited to fiat currency transactions",
+                                        "Multi-chain support",
+                                    ],
+                                    _id: "657c3aa5d306cc1e607e91e2",
+                                },
+                                {
+                                    key: "RIGHT_ANSWER",
+                                    inputType: "SELECT_FROM_ADMIN_INPUT",
+                                    label: "Select right options",
+                                    optionsFrom: "MCQ_OPTIONS",
+                                    _id: "657c3aa5d306cc1e607e91e3",
+                                },
+                                {
+                                    key: "IS_TASK_TITLE",
+                                    inputType: "INPUT_CHECKBOX",
+                                    label: "Set as task title",
+                                    value: 1,
+                                    _id: "657c3aa5d306cc1e607e91e4",
+                                },
+                                {
+                                    key: "MAX_RETRIES",
+                                    inputType: "INPUT_NUMBER",
+                                    label: "Max Attempts Allowed?",
+                                    value: 0,
+                                    _id: "657c3aa5d306cc1e607e91e5",
+                                },
+                                {
+                                    key: "IS_XP_TO_BE_REDUCED",
+                                    inputType: "INPUT_CHECKBOX",
+                                    label: "XPs to be reduced on wrong answer?",
+                                    value: 0,
+                                    _id: "657c3aa5d306cc1e607e91e6",
+                                },
+                            ],
+                            isAttributionTask: true,
+                            templateFamily: "FORMS",
+                            totalUsersCompleted: 30970,
+                            totalRecurringUsersCompleted: [],
+                            requiredLogins: [],
+                            isIntractTask: false,
+                            isRequiredTask: true,
+                            showOnChainHelper: false,
+                            hasMaxRetryCheck: true,
+                            hasRateLimitCheck: false,
+                            isAddedLater: false,
+                            isVisible: true,
+                            isDeleted: false,
+                            _id: "657c3aa5d306cc1e607e91e0",
+                        },
+                        verificationObject: {
+                            ANSWER: "Multi-chain support",
+                            questerWalletAddress: account.address,
+                        },
+                    },
+                    {
+                        campaignId: "657c3aa5d306cc1e607e918f",
+                        userInputs: {
+                            ANSWER: "Providing integrated analytics tools for tracking and managing blockchain investments and activities",
+                            TRANSACTION_HASH: "0x",
+                        },
+                        task: {
+                            userInputs: {
+                                initiateButton: {
+                                    label: "Answer",
+                                    isExist: false,
+                                    callbackFunction: false,
+                                },
+                                verifyButton: {
+                                    label: "Verify",
+                                    callbackFunction: true,
+                                    callbackParameters: [
+                                        {
+                                            source: "QUEST_USER_INPUT_FIELD",
+                                            key: "ANSWER",
+                                        },
+                                        {
+                                            source: "ADMIN_INPUT_FIELD",
+                                            key: "RIGHT_ANSWER",
+                                        },
+                                        {
+                                            source: "ADMIN_INPUT_FIELD",
+                                            key: "MAX_RETRIES",
+                                        },
+                                        {
+                                            source: "ADMIN_INPUT_FIELD",
+                                            key: "IS_XP_TO_BE_REDUCED",
+                                        },
+                                        {
+                                            source: "QUEST_USER_DB_FIELD",
+                                            key: "_id",
+                                        },
+                                        {
+                                            source: "CAMPAIGN_DB_FIELD",
+                                            key: "_id",
+                                        },
+                                    ],
+                                },
+                                dynamicInputs: [
+                                    {
+                                        key: "ANSWER",
+                                        label: "Answer the quiz",
+                                        placeholder: "Write your answer here",
+                                        inputType: "INPUT_STRING",
+                                        options: [],
+                                        _id: "657c3aa5d306cc1e607e91ef",
+                                    },
+                                ],
+                            },
+                            asyncVerifyConfig: {
+                                isAsyncVerify: false,
+                                verifyTimeInSeconds: 0,
+                                maxRetryCount: 0,
+                                retryTimeInSeconds: 0,
+                                isScatterEnabled: false,
+                                maxScatterInSeconds: 0,
+                            },
+                            powVerifyConfig: {
+                                isPOWVerify: false,
+                            },
+                            recurrenceConfig: {
+                                isRecurring: false,
+                                frequencyInDays: 0,
+                                maxRecurrenceCount: 0,
+                            },
+                            flashTaskConfig: {
+                                isFlashTask: false,
+                            },
+                            name: "Quiz with a right answer",
+                            description:
+                                "How are Superdapps addressing the challenge of blockchain data analysis and management?",
+                            templateType: "Quiz",
+                            xp: 6,
+                            adminInputs: [
+                                {
+                                    key: "QUESTION",
+                                    inputType: "INPUT_STRING",
+                                    label: "Describe your question",
+                                    placeholder: "Describe your question",
+                                    value: "How are Superdapps addressing the challenge of blockchain data analysis and management?",
+                                    _id: "657c3aa5d306cc1e607e91e9",
+                                },
+                                {
+                                    key: "MCQ_OPTIONS",
+                                    inputType: "INPUT_STRING_ARRAY",
+                                    label: "Add your options",
+                                    value: [
+                                        "Providing integrated analytics tools for tracking and managing blockchain investments and activities",
+                                        "Offering no data analysis tools",
+                                        "Limited analytics to specific blockchain networks",
+                                        "Only basic tracking of transaction history",
+                                    ],
+                                    _id: "657c3aa5d306cc1e607e91ea",
+                                },
+                                {
+                                    key: "RIGHT_ANSWER",
+                                    inputType: "SELECT_FROM_ADMIN_INPUT",
+                                    label: "Select right options",
+                                    optionsFrom: "MCQ_OPTIONS",
+                                    _id: "657c3aa5d306cc1e607e91eb",
+                                },
+                                {
+                                    key: "IS_TASK_TITLE",
+                                    inputType: "INPUT_CHECKBOX",
+                                    label: "Set as task title",
+                                    value: 1,
+                                    _id: "657c3aa5d306cc1e607e91ec",
+                                },
+                                {
+                                    key: "MAX_RETRIES",
+                                    inputType: "INPUT_NUMBER",
+                                    label: "Max Attempts Allowed?",
+                                    value: 0,
+                                    _id: "657c3aa5d306cc1e607e91ed",
+                                },
+                                {
+                                    key: "IS_XP_TO_BE_REDUCED",
+                                    inputType: "INPUT_CHECKBOX",
+                                    label: "XPs to be reduced on wrong answer?",
+                                    value: 0,
+                                    _id: "657c3aa5d306cc1e607e91ee",
+                                },
+                            ],
+                            isAttributionTask: true,
+                            templateFamily: "FORMS",
+                            totalUsersCompleted: 30866,
+                            totalRecurringUsersCompleted: [],
+                            requiredLogins: [],
+                            isIntractTask: false,
+                            isRequiredTask: true,
+                            showOnChainHelper: false,
+                            hasMaxRetryCheck: true,
+                            hasRateLimitCheck: false,
+                            isAddedLater: false,
+                            isVisible: true,
+                            isDeleted: false,
+                            _id: "657c3aa5d306cc1e607e91e8",
+                        },
+                        verificationObject: {
+                            ANSWER: "Providing integrated analytics tools for tracking and managing blockchain investments and activities",
+                            questerWalletAddress: account.address,
+                        },
+                    },
+                    {
+                        campaignId: "657c3aa5d306cc1e607e918f",
+                        userInputs: {
+                            ANSWER: "Offering integrated gaming platforms and easy management of in-game assets and currencies",
+                            TRANSACTION_HASH: "0x",
+                        },
+                        task: {
+                            userInputs: {
+                                initiateButton: {
+                                    label: "Answer",
+                                    isExist: false,
+                                    callbackFunction: false,
+                                },
+                                verifyButton: {
+                                    label: "Verify",
+                                    callbackFunction: true,
+                                    callbackParameters: [
+                                        {
+                                            source: "QUEST_USER_INPUT_FIELD",
+                                            key: "ANSWER",
+                                        },
+                                        {
+                                            source: "ADMIN_INPUT_FIELD",
+                                            key: "RIGHT_ANSWER",
+                                        },
+                                        {
+                                            source: "ADMIN_INPUT_FIELD",
+                                            key: "MAX_RETRIES",
+                                        },
+                                        {
+                                            source: "ADMIN_INPUT_FIELD",
+                                            key: "IS_XP_TO_BE_REDUCED",
+                                        },
+                                        {
+                                            source: "QUEST_USER_DB_FIELD",
+                                            key: "_id",
+                                        },
+                                        {
+                                            source: "CAMPAIGN_DB_FIELD",
+                                            key: "_id",
+                                        },
+                                    ],
+                                },
+                                dynamicInputs: [
+                                    {
+                                        key: "ANSWER",
+                                        label: "Answer the quiz",
+                                        placeholder: "Write your answer here",
+                                        inputType: "INPUT_STRING",
+                                        options: [],
+                                        _id: "657c3aa5d306cc1e607e91f7",
+                                    },
+                                ],
+                            },
+                            asyncVerifyConfig: {
+                                isAsyncVerify: false,
+                                verifyTimeInSeconds: 0,
+                                maxRetryCount: 0,
+                                retryTimeInSeconds: 0,
+                                isScatterEnabled: false,
+                                maxScatterInSeconds: 0,
+                            },
+                            powVerifyConfig: {
+                                isPOWVerify: false,
+                            },
+                            recurrenceConfig: {
+                                isRecurring: false,
+                                frequencyInDays: 0,
+                                maxRecurrenceCount: 0,
+                            },
+                            flashTaskConfig: {
+                                isFlashTask: false,
+                            },
+                            name: "Quiz with a right answer",
+                            description:
+                                "In the sphere of SuperDApps, how do crypto wallets facilitate blockchain gaming experiences?",
+                            templateType: "Quiz",
+                            xp: 6,
+                            adminInputs: [
+                                {
+                                    key: "QUESTION",
+                                    inputType: "INPUT_STRING",
+                                    label: "Describe your question",
+                                    placeholder: "Describe your question",
+                                    value: "In the sphere of SuperDApps, how do crypto wallets facilitate blockchain gaming experiences?",
+                                    _id: "657c3aa5d306cc1e607e91f1",
+                                },
+                                {
+                                    key: "MCQ_OPTIONS",
+                                    inputType: "INPUT_STRING_ARRAY",
+                                    label: "Add your options",
+                                    value: [
+                                        "No support for blockchain gaming",
+                                        "Offering integrated gaming platforms and easy management of in-game assets and currencies",
+                                        "Limited to tracking gaming assets",
+                                        "Only providing information about blockchain games",
+                                    ],
+                                    _id: "657c3aa5d306cc1e607e91f2",
+                                },
+                                {
+                                    key: "RIGHT_ANSWER",
+                                    inputType: "SELECT_FROM_ADMIN_INPUT",
+                                    label: "Select right options",
+                                    optionsFrom: "MCQ_OPTIONS",
+                                    _id: "657c3aa5d306cc1e607e91f3",
+                                },
+                                {
+                                    key: "IS_TASK_TITLE",
+                                    inputType: "INPUT_CHECKBOX",
+                                    label: "Set as task title",
+                                    value: 1,
+                                    _id: "657c3aa5d306cc1e607e91f4",
+                                },
+                                {
+                                    key: "MAX_RETRIES",
+                                    inputType: "INPUT_NUMBER",
+                                    label: "Max Attempts Allowed?",
+                                    value: 0,
+                                    _id: "657c3aa5d306cc1e607e91f5",
+                                },
+                                {
+                                    key: "IS_XP_TO_BE_REDUCED",
+                                    inputType: "INPUT_CHECKBOX",
+                                    label: "XPs to be reduced on wrong answer?",
+                                    value: 0,
+                                    _id: "657c3aa5d306cc1e607e91f6",
+                                },
+                            ],
+                            isAttributionTask: true,
+                            templateFamily: "FORMS",
+                            totalUsersCompleted: 30830,
+                            totalRecurringUsersCompleted: [],
+                            requiredLogins: [],
+                            isIntractTask: false,
+                            isRequiredTask: true,
+                            showOnChainHelper: false,
+                            hasMaxRetryCheck: true,
+                            hasRateLimitCheck: false,
+                            isAddedLater: false,
+                            isVisible: true,
+                            isDeleted: false,
+                            _id: "657c3aa5d306cc1e607e91f0",
+                        },
+                        verificationObject: {
+                            ANSWER: "Offering integrated gaming platforms and easy management of in-game assets and currencies",
+                            questerWalletAddress: account.address,
+                        },
+                    },
+                    {
+                        campaignId: "657c3aa5d306cc1e607e918f",
+                        userInputs: {
+                            ANSWER: "Facilitate seamless cross-chain transfers and swaps",
+                            TRANSACTION_HASH: "0x",
+                        },
+                        task: {
+                            userInputs: {
+                                initiateButton: {
+                                    label: "Answer",
+                                    isExist: false,
+                                    callbackFunction: false,
+                                },
+                                verifyButton: {
+                                    label: "Verify",
+                                    callbackFunction: true,
+                                    callbackParameters: [
+                                        {
+                                            source: "QUEST_USER_INPUT_FIELD",
+                                            key: "ANSWER",
+                                        },
+                                        {
+                                            source: "ADMIN_INPUT_FIELD",
+                                            key: "RIGHT_ANSWER",
+                                        },
+                                        {
+                                            source: "ADMIN_INPUT_FIELD",
+                                            key: "MAX_RETRIES",
+                                        },
+                                        {
+                                            source: "ADMIN_INPUT_FIELD",
+                                            key: "IS_XP_TO_BE_REDUCED",
+                                        },
+                                        {
+                                            source: "QUEST_USER_DB_FIELD",
+                                            key: "_id",
+                                        },
+                                        {
+                                            source: "CAMPAIGN_DB_FIELD",
+                                            key: "_id",
+                                        },
+                                    ],
+                                },
+                                dynamicInputs: [
+                                    {
+                                        key: "ANSWER",
+                                        label: "Answer the quiz",
+                                        placeholder: "Write your answer here",
+                                        inputType: "INPUT_STRING",
+                                        options: [],
+                                        _id: "657c3aa5d306cc1e607e91ff",
+                                    },
+                                ],
+                            },
+                            asyncVerifyConfig: {
+                                isAsyncVerify: false,
+                                verifyTimeInSeconds: 0,
+                                maxRetryCount: 0,
+                                retryTimeInSeconds: 0,
+                                isScatterEnabled: false,
+                                maxScatterInSeconds: 0,
+                            },
+                            powVerifyConfig: {
+                                isPOWVerify: false,
+                            },
+                            recurrenceConfig: {
+                                isRecurring: false,
+                                frequencyInDays: 0,
+                                maxRecurrenceCount: 0,
+                            },
+                            flashTaskConfig: {
+                                isFlashTask: false,
+                            },
+                            name: "Quiz with a right answer",
+                            description: "How do most superdapps address cross-chain transactions?",
+                            templateType: "Quiz",
+                            xp: 6,
+                            adminInputs: [
+                                {
+                                    key: "QUESTION",
+                                    inputType: "INPUT_STRING",
+                                    label: "Describe your question",
+                                    placeholder: "Describe your question",
+                                    value: "How do most superdapps address cross-chain transactions?",
+                                    _id: "657c3aa5d306cc1e607e91f9",
+                                },
+                                {
+                                    key: "MCQ_OPTIONS",
+                                    inputType: "INPUT_STRING_ARRAY",
+                                    label: "Add your options",
+                                    value: [
+                                        "No support for cross-chain transactions",
+                                        "Facilitate seamless cross-chain transfers and swaps",
+                                        "Charge high fees for cross-chain transactions",
+                                        "Limited to only the most popular chains",
+                                    ],
+                                    _id: "657c3aa5d306cc1e607e91fa",
+                                },
+                                {
+                                    key: "RIGHT_ANSWER",
+                                    inputType: "SELECT_FROM_ADMIN_INPUT",
+                                    label: "Select right options",
+                                    optionsFrom: "MCQ_OPTIONS",
+                                    _id: "657c3aa5d306cc1e607e91fb",
+                                },
+                                {
+                                    key: "IS_TASK_TITLE",
+                                    inputType: "INPUT_CHECKBOX",
+                                    label: "Set as task title",
+                                    value: 1,
+                                    _id: "657c3aa5d306cc1e607e91fc",
+                                },
+                                {
+                                    key: "MAX_RETRIES",
+                                    inputType: "INPUT_NUMBER",
+                                    label: "Max Attempts Allowed?",
+                                    value: 0,
+                                    _id: "657c3aa5d306cc1e607e91fd",
+                                },
+                                {
+                                    key: "IS_XP_TO_BE_REDUCED",
+                                    inputType: "INPUT_CHECKBOX",
+                                    label: "XPs to be reduced on wrong answer?",
+                                    value: 0,
+                                    _id: "657c3aa5d306cc1e607e91fe",
+                                },
+                            ],
+                            isAttributionTask: true,
+                            templateFamily: "FORMS",
+                            totalUsersCompleted: 30804,
+                            totalRecurringUsersCompleted: [],
+                            requiredLogins: [],
+                            isIntractTask: false,
+                            isRequiredTask: true,
+                            showOnChainHelper: false,
+                            hasMaxRetryCheck: true,
+                            hasRateLimitCheck: false,
+                            isAddedLater: false,
+                            isVisible: true,
+                            isDeleted: false,
+                            _id: "657c3aa5d306cc1e607e91f8",
+                        },
+                        verificationObject: {
+                            ANSWER: "Facilitate seamless cross-chain transfers and swaps",
+                            questerWalletAddress: account.address,
+                        },
+                    },
+                    {
+                        campaignId: "657c3aa5d306cc1e607e918f",
+                        userInputs: {
+                            ANSWER: "Emphasis on simplicity and ease of use, catering to both beginners and experts",
+                            TRANSACTION_HASH: "0x",
+                        },
+                        task: {
+                            userInputs: {
+                                initiateButton: {
+                                    label: "Answer",
+                                    isExist: false,
+                                    callbackFunction: false,
+                                },
+                                verifyButton: {
+                                    label: "Verify",
+                                    callbackFunction: true,
+                                    callbackParameters: [
+                                        {
+                                            source: "QUEST_USER_INPUT_FIELD",
+                                            key: "ANSWER",
+                                        },
+                                        {
+                                            source: "ADMIN_INPUT_FIELD",
+                                            key: "RIGHT_ANSWER",
+                                        },
+                                        {
+                                            source: "ADMIN_INPUT_FIELD",
+                                            key: "MAX_RETRIES",
+                                        },
+                                        {
+                                            source: "ADMIN_INPUT_FIELD",
+                                            key: "IS_XP_TO_BE_REDUCED",
+                                        },
+                                        {
+                                            source: "QUEST_USER_DB_FIELD",
+                                            key: "_id",
+                                        },
+                                        {
+                                            source: "CAMPAIGN_DB_FIELD",
+                                            key: "_id",
+                                        },
+                                    ],
+                                },
+                                dynamicInputs: [
+                                    {
+                                        key: "ANSWER",
+                                        label: "Answer the quiz",
+                                        placeholder: "Write your answer here",
+                                        inputType: "INPUT_STRING",
+                                        options: [],
+                                        _id: "657c3aa5d306cc1e607e9207",
+                                    },
+                                ],
+                            },
+                            asyncVerifyConfig: {
+                                isAsyncVerify: false,
+                                verifyTimeInSeconds: 0,
+                                maxRetryCount: 0,
+                                retryTimeInSeconds: 0,
+                                isScatterEnabled: false,
+                                maxScatterInSeconds: 0,
+                            },
+                            powVerifyConfig: {
+                                isPOWVerify: false,
+                            },
+                            recurrenceConfig: {
+                                isRecurring: false,
+                                frequencyInDays: 0,
+                                maxRecurrenceCount: 0,
+                            },
+                            flashTaskConfig: {
+                                isFlashTask: false,
+                            },
+                            name: "Quiz with a right answer",
+                            description: "What is a notable trend in superdapp user experience design?",
+                            templateType: "Quiz",
+                            xp: 6,
+                            adminInputs: [
+                                {
+                                    key: "QUESTION",
+                                    inputType: "INPUT_STRING",
+                                    label: "Describe your question",
+                                    placeholder: "Describe your question",
+                                    value: "What is a notable trend in superdapp user experience design?",
+                                    _id: "657c3aa5d306cc1e607e9201",
+                                },
+                                {
+                                    key: "MCQ_OPTIONS",
+                                    inputType: "INPUT_STRING_ARRAY",
+                                    label: "Add your options",
+                                    value: [
+                                        "Focus on technical users with complex interfaces",
+                                        "Text-based interfaces",
+                                        "Emphasis on simplicity and ease of use, catering to both beginners and experts",
+                                        "No graphical user interface, command-line only",
+                                    ],
+                                    _id: "657c3aa5d306cc1e607e9202",
+                                },
+                                {
+                                    key: "RIGHT_ANSWER",
+                                    inputType: "SELECT_FROM_ADMIN_INPUT",
+                                    label: "Select right options",
+                                    optionsFrom: "MCQ_OPTIONS",
+                                    _id: "657c3aa5d306cc1e607e9203",
+                                },
+                                {
+                                    key: "IS_TASK_TITLE",
+                                    inputType: "INPUT_CHECKBOX",
+                                    label: "Set as task title",
+                                    value: 1,
+                                    _id: "657c3aa5d306cc1e607e9204",
+                                },
+                                {
+                                    key: "MAX_RETRIES",
+                                    inputType: "INPUT_NUMBER",
+                                    label: "Max Attempts Allowed?",
+                                    value: 0,
+                                    _id: "657c3aa5d306cc1e607e9205",
+                                },
+                                {
+                                    key: "IS_XP_TO_BE_REDUCED",
+                                    inputType: "INPUT_CHECKBOX",
+                                    label: "XPs to be reduced on wrong answer?",
+                                    value: 0,
+                                    _id: "657c3aa5d306cc1e607e9206",
+                                },
+                            ],
+                            isAttributionTask: true,
+                            templateFamily: "FORMS",
+                            totalUsersCompleted: 30752,
+                            totalRecurringUsersCompleted: [],
+                            requiredLogins: [],
+                            isIntractTask: false,
+                            isRequiredTask: true,
+                            showOnChainHelper: false,
+                            hasMaxRetryCheck: true,
+                            hasRateLimitCheck: false,
+                            isAddedLater: false,
+                            isVisible: true,
+                            isDeleted: false,
+                            _id: "657c3aa5d306cc1e607e9200",
+                        },
+                        verificationObject: {
+                            ANSWER: "Emphasis on simplicity and ease of use, catering to both beginners and experts",
+                            questerWalletAddress: account.address,
+                        },
+                    },
+                ];
+
+                try {
+                    console.log(`Verification started for Wave 9 SuperDapps`);
+                    for (const data of verifyPayloads) {
+                        await verifyTask(authInfo.token, data, []);
+                        console.log(`Question ${verifyPayloads.indexOf(data) + 1}`);
+                        await delay(0.02);
+                    }
+                    if (taskArgs.delay != undefined) {
+                        await delay(taskArgs.delay);
+                    }
+                } catch (e: any) {
+                    if (e instanceof AxiosError) {
+                        console.log(e.response?.data.message);
+                    } else {
+                        console.log(e.message);
+                    }
                 }
             } catch (error) {
                 console.log(`Error when process account`);
