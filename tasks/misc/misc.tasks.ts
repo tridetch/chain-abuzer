@@ -1,15 +1,16 @@
+import axios, { AxiosResponse } from "axios";
 import { BigNumber, ethers, utils } from "ethers";
 import { task, types } from "hardhat/config";
 import { ERC20__factory } from "../../typechain-types";
 import { ChainId, getChainInfo } from "../../utils/ChainInfoUtils";
 import "../../utils/Util.tasks";
-import { delay, getAccounts, populateTxnParams, toHexZeroPad, waitForGasPrice } from "../../utils/Utils";
+import { delay, getAccounts, populateTxnParams, waitForGasPrice } from "../../utils/Utils";
 
 task("miscWithbackedCommunityNft", "Mint nft on optimism")
     .addParam("delay", "Add random delay", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -54,7 +55,7 @@ task("layerZeroUsdcBridge", "Layer zero USDC goerli bridge. Send 3 USDC with gas
     .addParam("delay", "Add random delay", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -113,7 +114,7 @@ task("mintCatAttackNft", "Mint base nft")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -159,7 +160,7 @@ task("mintShapellaNft", "Mint shapella NFT")
     .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -206,7 +207,7 @@ task("mintOpWorldcoinNft", "Mint OP worldcoin NFT")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -251,7 +252,7 @@ task("eigenlayerDepositStEth", "Deposit stETH to eigenLayer")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -311,7 +312,7 @@ task("stakegEthInRoketPool", "Stake gETH for rETH")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -364,7 +365,7 @@ task("eigenlayerDepositREth", "Deposit RETH to eigenLayer")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -424,7 +425,7 @@ task("mintOptimismCoGrantNft", "Mint optimism Co-Grant NFT")
     .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -472,7 +473,7 @@ task("mintZkLightClient", "Mint zkLightClient NFT")
     .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -519,7 +520,7 @@ task("mintOpBadrockNft", "Mint Optimism badrock NFT")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -571,7 +572,7 @@ task("lineaMintWeek9", "Mint nft")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -620,7 +621,7 @@ task("mintManifoldSoundNft", "Mint nft")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -673,7 +674,7 @@ task("mintEigenWorldNft", "Mint Eigen World nft")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -729,7 +730,7 @@ task("mintFunCustomNft", "Mint custom NFT on MintFun")
     .addParam("contractAddress", "Contract address of NFT", undefined, types.string, false)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize accounts execution order")
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -772,6 +773,73 @@ task("mintFunCustomNft", "Mint custom NFT on MintFun")
                 console.log(
                     `Error when process account #${accounts.indexOf(account)} Address: ${account.address}`
                 );
+                console.log(error);
+            }
+        }
+    });
+
+task("zkFairCheckAirdrop", "")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+        interface ZkFairDropInfo {
+            community_airdrop: {
+                "Polygon zkEVM": {
+                    value: string;
+                    value_decimal: string;
+                    gas_fee: string;
+                };
+                Lumoz: {
+                    value: string;
+                    value_decimal: string;
+                    points: string;
+                };
+                zkRollups: {
+                    value: string;
+                    value_decimal: string;
+                    gas_fee: string;
+                };
+            };
+        }
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                const response: AxiosResponse<ZkFairDropInfo> = await axios.get(
+                    `https://api.zkfair.io/data/api/community-airdrop?address=${account.address.toLocaleLowerCase()}`
+                );
+
+                const lumozAmount = BigNumber.from(response.data.community_airdrop.Lumoz.value);
+                const polygonAmount = BigNumber.from(response.data.community_airdrop["Polygon zkEVM"].value);
+                const zkRollupsAmount = BigNumber.from(response.data.community_airdrop.zkRollups.value);
+
+                console.log(
+                    `Lumoz ${ethers.utils.formatEther(lumozAmount)}; Polygon zkEVM ${ethers.utils.formatEther(
+                        polygonAmount
+                    )}; zkRollups ${ethers.utils.formatEther(
+                        zkRollupsAmount
+                    )};\nTotal amount ${ethers.utils.formatEther(
+                        lumozAmount.add(polygonAmount).add(zkRollupsAmount)
+                    )}`
+                );
+
+                if (taskArgs.delay != undefined) {
+                    await delay(taskArgs.delay);
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
                 console.log(error);
             }
         }
