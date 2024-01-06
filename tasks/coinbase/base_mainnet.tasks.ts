@@ -15,6 +15,7 @@ task("baseMainnetBridge", "Bridge ETH to base network")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -79,6 +80,7 @@ task("baseGenesisBuilderNFT", "Mint Genesis Builder NFT")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -137,6 +139,7 @@ task("baseMintLayerZeroExpedition", "Mint MintDAO LayerZero EXPEDITION NFT")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -190,6 +193,7 @@ task("baseContractInteractions", "Interact with erc-20 contracts")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -225,9 +229,9 @@ task("baseContractInteractions", "Interact with erc-20 contracts")
                 var erc20Shuffled = shuffle(erc20Contracts);
 
                 if (taskArgs.interactions <= erc20Shuffled.length) {
-                    erc20Shuffled = erc20Shuffled.slice(undefined, taskArgs.interactions)
+                    erc20Shuffled = erc20Shuffled.slice(undefined, taskArgs.interactions);
                 }
-                
+
                 for (const erc20 of erc20Shuffled) {
                     const txParams = await populateTxnParams({ signer: account, chain: chainInfo });
                     const tx = await erc20

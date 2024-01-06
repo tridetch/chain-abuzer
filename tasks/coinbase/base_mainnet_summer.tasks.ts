@@ -9,6 +9,7 @@ task("baseMintOnchainSummerNFT", "Mint Onchain Summer NFT")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -70,6 +71,7 @@ task("baseMintOnchainSummerD1NFT", "Mint Onchain Summer Day One NFT")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -130,6 +132,7 @@ task("baseMintOnchainSummerD4IchRUNFT", "Mint Onchain Summer Day Four NFT")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -184,6 +187,7 @@ task("baseMintOnchainSummerD4OriginatorNFT", "Mint Onchain Summer Day Four NFT")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -238,6 +242,7 @@ task("baseMintOnchainSummerD4ParadiseNFT", "Mint Onchain Summer Day Four NFT")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -292,6 +297,7 @@ task("baseMintOnchainSummerZorbNFT", "Mint Onchain Summer Zorb NFT")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -359,6 +365,7 @@ task("baseMintOnchainSummerClashMonNFT", "Mint Onchain Summer ClashMon NFT")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",

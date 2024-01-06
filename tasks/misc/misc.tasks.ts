@@ -1,16 +1,17 @@
 import axios, { AxiosResponse } from "axios";
-import { BigNumber, ethers, utils } from "ethers";
+import { BigNumber, Contract, ethers, utils } from "ethers";
 import { task, types } from "hardhat/config";
 import { ERC20__factory } from "../../typechain-types";
 import { ChainId, getChainInfo } from "../../utils/ChainInfoUtils";
 import "../../utils/Util.tasks";
-import { delay, getAccounts, populateTxnParams, waitForGasPrice } from "../../utils/Utils";
+import { MOCK_USER_AGENT, delay, getAccounts, populateTxnParams, waitForGasPrice } from "../../utils/Utils";
 
 task("miscWithbackedCommunityNft", "Mint nft on optimism")
     .addParam("delay", "Add random delay", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -55,7 +56,8 @@ task("layerZeroUsdcBridge", "Layer zero USDC goerli bridge. Send 3 USDC with gas
     .addParam("delay", "Add random delay", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -114,7 +116,8 @@ task("mintCatAttackNft", "Mint base nft")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -160,7 +163,8 @@ task("mintShapellaNft", "Mint shapella NFT")
     .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -207,7 +211,8 @@ task("mintOpWorldcoinNft", "Mint OP worldcoin NFT")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -252,7 +257,8 @@ task("eigenlayerDepositStEth", "Deposit stETH to eigenLayer")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -312,7 +318,8 @@ task("stakegEthInRoketPool", "Stake gETH for rETH")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -365,7 +372,8 @@ task("eigenlayerDepositREth", "Deposit RETH to eigenLayer")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -425,7 +433,8 @@ task("mintOptimismCoGrantNft", "Mint optimism Co-Grant NFT")
     .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -473,7 +482,8 @@ task("mintZkLightClient", "Mint zkLightClient NFT")
     .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -520,7 +530,8 @@ task("mintOpBadrockNft", "Mint Optimism badrock NFT")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -572,7 +583,8 @@ task("lineaMintWeek9", "Mint nft")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -621,7 +633,8 @@ task("mintManifoldSoundNft", "Mint nft")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -674,7 +687,8 @@ task("mintEigenWorldNft", "Mint Eigen World nft")
     .addParam("delay", "Add random delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -730,7 +744,8 @@ task("mintFunCustomNft", "Mint custom NFT on MintFun")
     .addParam("contractAddress", "Contract address of NFT", undefined, types.string, false)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -782,7 +797,8 @@ task("zkFairCheckAirdrop", "")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -818,7 +834,12 @@ task("zkFairCheckAirdrop", "")
                 console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
 
                 const response: AxiosResponse<ZkFairDropInfo> = await axios.get(
-                    `https://api.zkfair.io/data/api/community-airdrop?address=${account.address.toLocaleLowerCase()}`
+                    `https://api.zkfair.io/data/api/community-airdrop?address=${account.address.toLocaleLowerCase()}`,
+                    {
+                        headers: {
+                            "User-Agent": MOCK_USER_AGENT,
+                        },
+                    }
                 );
 
                 const lumozAmount = BigNumber.from(response.data.community_airdrop.Lumoz.value);
@@ -833,6 +854,126 @@ task("zkFairCheckAirdrop", "")
                     )};\nTotal amount ${ethers.utils.formatEther(
                         lumozAmount.add(polygonAmount).add(zkRollupsAmount)
                     )}`
+                );
+
+                if (taskArgs.delay != undefined) {
+                    await delay(taskArgs.delay);
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("zkFairClaimAirdrop", "")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        if (![ChainId.zkfMainnet].includes(currentNetwork.chainId)) {
+            console.log(`Task supported only at zkf mainnet!`);
+            return;
+        }
+
+        interface ZkFairDropInfo {
+            resultCode: number;
+            data: {
+                account_profit: string;
+                contract_address: string;
+                index: string;
+            };
+        }
+
+        interface zkFairProof {
+            resultCode: number;
+            data: {
+                proof: string[];
+            };
+        }
+
+        const claimContract = new Contract("0x53c390b02339519991897b59eb6d9e0b211eb840", [
+            "function claim(uint256 index, uint256 amount, bytes32[] proof)",
+        ]);
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                const claimTimestamp = new Date().toISOString();
+                const claimSign = await account.signMessage(
+                    `${claimTimestamp}GET/api/airdrop?address=${account.address.toLowerCase()}`
+                );
+                const claimDataResponse: AxiosResponse<ZkFairDropInfo> = await axios.get(
+                    `https://airdrop.zkfair.io/api/airdrop?address=${account.address.toLocaleLowerCase()}&API-SIGNATURE=${claimSign}&TIMESTAMP=${claimTimestamp}`,
+                    {
+                        headers: {
+                            authority: "airdrop.zkfair.io",
+                            accept: "application/json, text/plain, */*",
+                            "accept-language": "en-US,en;q=0.9",
+                            dnt: "1",
+                            origin: "https://zkfair.io",
+                            referer: "https://zkfair.io/",
+                            "sec-ch-ua": '"Not_A Brand";v="8", "Chromium";v="120"',
+                            "sec-ch-ua-mobile": "?0",
+                            "sec-ch-ua-platform": '"macOS"',
+                            "sec-fetch-dest": "empty",
+                            "sec-fetch-mode": "cors",
+                            "sec-fetch-site": "same-site",
+                            "user-agent": MOCK_USER_AGENT,
+                        },
+                    }
+                );
+
+                const proofTimestamp = new Date().toISOString();
+                const proofSign = await account.signMessage(
+                    `${proofTimestamp}GET/api/airdrop?address=${account.address.toLowerCase()}`
+                );
+                const proof: AxiosResponse<zkFairProof> = await axios.get(
+                    `https://airdrop.zkfair.io/api/airdrop_merkle?address=${account.address.toLocaleLowerCase()}&API-SIGNATURE=${proofSign}&TIMESTAMP=${proofTimestamp}`,
+                    {
+                        headers: {
+                            authority: "airdrop.zkfair.io",
+                            accept: "application/json, text/plain, */*",
+                            "accept-language": "en-US,en;q=0.9",
+                            dnt: "1",
+                            origin: "https://zkfair.io",
+                            referer: "https://zkfair.io/",
+                            "sec-ch-ua": '"Not_A Brand";v="8", "Chromium";v="120"',
+                            "sec-ch-ua-mobile": "?0",
+                            "sec-ch-ua-platform": '"macOS"',
+                            "sec-fetch-dest": "empty",
+                            "sec-fetch-mode": "cors",
+                            "sec-fetch-site": "same-site",
+                            "user-agent": MOCK_USER_AGENT,
+                        },
+                    }
+                );
+
+                const claimTx = await claimContract
+                    .connect(account)
+                    .claim(
+                        claimDataResponse.data.data.index,
+                        claimDataResponse.data.data.account_profit,
+                        proof.data.data.proof
+                    );
+
+                console.log(
+                    `ZKF claimed - ${ethers.utils.formatUnits(
+                        claimDataResponse.data.data.account_profit
+                    )}\ntxn: ${chainInfo.explorer}${claimTx.hash}`
                 );
 
                 if (taskArgs.delay != undefined) {

@@ -1,6 +1,15 @@
 node_modules
+.env
 coverage
 coverage.json
+typechain
+typechain-types
 temp.json
 private_keys_e.json
 ItractAuthCache.json
+social_accounts.ts
+
+#Hardhat files
+cache
+artifacts
+

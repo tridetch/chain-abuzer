@@ -23,6 +23,7 @@ task("zksyncLiteBalances", "Print zksync balances")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -56,6 +57,7 @@ task("zksyncLiteDeposit", "Deposit to zksync from Ethereum")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -106,6 +108,7 @@ task("zksyncLiteWithdraw", "Withdraw from zksync to Ethereum")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -159,7 +162,8 @@ task("zksyncLiteDisperse", "Disperse to accounts")
     .addParam("delay", "Add delay", undefined, types.int, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.int)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize account execution order")
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -226,6 +230,7 @@ task("zksyncLiteActivate", "Activate account")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",

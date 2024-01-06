@@ -17,6 +17,7 @@ task("arbitrumSepoliaBridge", "Bridge ETH Sepolia to arbitrum sepolia network")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -84,6 +85,7 @@ task("arbitrumStylusSepoliaBridge", "Bridge ETH to arbitrum stylus network")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -146,6 +148,7 @@ task("arbitrumStylusSepoliaMintOnchainPowerNFT", "Mint Onchain Power NFT")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -200,6 +203,7 @@ task("arbitrumStylusSepoliaMintOnchainPowerNFT", "Mint Onchain Power NFT")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",

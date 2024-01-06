@@ -112,8 +112,13 @@ export const LineaCampaignIdentifiers = {
         Name: "SuperDapps",
         CampaignId: "657c3aa5d306cc1e607e918f",
         tasksIds: {
-            q1: "657c3aa5d306cc1e607e91e0",
-            q2: "657c3aa5d306cc1e607e91e0",
+        },
+    },
+    Wave10: {
+        Name: "AA",
+        CampaignId: "657c2ce9fb489b1364301ea3",
+        tasksIds: {
+            Swap: "657c2ce9fb489b1364301ea4",
         },
     },
 };

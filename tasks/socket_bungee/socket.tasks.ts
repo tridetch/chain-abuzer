@@ -36,7 +36,8 @@ task("bungeeBridge", "Bridge token between networks")
     .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.int)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addFlag("randomize", "Randomize account execution order")
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -384,6 +385,7 @@ task("bungeeRefuel", "Bridge gas token across networks")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -459,15 +461,17 @@ task("bungeeRefuel", "Bridge gas token across networks")
 
                     const minAmount = BigNumber.from(targetChainInfo?.minAmount);
                     const maxAmount = BigNumber.from(targetChainInfo?.maxAmount);
-        
+
                     const checkAmount = amount;
-        
+
                     if (
                         checkAmount.lt(minAmount) ||
                         checkAmount.add(percentOf(checkAmount, taskArgs.dust || 0)).gt(maxAmount)
                     ) {
                         console.log(
-                            `Max = ${utils.formatEther(checkAmount.add(percentOf(checkAmount, taskArgs.dust || 0)))}`
+                            `Max = ${utils.formatEther(
+                                checkAmount.add(percentOf(checkAmount, taskArgs.dust || 0))
+                            )}`
                         );
                         console.log(
                             `Error amount ${utils.formatEther(checkAmount)} + dust ${
@@ -476,7 +480,7 @@ task("bungeeRefuel", "Bridge gas token across networks")
                         );
                         return;
                     }
-        
+
                     const bridgeTx = await refuelContract
                         .connect(account)
                         .depositNativeToken(taskArgs.targetChainId, account.address, { value: amount });

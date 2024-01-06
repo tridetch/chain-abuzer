@@ -32,7 +32,8 @@ task("gasPrice", "Print chain info").setAction(async (taskArgs, hre) => {
 task("accounts", "Show accounts")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -69,7 +70,8 @@ task("accounts", "Show accounts")
 task("accountsPrivateKeys", "Show accounts private keys")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -97,7 +99,8 @@ task("balances", "Show accounts balances")
     .addOptionalParam("tokenAddress", "Token address")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -127,7 +130,8 @@ task("tokenBalances", "Print accounts token balances")
     .addParam("address", "Token address", undefined, types.string)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -151,7 +155,8 @@ task("tokenBalances", "Print accounts token balances")
 task("balancesCrossChain", "Show accounts balances")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -168,6 +173,7 @@ task("balancesCrossChain", "Show accounts balances")
             ZkEvm: string;
             ZksyncEra: string;
             Base: string;
+            Scroll: string;
         }
 
         const accounts = await getAccounts(taskArgs, hre.ethers.provider);
@@ -179,6 +185,7 @@ task("balancesCrossChain", "Show accounts balances")
         const zkEvmProvider = new hre.ethers.providers.JsonRpcProvider(process.env.POLYGON_ZK_EVM_URL);
         const zksyncEraProvider = new hre.ethers.providers.JsonRpcProvider(process.env.ZKSYNC_ERA_URL);
         const baseProvider = new hre.ethers.providers.JsonRpcProvider(process.env.BASE_MAINNET_URL);
+        const scrollProvider = new hre.ethers.providers.JsonRpcProvider(process.env.SCROLL_MAINNET_URL);
 
         let accountBalances: AccountInfo[] = [];
 
@@ -196,6 +203,7 @@ task("balancesCrossChain", "Show accounts balances")
                     .substring(0, 8),
                 Base: utils.formatEther(await baseProvider.getBalance(account.address)).substring(0, 8),
                 ZkEvm: utils.formatEther(await zkEvmProvider.getBalance(account.address)).substring(0, 8),
+                Scroll: utils.formatEther(await scrollProvider.getBalance(account.address)).substring(0, 8),
             };
             accountBalances.push(accountInfo);
         }
@@ -227,7 +235,8 @@ task("disperseEth", "Disperse ETH from main account to all others")
     .addParam("delay", "Add delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.int)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -339,7 +348,8 @@ task("wrapEth", "Wrap native ETH to WETH")
     .addParam("delay", "Add delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -373,14 +383,17 @@ task("wrapEth", "Wrap native ETH to WETH")
                         provider: hre.ethers.provider,
                     });
 
-                    await waitForGasPrice({ maxPriceInGwei: taskArgs.gasPrice, provider: hre.ethers.provider });
+                    await waitForGasPrice({
+                        maxPriceInGwei: taskArgs.gasPrice,
+                        provider: hre.ethers.provider,
+                    });
 
                     const txParams = await populateTxnParams({ signer: account, chain: chainInfo });
                     const txn = await wethContract.connect(account).deposit({ value: amount, ...txParams });
                     console.log(
-                        `#${accounts.indexOf(account)} Address ${
-                            account.address
-                        }\nWrap ${utils.formatUnits(amount)} WETH txn: ${chainInfo.explorer}${txn.hash}`
+                        `#${accounts.indexOf(account)} Address ${account.address}\nWrap ${utils.formatUnits(
+                            amount
+                        )} WETH txn: ${chainInfo.explorer}${txn.hash}`
                     );
                 } else {
                     console.log(
@@ -408,7 +421,8 @@ task("unwrapEth", "Unwrap WETH to native ether")
     .addParam("delay", "Add delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -464,7 +478,8 @@ task("unwrapEth", "Unwrap WETH to native ether")
 subtask("printWethBalances", "Print accounts token balances")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -508,7 +523,8 @@ task("sendEth", "Send ETH to address")
     .addParam("to", "Destination address", undefined, types.string, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.int)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -585,7 +601,8 @@ task("sendToken", "Send ETH to address")
     .addParam("to", "Destination address", undefined, types.string)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.int)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -649,7 +666,8 @@ task("sendToken", "Send ETH to address")
 task("txCount", "Show account transaction count")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -684,7 +702,8 @@ task("approve", "Approve token to spender")
     .addParam("delay", "Add delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -738,7 +757,8 @@ task("testRpcMethod", "Test rpc")
     .addParam("delay", "Add delay", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -772,7 +792,8 @@ task("ethereumContractInteractions", "Interact with erc-20 contracts")
     .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",

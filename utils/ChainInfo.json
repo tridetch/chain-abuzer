@@ -215,5 +215,13 @@
     "wethAddress": "emptyWethAddress",
     "usdcAddress": "emptyUSDCAddress",
     "usdtAddress": ""
+  },
+  "zkfMainnetChainInfo":{
+    "chainId": 42766,
+    "chainName": "ZKFair Mainnet",
+    "explorer": "https://scan.zkfair.io/",
+    "wethAddress": "0x4b21b980d0Dc7D3C0C6175b0A412694F3A1c7c6b",
+    "usdcAddress": "0xD33Db7EC50A98164cC865dfaa64666906d79319C",
+    "usdtAddress": "0x3f97bf3cd76b5ca9d4a4e9cd8a73c24e32d6c193"
   }
 }

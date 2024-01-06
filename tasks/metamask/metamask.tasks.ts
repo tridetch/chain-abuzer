@@ -20,6 +20,7 @@ task("metamaskBridge", "Bridge tokens with metamask bridge")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
     .addOptionalParam(
         "accountIndex",
@@ -167,6 +168,7 @@ task("metamaskSwap", "Swap tokens with metamask swap")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
     .addOptionalParam(
         "accountIndex",

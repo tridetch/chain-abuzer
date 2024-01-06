@@ -9,7 +9,8 @@ task("routeIntractWave7Trading", "")
     .addParam("delay", "Wait for gas price", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -53,7 +54,10 @@ task("routeIntractWave7Trading", "")
                 const usdcTokenAddress = "0x176211869ca2b568f2a7d4ee941e073a821ee1ff";
                 const usdcContract = ERC20__factory.connect(usdcTokenAddress, hre.ethers.provider);
                 const usdcAmountRaw = 16;
-                const usdcAmount = ethers.utils.parseUnits(usdcAmountRaw.toString(), await usdcContract.decimals());
+                const usdcAmount = ethers.utils.parseUnits(
+                    usdcAmountRaw.toString(),
+                    await usdcContract.decimals()
+                );
 
                 const zkdxAddress = "0x3a85b87e81cd99d4a6670f95a4f0dedaac207da0";
 
@@ -80,10 +84,10 @@ task("routeIntractWave7Trading", "")
                     spenderAddress: zkdxAddress,
                     ...taskArgs,
                 });
-                await delay(0.05)
+                await delay(0.11);
 
                 console.log(`Deposit to ZKDX`);
-                
+
                 var txparams = await populateTxnParams({ signer: account, chain: chainInfo });
                 const supplyTx = await account.sendTransaction({
                     to: zkdxAddress,
@@ -101,10 +105,10 @@ task("routeIntractWave7Trading", "")
                     ...txparams,
                 });
                 console.log(`tx - ${chainInfo.explorer}${withdrawTx.hash}`);
-                await withdrawTx.wait(3)
+                await withdrawTx.wait(3);
 
                 console.log(`Swap back to ETH`);
-                
+
                 await hre.run("syncSwapTrade", {
                     all: true,
                     fromToken: usdcTokenAddress,

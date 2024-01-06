@@ -37,6 +37,7 @@ export enum ChainId {
     zoraTestnet = chainInfo.zoraTestnetChainInfo.chainId,
     taikoA3 = chainInfo.taikoAlpha3ChainInfo.chainId,
     pgnSepolia = chainInfo.pgnSepoliaChainInfo.chainId,
+    zkfMainnet = chainInfo.zkfMainnetChainInfo.chainId,
 }
 
 export function getChainInfo(chainId: number): ChainInfo {
@@ -93,6 +94,8 @@ export function getChainInfo(chainId: number): ChainInfo {
             return chainInfo.arbitrumStylusSepoliaChainInfo;
         case ChainId.arbbitrumSepolia:
             return chainInfo.arbitrumSepoliaChainInfo;
+        case ChainId.zkfMainnet:
+            return chainInfo.zkfMainnetChainInfo;
         default:
             throw new Error("Unknown network!");
     }

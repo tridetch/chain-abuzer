@@ -116,6 +116,9 @@ const config: HardhatUserConfig = {
         arbSepolia: {
             url: process.env.ARBITRUM_SEPOLIA || ""
         },
+        zkfMainnet: {
+            url: process.env.ZKFAIR_MAINNET_URL || ""
+        },
     },
 };
 

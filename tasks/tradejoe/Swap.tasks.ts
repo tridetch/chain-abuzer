@@ -10,7 +10,7 @@ export const OneInchTasks = {
     TraderJoeSwap: "TraderJoeSwap",
 };
 
-task("1inchSwap", "Swap tokens on 1inch")
+/* task("1inchSwap", "Swap tokens on 1inch")
     .addParam("amount", "Amount of tokens to swap", undefined, types.float, true)
     .addFlag("all", "Use all balance of tokens")
     .addParam("dust", "Dust percentage", undefined, types.int, true)
@@ -20,6 +20,7 @@ task("1inchSwap", "Swap tokens on 1inch")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -113,4 +114,4 @@ task("1inchSwap", "Swap tokens on 1inch")
             const BASES = [WETH, USDC, USDT];
             return BASES;
         }
-    });
+    }); */

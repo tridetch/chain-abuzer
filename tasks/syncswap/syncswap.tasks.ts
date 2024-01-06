@@ -20,6 +20,7 @@ task("syncSwapTrade", "Swap tokens on Syncswap")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -122,11 +123,15 @@ task("syncSwapTrade", "Swap tokens on Syncswap")
                     console.log(`Skip address with zero balance ${account.address}`);
                     continue;
                 }
-                
+
                 await waitForGasPrice({ maxPriceInGwei: taskArgs.gasPrice, provider: hre.ethers.provider });
 
-                console.log(`Swap ${utils.formatUnits(amount, sellTokenDecimals)} ${fromNativeEth ? "ETH" : await sellTokenContract.symbol()} to ${toNativeEth ? "ETH" : await buyTokenContract.symbol()}`);
-                
+                console.log(
+                    `Swap ${utils.formatUnits(amount, sellTokenDecimals)} ${
+                        fromNativeEth ? "ETH" : await sellTokenContract.symbol()
+                    } to ${toNativeEth ? "ETH" : await buyTokenContract.symbol()}`
+                );
+
                 const swapData: string = defaultAbiCoder.encode(
                     ["address", "address", "uint8"],
                     [sellTokenContract.address, account.address, withdrawMode] // tokenIn, to, withdraw mode
@@ -195,7 +200,7 @@ task("syncSwapTrade", "Swap tokens on Syncswap")
                     BigNumber.from(Math.floor(Date.now() / 1000)).add(300), // deadline // 5 minutes
                     {
                         value: fromNativeEth ? amount : undefined,
-                        ...txParams
+                        ...txParams,
                     }
                 );
 

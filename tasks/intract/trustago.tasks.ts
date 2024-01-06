@@ -4,7 +4,7 @@ import "../../utils/Util.tasks";
 import { MOCK_USER_AGENT, delay, getAccounts, populateTxnParams, waitForGasPrice } from "../../utils/Utils";
 
 import axios, { AxiosResponse } from "axios";
-import { Wallet } from "ethers";
+import { Wallet, ethers } from "ethers";
 
 interface AttestDataPayload {
     code: number;
@@ -43,13 +43,71 @@ interface AttestInfoPayload {
     success: boolean;
 }
 
+task("trustaGoDailyCheckIn", "")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                if ((await account.getBalance()).lt(ethers.utils.parseEther("0.05"))) {
+                    console.log(`Require min balance on Ethereum mainnet of 0.05 ETH. Skip address.`);
+                    continue;
+                }
+
+                const token = await signIn(account);
+
+                const checkInResponse = await axios.post(
+                    "https://mp.trustalabs.ai/accounts/daily_check_in",
+                    undefined,
+                    {
+                        headers: {
+                            "User-Agent": MOCK_USER_AGENT,
+                            Authorization: token,
+                        },
+                    }
+                );
+
+                if (checkInResponse.data.success) {
+                    console.log("Daily Check-In completed!");
+                } else {
+                    console.log("Daily Check-In Failed!");
+                }
+
+                if (taskArgs.delay != undefined) {
+                    await delay(taskArgs.delay);
+                }
+            } catch (error) {
+                console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
 task("trustaGoAttestaionPoh", "")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
     .addFlag("mint", "Mint attestation")
     .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -120,6 +178,7 @@ task("trustaGoAttestaionPoh", "")
                     console.log(`Attestation claimed tx: ${chainInfo.explorer}${attestTx.hash}`);
                 } else {
                     console.log(`Humanity attestation already claimed`);
+                    continue;
                 }
                 if (taskArgs.delay != undefined) {
                     await delay(taskArgs.delay);
@@ -137,7 +196,8 @@ task("trustaGoAttestaionMedia", "")
     .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -207,6 +267,7 @@ task("trustaGoAttestaionMedia", "")
                     console.log(`Attestation claimed tx: ${chainInfo.explorer}${attestTx.hash}`);
                 } else {
                     console.log(`MEDIA atteestation already claimed`);
+                    continue;
                 }
 
                 if (taskArgs.delay != undefined) {

@@ -8,7 +8,8 @@ task("routeIntractWave8SocialFi", "")
     .addParam("delay", "Wait for gas price", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
-    .addParam("randomize", "Take random accounts and execution order", undefined, types.int, true)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -56,7 +57,7 @@ task("routeIntractWave8SocialFi", "")
                     console.log(`Skip account, NFT already minted`);
                     return;
                 }
-                
+
                 await waitForGasPrice({ maxPriceInGwei: taskArgs.gasPrice, provider: hre.ethers.provider });
 
                 console.log(`Mint Persona NFT`);

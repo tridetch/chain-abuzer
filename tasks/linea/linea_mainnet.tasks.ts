@@ -18,6 +18,7 @@ task("lineaDepositEth", "Deposit ETH from ethereum mainnet to linea via official
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -100,6 +101,7 @@ task("lineaEchoDexDailyCheckin", "EchoDex daily check in")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -150,9 +152,11 @@ task("lineaEchoDexDailyCheckin", "EchoDex daily check in")
 task("lineaContractInteractions", "Interact with erc-20 contracts")
     .addParam("delay", "Add delay", undefined, types.float, true)
     .addParam("interactions", "Number of contracts to interact", undefined, types.int, true)
+    .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -182,23 +186,29 @@ task("lineaContractInteractions", "Interact with erc-20 contracts")
             ERC20__factory.connect("0x3b2F62d42DB19B30588648bf1c184865D4C3B1D6", hre.ethers.provider),
         ];
 
-        const metamaskRouterAddress = "0x9dDA6Ef3D919c9bC8885D5560999A3640431e8e6"
-        
+        const metamaskRouterAddress = "0x9dDA6Ef3D919c9bC8885D5560999A3640431e8e6";
+
         for (const account of accounts) {
             try {
                 console.log(`#${accounts.indexOf(account)} Address ${account.address}`);
-                
+
                 var erc20Shuffled = shuffle(erc20Contracts);
 
                 if (taskArgs.interactions <= erc20Shuffled.length) {
-                    erc20Shuffled = erc20Shuffled.slice(undefined, taskArgs.interactions)
+                    erc20Shuffled = erc20Shuffled.slice(undefined, taskArgs.interactions);
                 }
 
                 for (const erc20 of erc20Shuffled) {
-                    const txParams = await populateTxnParams({ signer: account, chain: chainInfo });
-                    const tx = await erc20.connect(account).approve(metamaskRouterAddress, BigNumber.from(0), {
-                        ...txParams,
+                    await waitForGasPrice({
+                        maxPriceInGwei: taskArgs.gasPrice,
+                        provider: hre.ethers.provider,
                     });
+                    const txParams = await populateTxnParams({ signer: account, chain: chainInfo });
+                    const tx = await erc20
+                        .connect(account)
+                        .approve(metamaskRouterAddress, BigNumber.from(0), {
+                            ...txParams,
+                        });
                     console.log(`Approve ${await erc20.symbol()} tx ${chainInfo.explorer}${tx.hash}`);
                     await delay(0.05);
                 }

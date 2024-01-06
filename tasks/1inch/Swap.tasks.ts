@@ -22,6 +22,7 @@ task("1inchSwap", "Swap tokens on 1inch")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -86,7 +87,7 @@ task("1inchSwap", "Swap tokens on 1inch")
                 );
 
                 await waitForGasPrice({ maxPriceInGwei: taskArgs.gasPrice, provider: hre.ethers.provider });
-                
+
                 if (allowance.lt(swapParams.amount)) {
                     console.log(
                         `Swap amount - ${utils.formatUnits(

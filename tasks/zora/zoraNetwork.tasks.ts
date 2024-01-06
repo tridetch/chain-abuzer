@@ -19,6 +19,7 @@ task("bridgeToZoraMainnet", "Bridge ETH to ZORA mainnet")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -92,6 +93,7 @@ task("withdrawFromZoraMainnet", "Withdraw ETH from ZORA mainnet")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -158,6 +160,7 @@ task("zoraWithdrawRewards", "Withdraw rewards for referrals")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -199,7 +202,11 @@ task("zoraWithdrawRewards", "Withdraw rewards for referrals")
                 const tx = await rewardContract
                     .connect(account)
                     .withdraw(taskArgs.to || account.address, balance, { ...txParams });
-                console.log(`Rewards withdrawed ${ethers.utils.formatEther(balance)} ETH\ntxn: ${chainInfo.explorer}${tx.hash}`);
+                console.log(
+                    `Rewards withdrawed ${ethers.utils.formatEther(balance)} ETH\ntxn: ${chainInfo.explorer}${
+                        tx.hash
+                    }`
+                );
 
                 if (taskArgs.delay != undefined) {
                     await delay(taskArgs.delay);
@@ -218,6 +225,7 @@ task("mintZoraTheSourceOfLightNft", "Mint THE SOURCE OF LIGHT Nft")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -274,6 +282,7 @@ task("mintZoraGitcoinImpactNft", "Mint Gitcoin Impact Report 01: PDF Onchain")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -329,6 +338,7 @@ task("mintZoraRainbowNft", "Mint Rainbow Zorb Energy")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -382,6 +392,7 @@ task("zoraMintEnjoyEthereumNft", "Mint Enjoy Ethereum+ NFT")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -449,6 +460,7 @@ task("zoraMintFarcasterElephantNft", "Mint Farcaster Elephant NFT")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -520,6 +532,7 @@ task("zoraMintWithRewards", "Mint zora NFT")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",

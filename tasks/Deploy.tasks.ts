@@ -15,6 +15,7 @@ task("deployStubContract", "Deploy stub contract")
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -30,7 +31,7 @@ task("deployStubContract", "Deploy stub contract")
         for (const account of accounts) {
             try {
                 console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
-                
+
                 await waitForGasPrice({
                     maxPriceInGwei: taskArgs.gasPrice,
                     provider: hre.ethers.provider,
@@ -57,9 +58,11 @@ task("deployErc20", "Deploy standart ERC20 contract")
     .addParam("name", "Add delay", "Wrapped ETH", types.string, true)
     .addParam("symbol", "Add delay", "WETH", types.string, true)
     .addParam("delay", "Add delay", undefined, types.int, true)
+    .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -76,6 +79,10 @@ task("deployErc20", "Deploy standart ERC20 contract")
             try {
                 console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
 
+                await waitForGasPrice({
+                    maxPriceInGwei: taskArgs.gasPrice,
+                    provider: hre.ethers.provider,
+                });
                 const txParams = await populateTxnParams({ signer: account, chain: chainInfo });
 
                 const erc20StubContract = await ERC20ContractFacroty.connect(account).deploy(
@@ -103,9 +110,11 @@ task("deployErc721", "Deploy standart ERC721 contract")
     .addParam("name", "Add delay", undefined, types.string, false)
     .addParam("symbol", "Add delay", undefined, types.string, false)
     .addParam("delay", "Add delay", undefined, types.int, true)
+    .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -123,6 +132,10 @@ task("deployErc721", "Deploy standart ERC721 contract")
             try {
                 console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
 
+                await waitForGasPrice({
+                    maxPriceInGwei: taskArgs.gasPrice,
+                    provider: hre.ethers.provider,
+                });
                 const txParams = await populateTxnParams({ signer: account, chain: chainInfo });
 
                 const erc721StubContract = await Erc721ContractFacroty.connect(account).deploy(
@@ -147,9 +160,11 @@ task("deployErc721", "Deploy standart ERC721 contract")
 
 task("deployEscrowContract", "Deploy standart Escrow contract")
     .addParam("delay", "Add delay", undefined, types.int, true)
+    .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
     .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
     .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
     .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
     .addOptionalParam(
         "accountIndex",
         "Index of the account for which it will be executed",
@@ -167,6 +182,10 @@ task("deployEscrowContract", "Deploy standart Escrow contract")
             try {
                 console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
 
+                await waitForGasPrice({
+                    maxPriceInGwei: taskArgs.gasPrice,
+                    provider: hre.ethers.provider,
+                });
                 const txParams = await populateTxnParams({ signer: account, chain: chainInfo });
 
                 const escrowStubContract = await EscrowContractFacroty.connect(account).deploy({
