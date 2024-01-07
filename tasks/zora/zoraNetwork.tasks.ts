@@ -523,9 +523,96 @@ task("zoraMintFarcasterElephantNft", "Mint Farcaster Elephant NFT")
         }
     });
 
+task("zoraMintFW23Nft", "Mint zora NFT")
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addParam(
+        "referral",
+        "Referral address",
+        "0xd5d7a8d80c426AAE43E0AA3f99E6a7E2A862D678",
+        types.string,
+        true
+    )
+    .addFlag("selfReferral", "User same account address as referral")
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const currentNetwork = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(currentNetwork.chainId);
+        const targetAddress = "0x03FEe76c3901D802407B0e3b1259657Ef2e163A4";
+
+        if (![ChainId.zoraMainnet].includes(currentNetwork.chainId)) {
+            console.log(`Task supported only on Zora mainnet!`);
+            return;
+        }
+        let mintContract = new Contract(
+            targetAddress,
+            [
+                "function mintWithRewards(address minter,uint256 tokenId,uint256 quantity,bytes minterArguments,address mintReferral) payable",
+            ],
+            hre.ethers.provider
+        );
+
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        for (const account of accounts) {
+            try {
+                console.log(`\n#${accounts.indexOf(account)} Address: ${account.address}`);
+
+                var txParams = await populateTxnParams({ signer: account, chain: chainInfo });
+                let minterArgs = toHexZeroPad(account.address);
+
+                var referral = ethers.constants.AddressZero;
+
+                if (taskArgs.selfReferral) {
+                    referral = account.address;
+                } else if (taskArgs.referral) {
+                    referral = taskArgs.referral;
+                }
+
+                const tx = await mintContract
+                    .connect(account)
+                    .mintWithRewards(
+                        "0x04e2516a2c207e84a1839755675dfd8ef6302f0a",
+                        16,
+                        1,
+                        minterArgs,
+                        referral,
+                        {
+                            value: utils.parseEther("0.000777"),
+                            ...txParams,
+                        }
+                    );
+                console.log(`Mint txn: ${chainInfo.explorer}${tx.hash}`);
+
+                if (taskArgs.delay != undefined) {
+                    await delay(taskArgs.delay);
+                }
+            } catch (error) {
+                console.log(
+                    `Error when process account #${accounts.indexOf(account)} Address: ${account.address}`
+                );
+                console.log(error);
+            }
+        }
+    });
+
 task("zoraMintWithRewards", "Mint zora NFT")
     .addParam("delay", "Add delay between operations", undefined, types.float, true)
-    .addParam("referral", "Referral address", undefined, types.string, true)
+    .addParam(
+        "referral",
+        "Referral address",
+        "0xd5d7a8d80c426AAE43E0AA3f99E6a7E2A862D678",
+        types.string,
+        true
+    )
     .addFlag("selfReferral", "User same account address as referral")
     .addParam("contractAddress", "Address of NFT contract")
     // .addParam("message", "Message to post in tokenchat after mint", undefined, types.string, true)
