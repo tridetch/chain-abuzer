@@ -7,6 +7,7 @@ import * as zksync from "zksync-web3";
 import { ERC20__factory } from "../../typechain-types";
 import { ChainId, getChainInfo } from "../../utils/ChainInfoUtils";
 import {
+    DEFAULT_REFERER,
     MOCK_USER_AGENT,
     addDust,
     dateInSeconds,
@@ -982,6 +983,86 @@ task("zksyncClaimZkPepeAirdrop", "Check zkpepe airdrop amount")
                 } else {
                     console.log(`What a pity! You are not eligible for this airdrop round.`);
                 }
+
+                if (taskArgs.delay != undefined) {
+                    await delay(taskArgs.delay);
+                }
+            } catch (error) {
+                console.log(
+                    `Error when process account #${accounts.indexOf(account)} Address: ${account.address}`
+                );
+                console.log(error);
+            }
+        }
+    });
+
+task("zksyncOwltoCheckIn", "Daily check-in")
+    .addParam("delay", "Add random delay", undefined, types.float, true)
+    .addParam("referer", "Add random delay", DEFAULT_REFERER, types.string, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account ixndex", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const network = await hre.ethers.provider.getNetwork();
+        const chainInfo = getChainInfo(network.chainId);
+
+        if (network.chainId != ChainId.zkSyncEra) {
+            throw new Error("Task allowed only on zksyncEra chain");
+        }
+
+        const zkProvider = new zksync.Provider(ZKSYNC_MAINNET_RPC);
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        const contract = new ethers.Contract("0xD48e3caf0D948203434646a3f3e80f8Ee18007dc", [
+            "function checkIn(uint256 date)",
+        ]);
+
+        const date = new Date().toISOString().replace(/-/g, "").slice(0, 8);
+
+        var ref: string = "https://owlto.finance";
+
+        if (taskArgs.referal && taskArgs.referal != "") {
+            ref = `https://owlto.finance/?ref=${taskArgs.referal}`
+        }
+
+        for (const account of accounts) {
+            try {
+                const zkWallet = new zksync.Wallet(account.privateKey, zkProvider, hre.ethers.provider);
+                console.log(`\n#${accounts.indexOf(account)} Address ${zkWallet.address}`);
+
+                const checkInTx = await contract.connect(account).checkIn(date);
+                await checkInTx.wait()
+
+                console.log(`Check-In tx ${chainInfo.explorer}${checkInTx.hash}`);
+
+                const response = await axios.get("https://owlto.finance/api/lottery/maker/sign/in", {
+                    params: {
+                        hash: checkInTx.hash,
+                        chainId: "324",
+                        userAddress: account.address,
+                    },
+                    headers: {
+                        authority: "owlto.finance",
+                        accept: "application/json, text/plain, */*",
+                        "accept-language": "en-US,en;q=0.9",
+                        dnt: "1",
+                        referer: ref,
+                        "sec-ch-ua": '"Not_A Brand";v="8", "Chromium";v="120"',
+                        "sec-ch-ua-mobile": "?0",
+                        "sec-ch-ua-platform": '"macOS"',
+                        "sec-fetch-dest": "empty",
+                        "sec-fetch-mode": "cors",
+                        "sec-fetch-site": "same-origin",
+                        "user-agent": MOCK_USER_AGENT,
+                    },
+                });
 
                 if (taskArgs.delay != undefined) {
                     await delay(taskArgs.delay);

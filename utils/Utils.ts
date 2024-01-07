@@ -2,6 +2,8 @@ import { BigNumber, ethers, utils } from "ethers";
 import { ChainId, ChainInfo } from "./ChainInfoUtils";
 import { deriveWallets } from "./HdNodeUtils";
 
+export const DEFAULT_REFERER = "0xd5d7a8d80c426AAE43E0AA3f99E6a7E2A862D678";
+
 export const MOCK_USER_AGENT =
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36";
 
