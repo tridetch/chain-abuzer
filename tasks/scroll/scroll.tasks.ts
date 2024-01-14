@@ -193,7 +193,7 @@ task("scrollContractInteractions", "Interact with erc-20 contracts")
         const spenderAddress = "0x80e38291e06339d10AAB483C65695D004dBD5C69"; //SyncSwap router
         for (const account of accounts) {
             try {
-                console.log(`#${accounts.indexOf(account)} Address ${account.address}`);
+                console.log(`\n#${accounts.indexOf(account)} Address ${account.address}`);
 
                 var erc20Shuffled = shuffle(erc20Contracts);
 

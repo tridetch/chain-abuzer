@@ -190,7 +190,7 @@ task("lineaContractInteractions", "Interact with erc-20 contracts")
 
         for (const account of accounts) {
             try {
-                console.log(`#${accounts.indexOf(account)} Address ${account.address}`);
+                console.log(`\n#${accounts.indexOf(account)} Address ${account.address}`);
 
                 var erc20Shuffled = shuffle(erc20Contracts);
 

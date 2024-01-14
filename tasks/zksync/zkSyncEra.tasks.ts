@@ -587,7 +587,7 @@ task("zksyncEraContractInteractions", "Interact with erc-20 contracts")
 
         for (const account of accounts) {
             try {
-                console.log(`#${accounts.indexOf(account)} Address ${account.address}`);
+                console.log(`\n#${accounts.indexOf(account)} Address ${account.address}`);
 
                 var erc20Shuffled = shuffle(erc20Contracts);
 
@@ -595,7 +595,7 @@ task("zksyncEraContractInteractions", "Interact with erc-20 contracts")
                     erc20Shuffled = erc20Shuffled.slice(undefined, taskArgs.interactions);
                 }
 
-                for (const erc20 of erc20Contracts) {
+                for (const erc20 of erc20Shuffled) {
                     const tx = await erc20.connect(account).approve(erc20.address, BigNumber.from(0));
                     console.log(`Approve ${await erc20.symbol()} tx ${chainInfo.explorer}${tx.hash}`);
                     await delay(0.1);

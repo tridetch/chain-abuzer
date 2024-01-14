@@ -117,7 +117,8 @@ const config: HardhatUserConfig = {
             url: process.env.ARBITRUM_SEPOLIA || ""
         },
         zkfMainnet: {
-            url: process.env.ZKFAIR_MAINNET_URL || ""
+            url: process.env.ZKFAIR_MAINNET_URL || "",
+            accounts: [`0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80`],
         },
     },
 };
