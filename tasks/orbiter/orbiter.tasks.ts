@@ -6,10 +6,21 @@ import * as zksyncEra from "zksync-web3";
 import { ERC20__factory } from "../../typechain-types";
 import { ChainId, getChainInfo } from "../../utils/ChainInfoUtils";
 import { addDust, delay, getAccounts, populateTxnParams, waitForGasPrice } from "../../utils/Utils";
-import { MAKER_ADDRESS, MAKER_ADDRESS_ERC, OrbiterBridgeInfo, OrbiterBridges } from "./orbiterMakerInfo";
+import {
+    L2_20Inscriptions,
+    L2_20_INSCRIPTION_ADDRESS,
+    MAKER_ADDRESS,
+    MAKER_ADDRESS_ERC,
+    OrbiterBridgeInfo,
+    OrbiterBridges,
+} from "./orbiterMakerInfo";
 
 function getBridgeInfo(chainId: number): OrbiterBridgeInfo | undefined {
     return OrbiterBridges.find((bridgeInfo) => bridgeInfo.chainId == chainId);
+}
+
+function getInscriptionInfo(chainId: number): OrbiterBridgeInfo | undefined {
+    return L2_20Inscriptions.find((bridgeInfo) => bridgeInfo.chainId == chainId);
 }
 
 function addBridgeIdentifierCodeToAmount(
@@ -326,6 +337,117 @@ task("orbiterCheckPoints", "")
                 }
             } catch (error) {
                 console.log(`Error when process account`);
+                console.log(error);
+            }
+        }
+    });
+
+task("l220InscriptionMint", "Mint L2_20 inscription")
+    .addParam("targetChainId", `Target chain id ${JSON.stringify(OrbiterBridges)}`, undefined, types.int)
+    .addParam("repeat", "Repeat count", 1, types.int, true)
+    .addParam("delay", "Add delay between operations", undefined, types.float, true)
+    .addParam("gasPrice", "Wait for gas price", undefined, types.float, true)
+    .addOptionalParam("startAccount", "Starting account index", undefined, types.string)
+    .addOptionalParam("endAccount", "Ending account index", undefined, types.string)
+    .addFlag("randomize", "Randomize accounts execution order")
+    .addOptionalParam("randomAccounts", "Random number of accounts", undefined, types.int)
+    .addOptionalParam(
+        "accountIndex",
+        "Index of the account for which it will be executed",
+        undefined,
+        types.string
+    )
+    .setAction(async (taskArgs, hre) => {
+        const ethProvider = new hre.ethers.providers.JsonRpcProvider(process.env.ETHEREUM_MAINNET_URL);
+        const network = await hre.ethers.provider.getNetwork();
+        const currentChainInfo = getChainInfo(network.chainId);
+        const accounts = await getAccounts(taskArgs, hre.ethers.provider);
+
+        const fromZksyncEra = currentChainInfo.chainId == ChainId.zkSyncEra;
+
+        const zkSyncEraProvider = new zksyncEra.Provider(ZKSYNC_MAINNET_RPC);
+
+        const chainInfo = getChainInfo((await hre.ethers.provider.getNetwork()).chainId);
+        var bridgeInfo = getInscriptionInfo(taskArgs.targetChainId);
+
+        const INSCRIPTION_CALL_DATA =
+            "0x646174613a2c7b2270223a226c61796572322d3230222c226f70223a22636c61696d222c227469636b223a22244c32222c22616d74223a2231303030227d";
+
+        if (!bridgeInfo) {
+            console.log(`Mint not supported to chain id ${taskArgs.targetChainId}`);
+            return;
+        }
+
+        for (const account of accounts) {
+            try {
+                let zksyncEraWallet: any;
+                if (currentChainInfo.chainId == ChainId.zkSyncEra) {
+                    zksyncEraWallet = new zksyncEra.Wallet(
+                        account.privateKey,
+                        zkSyncEraProvider,
+                        ethProvider
+                    );
+                }
+
+                console.log(`\n#${accounts.indexOf(account)} Address ${account.address}`);
+
+                const amountWithCode = addBridgeIdentifierCodeToAmount(
+                    false,
+                    bridgeInfo,
+                    ethers.utils.parseEther("0.00023")
+                );
+
+                let bridgeTx;
+
+                for (let index = 0; index < taskArgs.repeat; index++) {
+                    await waitForGasPrice({
+                        maxPriceInGwei: taskArgs.gasPrice,
+                        provider: hre.ethers.provider,
+                    });
+
+                    if (fromZksyncEra) {
+                        const txParams = await populateTxnParams({
+                            signer: zksyncEraWallet,
+                            chain: chainInfo,
+                        });
+                        bridgeTx = await zksyncEraWallet.sendTransaction({
+                            data: INSCRIPTION_CALL_DATA,
+                            to: L2_20_INSCRIPTION_ADDRESS,
+                            value: amountWithCode,
+                            ...txParams,
+                        });
+                        await bridgeTx.wait();
+
+                        console.log(
+                            `Mint to ${bridgeInfo.name} amount ${utils.formatEther(amountWithCode)}\nTx ${
+                                currentChainInfo.explorer
+                            }${bridgeTx.hash}`
+                        );
+                    } else {
+                        const txParams = await populateTxnParams({ signer: account, chain: chainInfo });
+                        bridgeTx = await account.sendTransaction({
+                            data: INSCRIPTION_CALL_DATA,
+                            to: L2_20_INSCRIPTION_ADDRESS,
+                            value: amountWithCode,
+                            ...txParams,
+                        });
+                        await bridgeTx.wait();
+
+                        console.log(
+                            `Mint to ${bridgeInfo.name} amount ${utils.formatEther(amountWithCode)}\nTx ${
+                                currentChainInfo.explorer
+                            }${bridgeTx.hash}`
+                        );
+                    }
+                }
+
+                if (taskArgs.delay != undefined) {
+                    await delay(taskArgs.delay);
+                }
+            } catch (error) {
+                console.log(
+                    `Error when process account #${accounts.indexOf(account)} Address: ${account.address}`
+                );
                 console.log(error);
             }
         }
